@@ -283,7 +283,7 @@ public class EasySMSAndroid extends ListActivity implements
 
 			} else {
 
-				Cursor photo2 = managedQuery(Data.CONTENT_URI,
+				Cursor photo2 = getContentResolver().query(Data.CONTENT_URI,
 						new String[] { Photo.PHOTO }, // column for the blob
 						Data._ID + "=?", // select row by id
 						new String[] { photoid }, // filter by photoId

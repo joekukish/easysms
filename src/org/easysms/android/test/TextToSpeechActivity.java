@@ -3,8 +3,6 @@ package org.easysms.android.test;
 import java.util.Locale;
 
 import org.easysms.android.R;
-import org.easysms.android.R.id;
-import org.easysms.android.R.layout;
 
 import android.app.Activity;
 import android.os.Bundle;

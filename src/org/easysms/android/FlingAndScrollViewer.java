@@ -66,7 +66,6 @@ public class FlingAndScrollViewer extends ViewGroup {
 		}
 	}
 
-	private static final String LOG_TAG = "FlingAndScrollViewer";
 	private static final int SNAP_VELOCITY = 1000;
 	private final static int TOUCH_STATE_REST = 0;
 	private final static int TOUCH_STATE_SCROLLING = 1;
