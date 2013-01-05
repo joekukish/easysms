@@ -16,6 +16,7 @@ import org.easysms.android.data.Conversation;
 import org.easysms.android.data.SMS;
 import org.easysms.android.ui.FlingAndScrollViewer;
 import org.easysms.android.ui.FlowLayout;
+import org.easysms.android.util.TextToSpeechManager;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -47,7 +48,6 @@ import android.provider.ContactsContract.Contacts;
 import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.PhoneLookup;
 import android.speech.RecognizerIntent;
-import android.speech.tts.TextToSpeech;
 import android.telephony.SmsManager;
 import android.util.Log;
 import android.util.TypedValue;
@@ -77,8 +77,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 @TargetApi(8)
-public class MessageDetails extends Activity implements
-		TextToSpeech.OnInitListener, OnClickListener {
+public class MessageDetails extends Activity implements OnClickListener {
 
 	// class for the GridView of quick sender
 	public class ImageAdapter extends BaseAdapter {
@@ -175,11 +174,9 @@ public class MessageDetails extends Activity implements
 					@Override
 					public void run() {
 						showToast("Error code:" + getResultCode());
-						// set error code
-						mTts.setLanguage(language);
-						// drop all pending entries in the playback queue.
-						mTts.speak("Error code:" + getResultCode(),
-								TextToSpeech.QUEUE_FLUSH, null);
+						TextToSpeechManager.getInstance().setLocale(language);
+						TextToSpeechManager.getInstance().say(
+								"Error code:" + getResultCode());
 					}
 				});
 			}
@@ -270,7 +267,6 @@ public class MessageDetails extends Activity implements
 	private LinearLayout msgsent1;
 	private Spinner mSupportedLanguageView;
 	private TextView mTimeDisplay;
-	private TextToSpeech mTts;
 	private int mYear;
 	private String nameContact = "Numéro inconnu";
 	// to know if it is message details or new message
@@ -348,9 +344,10 @@ public class MessageDetails extends Activity implements
 			dateButton.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					mTts.setLanguage(language);
-					// drop all pending entries in the playback.
-					mTts.speak(datesmsplayed, TextToSpeech.QUEUE_FLUSH, null);
+
+					// plays the audio.
+					TextToSpeechManager.getInstance().setLocale(language);
+					TextToSpeechManager.getInstance().say(datesmsplayed);
 
 					Date currentDate = new Date(System.currentTimeMillis());
 					String date = (String) android.text.format.DateFormat
@@ -389,9 +386,10 @@ public class MessageDetails extends Activity implements
 				btn.setOnClickListener(new OnClickListener() {
 					@Override
 					public void onClick(View v) {
-						mTts.setLanguage(language);
-						// drop all pending entries in the playback queue.
-						mTts.speak(toSay, TextToSpeech.QUEUE_FLUSH, null);
+
+						// plays the audio.
+						TextToSpeechManager.getInstance().setLocale(language);
+						TextToSpeechManager.getInstance().say(toSay);
 
 						Date currentDate = new Date(System.currentTimeMillis());
 						String date = (String) android.text.format.DateFormat
@@ -437,11 +435,11 @@ public class MessageDetails extends Activity implements
 						bouton.setOnClickListener(new OnClickListener() {
 							@Override
 							public void onClick(View v) {
-								mTts.setLanguage(language);
-								// drop all pending entries in the playback
-								// queue.
-								mTts.speak(toSay, TextToSpeech.QUEUE_FLUSH,
-										null);
+
+								// plays the audio.
+								TextToSpeechManager.getInstance().setLocale(
+										language);
+								TextToSpeechManager.getInstance().say(toSay);
 
 								Date currentDate = new Date(System
 										.currentTimeMillis());
@@ -563,11 +561,13 @@ public class MessageDetails extends Activity implements
 	 */
 
 	private void CreateMenu(Menu menu) {
-		mTts.setLanguage(Locale.FRENCH);
-		// drop all pending entries in the playback queue.
-		mTts.speak(
-				"Sélectionner la langue pour lire ou écrire un nouveau message.",
-				TextToSpeech.QUEUE_FLUSH, null);
+
+		// plays the audio.
+		TextToSpeechManager.getInstance().setLocale(Locale.FRENCH);
+		TextToSpeechManager
+				.getInstance()
+				.say("Sélectionner la langue pour lire ou écrire un nouveau message.");
+
 		menu.setQwertyMode(true);
 		((ContextMenu) menu).setHeaderTitle("Sélectionner la langue");
 		MenuItem mnu1 = menu.add(0, 0, 0, "Francais");
@@ -653,10 +653,10 @@ public class MessageDetails extends Activity implements
 		Runnable runnable = new Runnable() {
 			@Override
 			public void run() {
-				mTts.setLanguage(Locale.FRENCH);
-				// drop all pending entries in the playback queue.
-				mTts.speak("Parlez après le bip.", TextToSpeech.QUEUE_FLUSH,
-						null);
+
+				// plays the audio.
+				TextToSpeechManager.getInstance().setLocale(Locale.FRENCH);
+				TextToSpeechManager.getInstance().say("Parlez après le bip.");
 
 				try {
 					Thread.sleep(1200);
@@ -708,14 +708,17 @@ public class MessageDetails extends Activity implements
 		String date = (String) android.text.format.DateFormat.format(
 				"yyyy-MM-dd'T'kk:mm:ss'Z'", currentDate);
 
-		mTts.setLanguage(Locale.FRENCH);
+		// sets the locale.
+		TextToSpeechManager.getInstance().setLocale(Locale.FRENCH);
+
 		switch (item.getItemId()) {
 		case 0:
 			language = Locale.FRENCH;
 			langue = "français";
 			flaglanguage.setBackgroundResource(R.drawable.frenchflag);
-			// drop all pending entries in the playback queue.
-			mTts.speak(select + langue, TextToSpeech.QUEUE_FLUSH, null);
+
+			// plays the audio.
+			TextToSpeechManager.getInstance().say(select + langue);
 
 			writeSettings(getApplicationContext(), "<action><date>" + date
 					+ "</date>" + "<details>"
@@ -728,8 +731,9 @@ public class MessageDetails extends Activity implements
 			language = Locale.ENGLISH;
 			langue = "anglais";
 			flaglanguage.setBackgroundResource(R.drawable.americanflag);
-			// drop all pending entries in the playback queue.
-			mTts.speak(select + langue, TextToSpeech.QUEUE_FLUSH, null);
+
+			// plays the audio.
+			TextToSpeechManager.getInstance().say(select + langue);
 
 			writeSettings(getApplicationContext(), "<action><date>" + date
 					+ "</date>" + "<details>"
@@ -739,12 +743,12 @@ public class MessageDetails extends Activity implements
 			return true;
 
 		case 2:
-
 			language = Locale.ITALIAN;
 			langue = "italien";
 			flaglanguage.setBackgroundResource(R.drawable.italianflag);
-			// drop all pending entries in the playback queue.
-			mTts.speak(select + langue, TextToSpeech.QUEUE_FLUSH, null);
+
+			// plays the audio.
+			TextToSpeechManager.getInstance().say(select + langue);
 
 			writeSettings(getApplicationContext(), "<action><date>" + date
 					+ "</date>" + "<details>"
@@ -758,8 +762,14 @@ public class MessageDetails extends Activity implements
 			language = Locale.GERMAN;
 			langue = "allemand";
 			flaglanguage.setBackgroundResource(R.drawable.germanflag);
-			// drop all pending entries in the playback queue.
-			mTts.speak(select + langue, TextToSpeech.QUEUE_FLUSH, null);
+
+			// plays the audio.
+			TextToSpeechManager.getInstance().say(select + langue);
+
+			writeSettings(getApplicationContext(), "<action><date>" + date
+					+ "</date>" + "<details>"
+					+ "Change the language settings and set German."
+					+ "</details></action>");
 			return true;
 
 		}
@@ -873,16 +883,12 @@ public class MessageDetails extends Activity implements
 							// TODO Auto-generated method stub
 							// String sentence = tabWords[i];
 							// btn.setBackgroundColor(Color.RED);
-							mTts.setLanguage(language);
-							mTts.speak(toSay, TextToSpeech.QUEUE_FLUSH, // Drop
-																		// all
-																		// pending
-																		// entries
-																		// in
-																		// the
-																		// playback
-																		// queue.
-									null);
+
+							// plays the audio.
+							TextToSpeechManager.getInstance().setLocale(
+									language);
+							TextToSpeechManager.getInstance().say(toSay);
+
 							Date currentDate = new Date(System
 									.currentTimeMillis());
 							String date = (String) android.text.format.DateFormat
@@ -932,16 +938,12 @@ public class MessageDetails extends Activity implements
 							bouton.setOnClickListener(new OnClickListener() {
 								@Override
 								public void onClick(View v) {
-									mTts.setLanguage(language);
-									mTts.speak(toSay, TextToSpeech.QUEUE_FLUSH, // Drop
-																				// all
-																				// pending
-																				// entries
-																				// in
-																				// the
-																				// playback
-																				// queue.
-											null);
+
+									// plays the audio.
+									TextToSpeechManager.getInstance()
+											.setLocale(language);
+									TextToSpeechManager.getInstance()
+											.say(toSay);
 
 									Date currentDate = new Date(System
 											.currentTimeMillis());
@@ -1249,11 +1251,10 @@ public class MessageDetails extends Activity implements
 			}
 		} else {
 
-			mTts.setLanguage(language);
-			mTts.speak("Il n'y a pas de connection internete.",
-					TextToSpeech.QUEUE_FLUSH, // Drop all pending entries in the
-												// playback queue.
-					null);
+			// plays the audio.
+			TextToSpeechManager.getInstance().setLocale(Locale.FRENCH);
+			TextToSpeechManager.getInstance().say(
+					"Il n'y a pas de connection internete.");
 
 		}
 
@@ -1277,7 +1278,6 @@ public class MessageDetails extends Activity implements
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		// create a new text to speech object
-		mTts = new TextToSpeech(this, this);
 
 		// -------------two cases--------------------
 		Bundle bundle = getIntent().getExtras();
@@ -1427,10 +1427,10 @@ public class MessageDetails extends Activity implements
 				@Override
 				public void onClick(View v) {
 
-					mTts.setLanguage(Locale.FRENCH);
-					// drop all pending entries in the playback queue.
-					mTts.speak(but.getText().toString(),
-							TextToSpeech.QUEUE_FLUSH, null);
+					// plays the audio.
+					TextToSpeechManager.getInstance().setLocale(Locale.FRENCH);
+					TextToSpeechManager.getInstance().say(
+							but.getText().toString());
 
 					Date currentDate = new Date(System.currentTimeMillis());
 					// Time currentTime = new Time();
@@ -1500,9 +1500,10 @@ public class MessageDetails extends Activity implements
 					int position, long id) {
 				if (position < LABELS.length) {
 					String sentence = LABELS[position];
-					mTts.setLanguage(language);
-					// drop all pending entries in the playback queue.
-					mTts.speak(sentence, TextToSpeech.QUEUE_FLUSH, null);
+
+					// plays the audio.
+					TextToSpeechManager.getInstance().setLocale(language);
+					TextToSpeechManager.getInstance().say(sentence);
 
 					Date currentDate = new Date(System.currentTimeMillis());
 					String date = (String) android.text.format.DateFormat
@@ -1572,16 +1573,11 @@ public class MessageDetails extends Activity implements
 								// TODO Auto-generated method stub
 								// String sentence = tabWords[i];
 								// btn.setBackgroundColor(Color.RED);
-								mTts.setLanguage(language);
-								mTts.speak(toSay, TextToSpeech.QUEUE_FLUSH, // Drop
-																			// all
-																			// pending
-																			// entries
-																			// in
-																			// the
-																			// playback
-																			// queue.
-										null);
+
+								// plays the audio.
+								TextToSpeechManager.getInstance().setLocale(
+										language);
+								TextToSpeechManager.getInstance().say(toSay);
 
 								Date currentDate = new Date(System
 										.currentTimeMillis());
@@ -1629,16 +1625,12 @@ public class MessageDetails extends Activity implements
 							String sentence = "Message trop long";
 							Toast.makeText(getBaseContext(), sentence,
 									Toast.LENGTH_SHORT).show();
-							mTts.setLanguage(Locale.FRENCH);
-							mTts.speak(sentence, TextToSpeech.QUEUE_FLUSH, // Drop
-																			// all
-																			// pending
-																			// entries
-																			// in
-																			// the
-																			// playback
-																			// queue.
-									null);
+
+							// plays the audio.
+							TextToSpeechManager.getInstance().setLocale(
+									Locale.FRENCH);
+							TextToSpeechManager.getInstance().say(sentence);
+
 							Date currentDate2 = new Date(System
 									.currentTimeMillis());
 							String date2 = (String) android.text.format.DateFormat
@@ -1747,14 +1739,11 @@ public class MessageDetails extends Activity implements
 						@Override
 						public void run() {
 
-							mTts.setLanguage(Locale.FRENCH);
-							mTts.speak("Parlez maintenant.",
-									TextToSpeech.QUEUE_FLUSH, // Drop all
-																// pending
-																// entries in
-																// the playback
-																// queue.
-									null);
+							// plays the audio.
+							TextToSpeechManager.getInstance().setLocale(
+									Locale.FRENCH);
+							TextToSpeechManager.getInstance().say(
+									"Parlez maintenant.");
 
 							// helpVoiceRecog();
 							try {
@@ -1842,12 +1831,11 @@ public class MessageDetails extends Activity implements
 					Toast.makeText(getBaseContext(),
 							"Entrez un message s'il vous plait.",
 							Toast.LENGTH_SHORT).show();
-					mTts.setLanguage(Locale.FRENCH);
-					mTts.speak("Entrez un message s'il vous plait.",
-							TextToSpeech.QUEUE_FLUSH, // Drop all pending
-														// entries in the
-														// playback queue.
-							null);
+
+					// plays the audio.
+					TextToSpeechManager.getInstance().setLocale(Locale.FRENCH);
+					TextToSpeechManager.getInstance().say(
+							"Entrez un message s'il vous plait.");
 
 					Date currentDate1 = new Date(System.currentTimeMillis());
 					String date1 = (String) android.text.format.DateFormat
@@ -1861,12 +1849,11 @@ public class MessageDetails extends Activity implements
 					Toast.makeText(getBaseContext(),
 							"Entrez un numéro s'il vous plait.",
 							Toast.LENGTH_SHORT).show();
-					mTts.setLanguage(Locale.FRENCH);
-					mTts.speak("Entrez un numéro s'il vous plait.",
-							TextToSpeech.QUEUE_FLUSH, // Drop all pending
-														// entries in the
-														// playback queue.
-							null);
+
+					// plays the audio.
+					TextToSpeechManager.getInstance().setLocale(Locale.FRENCH);
+					TextToSpeechManager.getInstance().say(
+							"Entrez un message s'il vous plait.");
 
 					Date currentDate2 = new Date(System.currentTimeMillis());
 					String date2 = (String) android.text.format.DateFormat
@@ -1949,12 +1936,6 @@ public class MessageDetails extends Activity implements
 		}
 	}
 
-	@Override
-	public void onInit(int arg0) {
-		// TODO Auto-generated method stub
-
-	}
-
 	public void onUtteranceCompleted(String uttId) {
 		if (uttId == "end of wakeup message ID") {
 			// playAnnoyingMusic();
@@ -1987,7 +1968,10 @@ public class MessageDetails extends Activity implements
 
 		if (timesKaraoke <= 1) {
 			// KARAOKE
-			mTts.setLanguage(language);
+
+			// sets the locale.
+			TextToSpeechManager.getInstance().setLocale(Locale.FRENCH);
+
 			// Do something long
 			Runnable runnable = new Runnable() {
 				@Override
@@ -2007,14 +1991,12 @@ public class MessageDetails extends Activity implements
 							public void run() {
 								// progress.setProgress(value);
 								btn.requestFocus();
-								mTts.speak((String) btn.getText(),
-										TextToSpeech.QUEUE_FLUSH, // Drop all
-																	// pending
-																	// entries
-																	// in the
-																	// playback
-																	// queue.
-										null);
+								// drop all pending entries in the playback
+								// queue.
+
+								// plays the audio.
+								TextToSpeechManager.getInstance().say(
+										(String) btn.getText());
 							}
 						});
 
@@ -2123,9 +2105,10 @@ public class MessageDetails extends Activity implements
 
 					// vocal feedback when message sent
 					String sentence = "Message envoyé";
-					mTts.setLanguage(language);
-					// drop all pending entries in the playback queue.
-					mTts.speak(sentence, TextToSpeech.QUEUE_FLUSH, null);
+
+					// plays the audio.
+					TextToSpeechManager.getInstance().setLocale(language);
+					TextToSpeechManager.getInstance().say(sentence);
 
 					break;
 				case SmsManager.RESULT_ERROR_GENERIC_FAILURE:

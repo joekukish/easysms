@@ -1,6 +1,5 @@
 package org.easysms.android;
 
-import java.io.OutputStreamWriter;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -11,6 +10,7 @@ import java.util.Locale;
 import org.easysms.android.data.Conversation;
 import org.easysms.android.data.SMS;
 import org.easysms.android.ui.FlowLayout;
+import org.easysms.android.util.TextToSpeechManager;
 
 import android.annotation.TargetApi;
 import android.app.ListActivity;
@@ -38,19 +38,16 @@ import android.widget.ListView;
 import android.widget.SimpleAdapter;
 
 @TargetApi(8)
-public class EasySmsApp extends ListActivity implements
-		TextToSpeech.OnInitListener {
+public class EasySmsApp extends ListActivity {
 
 	// list of hash map for the message threads
-	private static final ArrayList<HashMap<String, Object>> list = new ArrayList<HashMap<String, Object>>();
+	private static final ArrayList<HashMap<String, Object>> mMessageList = new ArrayList<HashMap<String, Object>>();
 	// handler for karaoke
-	private Handler handler;
-	protected Boolean isComplete = false;
-	private TextToSpeech mTts;
-	private OutputStreamWriter osw = null;
-	private ImageView profile;
-	protected Handler taskHandler = new Handler();
-	private LinearLayout threadpage;
+	private Handler mHandler;
+	protected Boolean mIsComplete = false;
+	private ImageView mProfile;
+	protected Handler mTaskHandler = new Handler();
+	private LinearLayout mThreadPage;
 
 	public void displayListSMS() {
 
@@ -64,7 +61,7 @@ public class EasySmsApp extends ListActivity implements
 				Intent i = new Intent(EasySmsApp.this, MessageDetails.class);
 
 				Object selectedFromList = (lv.getItemAtPosition(position));
-				HashMap<String, Object> o = (HashMap<String, Object>) list
+				HashMap<String, Object> o = (HashMap<String, Object>) mMessageList
 						.get(position);
 				String telnum = "unknown";
 				String name = "unknown";
@@ -74,7 +71,7 @@ public class EasySmsApp extends ListActivity implements
 				Object nameobj = o.get("name");
 				if (nameobj != null) {
 					name = nameobj.toString();
-				} 	 	
+				}
 
 				// Next create the bundle and initialize it
 				Bundle bundle = new Bundle();
@@ -88,7 +85,7 @@ public class EasySmsApp extends ListActivity implements
 
 			}
 		});
-		final SimpleAdapter adapter = new SimpleAdapter(this, list,
+		final SimpleAdapter adapter = new SimpleAdapter(this, mMessageList,
 				R.layout.custom_row_view, new String[] { "avatar", "telnumber",
 						"date", "name", "message", "sent" }, new int[] {
 						R.id.contact_image, R.id.text1, R.id.text2, R.id.text3,
@@ -150,11 +147,12 @@ public class EasySmsApp extends ListActivity implements
 	public void onCreate(Bundle savedInstance) {
 		super.onCreate(savedInstance);
 		setContentView(R.layout.custom_list_view);
-		// text to speech
-		mTts = new TextToSpeech(this, this);
 		// for the karaoke
-		handler = new Handler();
-		profile = (ImageView) findViewById(R.id.contact_image);
+		mHandler = new Handler();
+		mProfile = (ImageView) findViewById(R.id.contact_image);
+
+		// initializes the TextToSpeech
+		TextToSpeechManager.init(getApplicationContext());
 
 		// -------------------New Message button------------------------
 		Button b = (Button) findViewById(R.id.btnClick);
@@ -176,15 +174,14 @@ public class EasySmsApp extends ListActivity implements
 		b.setOnLongClickListener(new View.OnLongClickListener() {
 			@Override
 			public boolean onLongClick(View v) {
+
 				String sentence = "ƒcrire un nouveau message";
-				mTts.setLanguage(Locale.FRENCH);
-				// Drop all pending entries in the playback queue.
-				mTts.speak(sentence, TextToSpeech.QUEUE_FLUSH, null);
+				TextToSpeechManager.getInstance().say(sentence);
 				return true;
 			}
 		});
 
-		threadpage = (LinearLayout) findViewById(R.id.threadpage);
+		mThreadPage = (LinearLayout) findViewById(R.id.threadpage);
 
 		displayListSMS();
 
@@ -196,20 +193,18 @@ public class EasySmsApp extends ListActivity implements
 			public void run() {
 				// Toast.makeText(getApplicationContext(), "dans timer",
 				// Toast.LENGTH_SHORT).show();
-				list.clear();
+				mMessageList.clear();
 				displayListSMS();
-				if (!isComplete) {
-					taskHandler.postDelayed(this, elapse);
+				if (!mIsComplete) {
+					mTaskHandler.postDelayed(this, elapse);
 				}
 			}
 		};
-		taskHandler.postDelayed(t, elapse);
+		mTaskHandler.postDelayed(t, elapse);
 
 	}
 
 	public void playKaraoke(final FlowLayout fl) {
-		// KARAOKE
-		mTts.setLanguage(Locale.FRENCH);
 		// do something long
 		Runnable runnable = new Runnable() {
 			@Override
@@ -224,16 +219,13 @@ public class EasySmsApp extends ListActivity implements
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
-					handler.post(new Runnable() {
+					mHandler.post(new Runnable() {
 						@Override
 						public void run() {
 							// progress.setProgress(value);
 							btn.requestFocus();
-							// drop all pending entries in the playback queue.
-							mTts.speak((String) btn.getText(),
-									TextToSpeech.QUEUE_FLUSH, null);
-							// mTts.speak((String) btn.getText(),
-							// TextToSpeech.QUEUE_ADD, myHashAlarm);
+							TextToSpeechManager.getInstance().say(
+									(String) btn.getText());
 						}
 					});
 				}
@@ -327,7 +319,7 @@ public class EasySmsApp extends ListActivity implements
 				temp2.put("sent", R.drawable.received);
 			}
 
-			list.add(temp2);
+			mMessageList.add(temp2);
 		}
 
 		return allconversations;
@@ -461,10 +453,9 @@ public class EasySmsApp extends ListActivity implements
 				but.setOnClickListener(new OnClickListener() {
 					@Override
 					public void onClick(View v) {
-						mTts.setLanguage(Locale.FRENCH);
-						// drop all pending entries in the playback queue.
-						mTts.speak(but.getText().toString(),
-								TextToSpeech.QUEUE_FLUSH, null);
+
+						TextToSpeechManager.getInstance().say(
+								but.getText().toString());
 					}
 				});
 				flowlayoutspeechrecog1.addView(but);
@@ -484,12 +475,7 @@ public class EasySmsApp extends ListActivity implements
 
 			wholeLayout.addView(flowlayoutspeechrecog1);
 			wholeLayout.addView(helpplay);
-			threadpage.addView(wholeLayout, layoutParams2);
+			mThreadPage.addView(wholeLayout, layoutParams2);
 		}
-	}
-
-	@Override
-	public void onInit(int status) {
-
 	}
 }
