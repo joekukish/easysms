@@ -1,4 +1,6 @@
-package org.easysms.android;
+package org.easysms.android.ui;
+
+import org.easysms.android.R;
 
 import android.content.Context;
 import android.content.res.TypedArray;

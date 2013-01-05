@@ -12,6 +12,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.StringTokenizer;
 
+import org.easysms.android.data.Conversation;
+import org.easysms.android.data.SMS;
+import org.easysms.android.ui.FlingAndScrollViewer;
+import org.easysms.android.ui.FlowLayout;
+
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.PendingIntent;
@@ -85,9 +90,7 @@ public class MessageDetails extends Activity implements
 				R.drawable.late, R.drawable.callme, R.drawable.nobattery,
 				R.drawable.busy, R.drawable.hurryup, R.drawable.howareu,
 				R.drawable.loveu, R.drawable.driving, R.drawable.whatdate,
-				R.drawable.whattime
-
-		};
+				R.drawable.whattime };
 
 		public ImageAdapter(Context c) {
 			mContext = c;
@@ -272,7 +275,7 @@ public class MessageDetails extends Activity implements
 	private String nameContact = "Numéro inconnu";
 	// to know if it is message details or new message
 	private Boolean newMsg;
-	private EasySMSAndroid ob;
+	private EasySmsApp ob;
 	private MessageDetails objectTest;
 	private OutputStreamWriter osw = null;
 	private String phoneNo = "";
@@ -2182,7 +2185,7 @@ public class MessageDetails extends Activity implements
 	}
 
 	// for the page navigation
-	public void setOb(EasySMSAndroid obA) {
+	public void setOb(EasySmsApp obA) {
 		this.ob = obA;
 	}
 

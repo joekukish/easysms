@@ -1,4 +1,4 @@
-package org.easysms.android.utils;
+package org.easysms.android.util;
 
 import java.io.File;
 import java.io.FileWriter;

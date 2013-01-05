@@ -1,4 +1,4 @@
-package org.easysms.android;
+package org.easysms.android.data;
 
 public class SMS {
 	public String body;

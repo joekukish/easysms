@@ -1,4 +1,4 @@
-package org.easysms.android;
+package org.easysms.android.data;
 
 import java.util.List;
 

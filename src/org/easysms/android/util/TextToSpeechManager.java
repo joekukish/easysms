@@ -1,53 +1,48 @@
-package org.easysms.android.test;
+package org.easysms.android.util;
 
 import java.util.Locale;
 
-import org.easysms.android.R;
-
-import android.app.Activity;
-import android.os.Bundle;
+import android.content.Context;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
-import android.view.View;
-import android.widget.Button;
 
-public class TextToSpeechActivity extends Activity implements
-		TextToSpeech.OnInitListener {
+public class TextToSpeechManager implements TextToSpeech.OnInitListener {
+	private static TextToSpeechManager sInstance;
+	private static final String TAG = "TextToSpeechManager";
 
-	private static final String TAG = "TextToSpeechDemo";
-	private Button mAgainButton;
-	private TextToSpeech mTts;
-
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.text_to_speech);
-
-		// Initialize text-to-speech. This is an asynchronous operation.
-		// The OnInitListener (second argument) is called after initialization
-		// completes.
-		mTts = new TextToSpeech(this, this);
-
-		// The button is disabled in the layout.
-		// It will be enabled upon initialization of the TTS engine.
-		mAgainButton = (Button) findViewById(R.id.btnClick);
-
-		mAgainButton.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				say("Bonjour!!!");
-			}
-		});
+	public static TextToSpeechManager getInstance() {
+		if (sInstance == null) {
+			throw new IllegalStateException("Uninitialized.");
+		}
+		return sInstance;
 	}
 
-	@Override
-	public void onDestroy() {
-		// do not forget to shutdown!
-		if (mTts != null) {
-			mTts.stop();
-			mTts.shutdown();
-		}
+	public static void init(Context context) {
 
-		super.onDestroy();
+		if (sInstance != null) {
+			Log.w(TAG, "Already initialized.");
+		}
+		sInstance = new TextToSpeechManager(context);
+	}
+
+	private Context mContext;
+	private Locale mLocale;
+	private TextToSpeech mTts;
+
+	/**
+	 * Creates a new TextToSpeechManager instance.
+	 * 
+	 * @param context
+	 *            current application context.
+	 */
+	private TextToSpeechManager(Context context) {
+		mContext = context;
+		mLocale = Locale.FRENCH;
+		mTts = new TextToSpeech(mContext, this);
+	}
+
+	public Locale getLocale() {
+		return mLocale;
 	}
 
 	// Implements TextToSpeech.OnInitListener.
@@ -57,7 +52,7 @@ public class TextToSpeechActivity extends Activity implements
 			// Set preferred language to US English.
 			// Note that a language may not be available, and the result will
 			// indicate this.
-			int result = mTts.setLanguage(Locale.US);
+			int result = mTts.setLanguage(mLocale);
 			// Try this someday for some interesting results.
 			// int result mTts.setLanguage(Locale.FRANCE);
 			if (result == TextToSpeech.LANG_MISSING_DATA
@@ -72,7 +67,6 @@ public class TextToSpeechActivity extends Activity implements
 				// The TTS engine has been successfully initialized.
 				// Allow the user to press the button for the app to speak
 				// again.
-				mAgainButton.setEnabled(true);
 				// Greet the user.
 				// sayHello();
 			}
@@ -82,9 +76,13 @@ public class TextToSpeechActivity extends Activity implements
 		}
 	}
 
-	private void say(String sentence) {
-		mTts.setLanguage(Locale.FRENCH);
+	public void say(String sentence) {
+		mTts.setLanguage(mLocale);
 		// drop all pending entries in the playback queue.
 		mTts.speak(sentence, TextToSpeech.QUEUE_FLUSH, null);
+	}
+
+	public void setLocale(Locale value) {
+		mLocale = value;
 	}
 }

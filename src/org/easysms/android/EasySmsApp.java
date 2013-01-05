@@ -8,6 +8,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
+import org.easysms.android.data.Conversation;
+import org.easysms.android.data.SMS;
+import org.easysms.android.ui.FlowLayout;
+
 import android.annotation.TargetApi;
 import android.app.ListActivity;
 import android.content.Intent;
@@ -34,7 +38,7 @@ import android.widget.ListView;
 import android.widget.SimpleAdapter;
 
 @TargetApi(8)
-public class EasySMSAndroid extends ListActivity implements
+public class EasySmsApp extends ListActivity implements
 		TextToSpeech.OnInitListener {
 
 	// list of hash map for the message threads
@@ -57,7 +61,7 @@ public class EasySMSAndroid extends ListActivity implements
 		lv.setOnItemClickListener(new OnItemClickListener() {
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
-				Intent i = new Intent(EasySMSAndroid.this, MessageDetails.class);
+				Intent i = new Intent(EasySmsApp.this, MessageDetails.class);
 
 				Object selectedFromList = (lv.getItemAtPosition(position));
 				HashMap<String, Object> o = (HashMap<String, Object>) list
@@ -68,14 +72,9 @@ public class EasySMSAndroid extends ListActivity implements
 				if (telnumobj != null)
 					telnum = telnumobj.toString();
 				Object nameobj = o.get("name");
-				if (nameobj != null)
+				if (nameobj != null) {
 					name = nameobj.toString();
-				// Toast.makeText(getApplicationContext(),"name"+name,
-				// Toast.LENGTH_SHORT).show();
-				// Date currentDate = new Date(System.currentTimeMillis());
-				// String date = (String)
-				// android.text.format.DateFormat.format("yyyy-MM-dd'T'kk:mm:ss'Z'",
-				// currentDate);
+				} 	 	
 
 				// Next create the bundle and initialize it
 				Bundle bundle = new Bundle();
@@ -164,7 +163,7 @@ public class EasySMSAndroid extends ListActivity implements
 			// page!
 			public void onClick(View arg0) {
 				// here i call new screen;
-				Intent i = new Intent(EasySMSAndroid.this, MessageDetails.class);
+				Intent i = new Intent(EasySmsApp.this, MessageDetails.class);
 				// Next create the bundle and initialize it
 				Bundle bundle = new Bundle();
 				// Add the parameters to bundle as
