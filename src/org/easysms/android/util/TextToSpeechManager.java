@@ -53,8 +53,7 @@ public class TextToSpeechManager implements TextToSpeech.OnInitListener {
 			// Note that a language may not be available, and the result will
 			// indicate this.
 			int result = mTts.setLanguage(mLocale);
-			// Try this someday for some interesting results.
-			// int result mTts.setLanguage(Locale.FRANCE);
+
 			if (result == TextToSpeech.LANG_MISSING_DATA
 					|| result == TextToSpeech.LANG_NOT_SUPPORTED) {
 				// language data is missing or the language is not supported.

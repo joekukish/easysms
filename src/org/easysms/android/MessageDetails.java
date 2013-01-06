@@ -72,6 +72,7 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -109,7 +110,6 @@ public class MessageDetails extends Activity implements OnClickListener {
 
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
-			// TODO Auto-generated method stub
 			View v;
 			if (convertView == null) {
 				LayoutInflater li = getLayoutInflater();
@@ -329,9 +329,6 @@ public class MessageDetails extends Activity implements OnClickListener {
 			dateButton.setSingleLine(false);
 			String textButton = sms.datesms + "\n" + sms.timesms;
 			dateButton.setText(textButton);
-			// dateButton.setTextSize((int)
-			// TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP,6,
-			// getResources().getDisplayMetrics()));
 			dateButton.setLayoutParams(new LayoutParams(
 					LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
 			dateButton.setBackgroundResource(R.drawable.datebutton);
@@ -789,15 +786,13 @@ public class MessageDetails extends Activity implements OnClickListener {
 			// sender)
 			flingAndScrollViewer.scrollBy(500, 10);
 
-			// flowlayoutspeechrecog1.removeAllViews();
-			// Fill the list view with the strings the recognizer thought it
+			// fill the list view with the strings the recognizer thought it
 			// could have heard
 			matches = data
 					.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
 
-			// MessageDetails.this.showDialog(CUSTOM_DIALOG);
 			final Vibrator vibrationadd = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-			// Fill the list view with the strings the recognizer thought it
+			// fill the list view with the strings the recognizer thought it
 			// could have heard
 
 			speechrecolayout.removeAllViewsInLayout();
@@ -1123,7 +1118,8 @@ public class MessageDetails extends Activity implements OnClickListener {
 
 				phoneNo = "";
 				Uri contactData = data.getData();
-				Cursor cur = managedQuery(contactData, null, null, null, null);
+				Cursor cur = getContentResolver().query(contactData, null,
+						null, null, null);
 				ContentResolver contect_resolver = getContentResolver();
 				String nameContact = "Nom inconnu";
 				String photoId = null;
@@ -1204,9 +1200,11 @@ public class MessageDetails extends Activity implements OnClickListener {
 					photoId = cur.getString(cur
 							.getColumnIndex(Contacts.PHOTO_ID));
 					if (photo != 0) {
-						Cursor photo2 = managedQuery(Data.CONTENT_URI,
-								new String[] { Photo.PHOTO }, // column for the
-																// blob
+						Cursor photo2 = getContentResolver().query(
+								Data.CONTENT_URI, new String[] { Photo.PHOTO }, // column
+																				// for
+																				// the
+																				// blob
 								Data._ID + "=?", // select row by id
 								new String[] { photoId }, // filter by photoId
 								null);
@@ -1277,7 +1275,6 @@ public class MessageDetails extends Activity implements OnClickListener {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		// create a new text to speech object
 
 		// -------------two cases--------------------
 		Bundle bundle = getIntent().getExtras();
@@ -1313,8 +1310,8 @@ public class MessageDetails extends Activity implements OnClickListener {
 			recipient = (TextView) findViewById(R.id.contactname);
 			recipientnum = (TextView) findViewById(R.id.contactnumber);
 
-		} else {// if not a new message, display the message details page of
-				// "user"
+		} else {
+			// if not a new message, display the message details page of "user"
 			setContentView(R.layout.messagedetails);
 
 			phoneNumContact = (String) bundle.get("Tel");
@@ -1344,7 +1341,7 @@ public class MessageDetails extends Activity implements OnClickListener {
 				profile.setBackgroundResource(R.drawable.nophotostored);
 			} else {
 
-				Cursor photo2 = managedQuery(Data.CONTENT_URI,
+				Cursor photo2 = getContentResolver().query(Data.CONTENT_URI,
 						new String[] { Photo.PHOTO }, // column for the blob
 						Data._ID + "=?", // select row by id
 						new String[] { photoid }, // filter by photoId
@@ -1405,14 +1402,11 @@ public class MessageDetails extends Activity implements OnClickListener {
 		// play button
 		ImageView helpplay = new ImageView(this);
 		helpplay.setBackgroundResource(R.drawable.playsmsclick);
-		// helpplay.setOnCreateContextMenuListener(this);
 		helpplay.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				playKaraoke(flowlayoutspeechrecog1);
-
 			}
-
 		});
 
 		final String[] messageHelp = new String[] { "Pour", "enregistrer",
@@ -1661,7 +1655,7 @@ public class MessageDetails extends Activity implements OnClickListener {
 
 			}// end of onitemclick
 		});
-		// msgbubblelayout.addView(implaybutton);
+
 		msgbubblelayout.addView(flowlayout, new LayoutParams(
 				LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
 
@@ -1686,11 +1680,10 @@ public class MessageDetails extends Activity implements OnClickListener {
 		}
 
 		// Most of the applications do not have to handle the voice settings. If
-		// the application
-		// does not require a recognition in a specific language (i.e.,
-		// different from the system
-		// locale), the application does not need to read the voice settings.
-		refreshVoiceSettings();
+		// the application does not require a recognition in a specific language
+		// (i.e., different from the system locale), the application does not
+		// need to read the voice settings.
+		// refreshVoiceSettings();
 
 		// menu
 		micromenu = (ImageView) findViewById(R.id.micro);
@@ -1715,10 +1708,6 @@ public class MessageDetails extends Activity implements OnClickListener {
 
 				/*
 				 * if(!isInternetOn()) {//internet is not available
-				 * mTts.setLanguage(Locale.FRENCH);
-				 * mTts.speak("Pas de connexion internet.",
-				 * TextToSpeech.QUEUE_FLUSH, // Drop all pending entries in the
-				 * playback queue. null);
 				 * 
 				 * Date currentDate1 = new Date(System.currentTimeMillis());
 				 * String date1 = (String)
@@ -2054,6 +2043,7 @@ public class MessageDetails extends Activity implements OnClickListener {
 		sendOrderedBroadcast(RecognizerIntent.getVoiceDetailsIntent(this),
 				null, new SupportedLanguageBroadcastReceiver(), null,
 				Activity.RESULT_OK, null, null);
+
 	}
 
 	public Conversation retrieveConvFromThreadId(List<Conversation> allConv,

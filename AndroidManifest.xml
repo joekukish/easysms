@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.easysms.android"
     android:versionCode="1"
-    android:versionName="1.0" >
+    android:versionName="1.1" >
 
     <uses-permission android:name="android.permission.SEND_SMS" >
     </uses-permission>
@@ -39,27 +39,12 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".MessageComposition"
-            android:label="Nouveau message"
-            android:screenOrientation="portrait" >
-        </activity>
-        <activity
             android:name=".MessageDetails"
-            android:label="Message composition"
-            android:screenOrientation="portrait" >
-        </activity>
-        <activity
-            android:name=".test.TextToSpeechActivity"
-            android:label="TTS" >
-        </activity>
-        <activity
-            android:name=".ChoicesVoiceRecognition"
-            android:label="J&apos;ai compris..."
             android:screenOrientation="portrait" >
         </activity>
 
         <receiver
-            android:name=".SmsReceiver"
+            android:name=".receiver.SmsReceiver"
             android:enabled="true"
             android:exported="true" >
             <intent-filter>

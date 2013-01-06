@@ -1,4 +1,4 @@
-package org.easysms.android;
+package org.easysms.android.receiver;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

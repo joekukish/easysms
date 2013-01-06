@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 
 import org.easysms.android.data.Conversation;
 import org.easysms.android.data.SMS;
@@ -24,7 +23,6 @@ import android.os.Handler;
 import android.provider.ContactsContract.CommonDataKinds.Photo;
 import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.PhoneLookup;
-import android.speech.tts.TextToSpeech;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -212,8 +210,6 @@ public class EasySmsApp extends ListActivity {
 				for (int i = 1; i < fl.getChildCount(); ++i) {
 					final Button btn = (Button) fl.getChildAt(i);
 					btn.setFocusableInTouchMode(true);
-					// mTts.speak((String) btn.getText(),
-					// TextToSpeech.QUEUE_ADD, myHashAlarm);
 					try {
 						Thread.sleep(800);
 					} catch (InterruptedException e) {
