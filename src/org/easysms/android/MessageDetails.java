@@ -72,7 +72,6 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -922,13 +921,11 @@ public class MessageDetails extends Activity implements OnClickListener {
 
 							final Button bouton = new Button(getBaseContext());
 							bouton.setText(btn.getText());
-							// bouton.setTextSize((int)
-							// TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP,10,
-							// getResources().getDisplayMetrics()));
 							bouton.setLayoutParams(new LayoutParams(
 									LayoutParams.WRAP_CONTENT,
 									LayoutParams.WRAP_CONTENT));
 							bouton.setBackgroundResource(R.drawable.button);
+
 							// play each button
 							bouton.setOnClickListener(new OnClickListener() {
 								@Override
@@ -1201,10 +1198,8 @@ public class MessageDetails extends Activity implements OnClickListener {
 							.getColumnIndex(Contacts.PHOTO_ID));
 					if (photo != 0) {
 						Cursor photo2 = getContentResolver().query(
-								Data.CONTENT_URI, new String[] { Photo.PHOTO }, // column
-																				// for
-																				// the
-																				// blob
+								// column for the blob
+								Data.CONTENT_URI, new String[] { Photo.PHOTO },
 								Data._ID + "=?", // select row by id
 								new String[] { photoId }, // filter by photoId
 								null);
@@ -1666,8 +1661,6 @@ public class MessageDetails extends Activity implements OnClickListener {
 
 		mList = (ListView) findViewById(R.id.list);
 
-		// mSupportedLanguageView = (Spinner) findViewById(R.id.spinner);
-
 		// Check to see if a recognition activity is present
 		PackageManager pm = getPackageManager();
 		List<ResolveInfo> activities = pm.queryIntentActivities(new Intent(
@@ -1706,22 +1699,6 @@ public class MessageDetails extends Activity implements OnClickListener {
 								+ "Click on microphone icon on the menu to start speech recognition"
 								+ "</details></action>");
 
-				/*
-				 * if(!isInternetOn()) {//internet is not available
-				 * 
-				 * Date currentDate1 = new Date(System.currentTimeMillis());
-				 * String date1 = (String)
-				 * android.text.format.DateFormat.format(
-				 * "yyyy-MM-dd'T'kk:mm:ss'Z'", currentDate1);
-				 * writeSettings(getApplicationContext(),
-				 * "<action><date>"+date1+"</date>"+"<details>"+
-				 * "No internet connexion for voice recognition."+
-				 * "</details></action>");
-				 * 
-				 * } else {//internet available
-				 */
-
-				boolean elsa = false;
 				if (isInternetOn()) {
 					// Do something long
 					Runnable runnable = new Runnable() {

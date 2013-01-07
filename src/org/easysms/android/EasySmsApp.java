@@ -320,6 +320,8 @@ public class EasySmsApp extends ListActivity {
 
 		return allconversations;
 	}
+	
+	public static boolean HELP_MESSAGE = false;
 
 	// return a list with all the SMS and for each sms a status sent: yes or no
 	public void smsAllRetrieve() {
@@ -400,7 +402,10 @@ public class EasySmsApp extends ListActivity {
 		}
 
 		List<Conversation> listconv = populateList(allSMSlocal);
-		if (listconv.isEmpty()) {
+		if (listconv.isEmpty() && !HELP_MESSAGE) {
+			
+			// sets the flag.
+			HELP_MESSAGE = true;
 
 			LinearLayout wholeLayout = new LinearLayout(this);
 			wholeLayout.setLayoutParams(new LayoutParams((int) TypedValue
