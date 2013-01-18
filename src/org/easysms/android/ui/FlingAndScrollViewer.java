@@ -237,7 +237,6 @@ public class FlingAndScrollViewer extends ViewGroup {
 		final float x = event.getX();
 		switch (action) {
 		case MotionEvent.ACTION_DOWN:
-			// Log.i(LOG_TAG, "event : down");
 			/*
 			 * If being flinged and user touches, stop the fling. isFinished
 			 * will be false if being flinged.

@@ -7,7 +7,9 @@ import android.speech.tts.TextToSpeech;
 import android.util.Log;
 
 public class TextToSpeechManager implements TextToSpeech.OnInitListener {
+	/** Singleton instance of the TextToSpeeachManager. */
 	private static TextToSpeechManager sInstance;
+	/** Tag used to log the activity of the application. */
 	private static final String TAG = "TextToSpeechManager";
 
 	public static TextToSpeechManager getInstance() {
@@ -25,8 +27,11 @@ public class TextToSpeechManager implements TextToSpeech.OnInitListener {
 		sInstance = new TextToSpeechManager(context);
 	}
 
+	/** Context of the current application. */
 	private Context mContext;
+	/** Locale in which the text with be said. */
 	private Locale mLocale;
+	/** TextToSpeech engine provided by the OS. */
 	private TextToSpeech mTts;
 
 	/**
@@ -75,6 +80,13 @@ public class TextToSpeechManager implements TextToSpeech.OnInitListener {
 		}
 	}
 
+	/**
+	 * Plays the sentence in the in the current Locale. It stops any text that
+	 * is being currently played.
+	 * 
+	 * @param sentence
+	 *            sentence to play in the current Locale.
+	 */
 	public void say(String sentence) {
 		mTts.setLanguage(mLocale);
 		// drop all pending entries in the playback queue.

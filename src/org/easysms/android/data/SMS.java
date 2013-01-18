@@ -1,6 +1,6 @@
 package org.easysms.android.data;
 
-public class SMS {
+public class Sms {
 	public String body;
 	public String contact;
 	public String datesms;
@@ -9,7 +9,7 @@ public class SMS {
 	public String threadid;
 	public String timesms;
 
-	public SMS(String m_sent, String m_threadid, String m_datesms,
+	public Sms(String m_sent, String m_threadid, String m_datesms,
 			String m_timesms, String m_contact, String m_body, int m_read) {
 		sent = m_sent;
 		threadid = m_threadid;

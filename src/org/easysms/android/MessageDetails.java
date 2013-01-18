@@ -13,7 +13,7 @@ import java.util.Locale;
 import java.util.StringTokenizer;
 
 import org.easysms.android.data.Conversation;
-import org.easysms.android.data.SMS;
+import org.easysms.android.data.Sms;
 import org.easysms.android.ui.FlingAndScrollViewer;
 import org.easysms.android.ui.FlowLayout;
 import org.easysms.android.util.TextToSpeechManager;
@@ -91,6 +91,10 @@ public class MessageDetails extends Activity implements OnClickListener {
 				R.drawable.loveu, R.drawable.driving, R.drawable.whatdate,
 				R.drawable.whattime };
 
+		private String[] mTextLabels = { "Ok", "Non", "Retard", "Appel",
+				"Vide", "Occupé", "Vite!", "Ça va?", "Amour", "Voiture",
+				"Date?", "Heure?" };
+
 		public ImageAdapter(Context c) {
 			mContext = c;
 		}
@@ -115,33 +119,8 @@ public class MessageDetails extends Activity implements OnClickListener {
 				v = li.inflate(R.layout.icon, null);
 				TextView tv = (TextView) v.findViewById(R.id.icon_text);
 
-				if (position == 0) {
-					tv.setText("Ok");
-				} else if (position == 1) {
-					tv.setText("Non");
-				} else if (position == 2) {
-					tv.setText("Retard");
-				} else if (position == 3) {
-					tv.setText("Appel");
-				} else if (position == 4) {
-					tv.setText("Vide");
-				} else if (position == 5) {
-					tv.setText("Occupé");
-				} else if (position == 6) {
-					tv.setText("Vite!");
-				} else if (position == 7) {
-					tv.setText("Ça va?");
-				} else if (position == 8) {
-					tv.setText("Amour");
-				} else if (position == 9) {
-					tv.setText("Voiture");
-				} else if (position == 10) {
-					tv.setText("Date?");
-				} else if (position == 11) {
-					tv.setText("Heure?");
-				} else {
-					tv.setText("Putain");
-				}
+				// sets the text that matches the image.
+				tv.setText(mTextLabels[position]);
 
 				ImageView iv = (ImageView) v.findViewById(R.id.icon_image);
 				iv.setImageResource(mThumbIds[position]);
@@ -213,9 +192,6 @@ public class MessageDetails extends Activity implements OnClickListener {
 		}
 	}
 
-	// for the pop up
-	private static final int CUSTOM_DIALOG = 1;
-	private static final int DATE_DIALOG_ID = 0;
 	private static final String[] LABELS = new String[] { "Ok. ", "Non. ",
 			"Désolé je suis en retard. ", "Appelle moi. ",
 			"Désolé je n'ai plus de batterie. ",
@@ -228,7 +204,6 @@ public class MessageDetails extends Activity implements OnClickListener {
 	static final int TIME_DIALOG_ID = 1;
 	private static final int VOICE_RECOGNITION_REQUEST_CODE = 1234;
 	private LinearLayout bubblelayoutreceivedplay;
-	private Conversation conversationtest = new Conversation();
 	private ImageView deletemenu;
 	private ImageView flaglanguage;
 	// for the snapping scroll
@@ -238,7 +213,6 @@ public class MessageDetails extends Activity implements OnClickListener {
 
 	private FlowLayout flowlayoutspeechrecog1;
 	private FileOutputStream fOut = null;
-	// handler for karaoke
 	private Handler handler;
 	private Locale language = Locale.FRENCH;
 	private ArrayList<String> matches;
@@ -252,7 +226,6 @@ public class MessageDetails extends Activity implements OnClickListener {
 	// for the fake menu bar
 	private ImageView micromenu;
 	private ListView mList;
-	// pour le bip
 	private MediaPlayer mMediaPlayer;
 	private int mminute;
 	private int mMonth;
@@ -289,7 +262,7 @@ public class MessageDetails extends Activity implements OnClickListener {
 	// displays all the SMSs in a conversation.
 	private void createLayoutbubbleconv(Conversation conv) {
 
-		for (final SMS sms : conv.listsms) {
+		for (final Sms sms : conv.listsms) {
 
 			LinearLayout wholelayout = new LinearLayout(this);
 
@@ -1990,11 +1963,11 @@ public class MessageDetails extends Activity implements OnClickListener {
 
 	}
 
-	private List<Conversation> populateList(List<SMS> allSMS) {
+	private List<Conversation> populateList(List<Sms> allSMS) {
 
 		// list with all the conversations
 		List<Conversation> allconversations = new ArrayList<Conversation>();
-		for (SMS smsnew : allSMS) {
+		for (Sms smsnew : allSMS) {
 			boolean add = false;
 			for (Conversation conv : allconversations) {
 				if (conv.threadid.equals(smsnew.threadid)) {
@@ -2005,7 +1978,7 @@ public class MessageDetails extends Activity implements OnClickListener {
 			}
 			if (add == false) { // we create a new conversation
 				Conversation newconv = new Conversation();
-				List<SMS> newlist = new ArrayList<SMS>();
+				List<Sms> newlist = new ArrayList<Sms>();
 				newlist.add(smsnew);
 				newconv.listsms = newlist;
 				newconv.threadid = smsnew.threadid;
@@ -2036,7 +2009,7 @@ public class MessageDetails extends Activity implements OnClickListener {
 	}
 
 	public String retrieveThreadIdFromNumberContact(String phoneNumContact) {
-		for (SMS sms : smsAllRetrieve()) {
+		for (Sms sms : smsAllRetrieve()) {
 			String smscontact = sms.contact;
 			if (smscontact.equals(phoneNumContact))
 				return sms.threadid;
@@ -2140,10 +2113,10 @@ public class MessageDetails extends Activity implements OnClickListener {
 	}
 
 	// return a list with all the SMS and for each sms a status sent: yes or no
-	public List<SMS> smsAllRetrieve() {
+	public List<Sms> smsAllRetrieve() {
 
 		// we put all the SMS sent and received in a list
-		List<SMS> allSMSlocal = new ArrayList<SMS>();
+		List<Sms> allSMSlocal = new ArrayList<Sms>();
 		Uri uriSMSURIinbox = Uri.parse("content://sms/");
 		Cursor curinbox = getContentResolver().query(uriSMSURIinbox, null,
 				null, null, null);
@@ -2198,7 +2171,7 @@ public class MessageDetails extends Activity implements OnClickListener {
 					threadid = "nada";
 
 				// we create a new SMS
-				SMS smsnew = new SMS("unknown", threadid, datestring,
+				Sms smsnew = new Sms("unknown", threadid, datestring,
 						timestring, phoneNumber, body, read);
 				// to know if it is a message sent or received
 				if (type == 2) { // SENT

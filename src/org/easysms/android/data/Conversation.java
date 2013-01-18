@@ -4,7 +4,7 @@ import java.util.List;
 
 public class Conversation {
 
-	public List<SMS> listsms;
+	public List<Sms> listsms;
 	public String threadid;
 
 	public Conversation() {

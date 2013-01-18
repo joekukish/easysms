@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.easysms.android.data.Conversation;
-import org.easysms.android.data.SMS;
+import org.easysms.android.data.Sms;
 import org.easysms.android.ui.FlowLayout;
 import org.easysms.android.util.TextToSpeechManager;
 
@@ -231,11 +231,11 @@ public class EasySmsApp extends ListActivity {
 
 	}
 
-	private List<Conversation> populateList(List<SMS> allSMS) {
+	private List<Conversation> populateList(List<Sms> allSMS) {
 
 		// list with all the conversations
 		List<Conversation> allconversations = new ArrayList<Conversation>();
-		for (SMS smsnew : allSMS) {
+		for (Sms smsnew : allSMS) {
 			boolean add = false;
 			// case where the SMS is a draft, otherwise the pp bugs.
 			if (smsnew.contact != null) {
@@ -247,7 +247,7 @@ public class EasySmsApp extends ListActivity {
 				}
 				if (add == false) { // we create a new conversation
 					Conversation newconv = new Conversation();
-					List<SMS> newlist = new ArrayList<SMS>();
+					List<Sms> newlist = new ArrayList<Sms>();
 					newlist.add(smsnew);
 					newconv.listsms = newlist;
 					newconv.threadid = smsnew.threadid;
@@ -261,7 +261,7 @@ public class EasySmsApp extends ListActivity {
 			HashMap<String, Object> temp2 = new HashMap<String, Object>();
 			// on regarde le 1er sms de chaque liste
 
-			SMS firstsms = conv.listsms.get(0);
+			Sms firstsms = conv.listsms.get(0);
 			// get name associated to phone number
 			String name = getContactNameFromNumber(firstsms.contact);
 			String photoid = getContactPhotoFromNumber(firstsms.contact);
@@ -320,13 +320,13 @@ public class EasySmsApp extends ListActivity {
 
 		return allconversations;
 	}
-	
+
 	public static boolean HELP_MESSAGE = false;
 
 	// return a list with all the SMS and for each sms a status sent: yes or no
 	public void smsAllRetrieve() {
 		// we put all the SMS sent and received in a list
-		List<SMS> allSMSlocal = new ArrayList<SMS>();
+		List<Sms> allSMSlocal = new ArrayList<Sms>();
 		Uri uriSMSURIinbox = Uri.parse("content://sms/");
 		Cursor curinbox = getContentResolver().query(uriSMSURIinbox, null,
 				null, null, null);
@@ -376,10 +376,10 @@ public class EasySmsApp extends ListActivity {
 					threadid = curinbox.getString(threadColumn);
 				else
 					threadid = "nada";
-				SMS smsnew;
+				Sms smsnew;
 
 				if (phoneNumber != null) {
-					smsnew = new SMS("unknown", threadid, datestring,
+					smsnew = new Sms("unknown", threadid, datestring,
 							timestring, phoneNumber, body, read);
 
 					// to know if it is a message sent or received
@@ -398,12 +398,11 @@ public class EasySmsApp extends ListActivity {
 				}
 
 			} while (curinbox.moveToNext());
-
 		}
 
 		List<Conversation> listconv = populateList(allSMSlocal);
 		if (listconv.isEmpty() && !HELP_MESSAGE) {
-			
+
 			// sets the flag.
 			HELP_MESSAGE = true;
 
