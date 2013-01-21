@@ -1,8 +1,6 @@
 package org.easysms.android;
 
-import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.sql.Date;
 import java.util.ArrayList;
@@ -16,9 +14,7 @@ import org.easysms.android.data.Conversation;
 import org.easysms.android.data.Sms;
 import org.easysms.android.ui.FlingAndScrollViewer;
 import org.easysms.android.ui.FlowLayout;
-import org.easysms.android.util.ApplicationTracker;
 import org.easysms.android.util.TextToSpeechManager;
-import org.easysms.android.util.ApplicationTracker.EventType;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -40,7 +36,6 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Vibrator;
 import android.provider.ContactsContract;
@@ -77,6 +72,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
@@ -158,7 +154,6 @@ public class MessagingActivity extends SherlockActivity implements
 					@Override
 					public void run() {
 						showToast("Error code:" + getResultCode());
-						TextToSpeechManager.getInstance().setLocale(language);
 						TextToSpeechManager.getInstance().say(
 								"Error code:" + getResultCode());
 					}
@@ -210,6 +205,11 @@ public class MessagingActivity extends SherlockActivity implements
 
 	/** Identifier of the extra that indicates a new message should be shown. */
 	public static final String NEW_MESSAGE_EXTRA = "NewMsg";
+	/** Identifier of the extra used to pass the name. */
+	public static final String NAME_EXTRA = "Name";
+	/** Identifier of the extra used to pass the phone number. */
+	public static final String PHONENUMBER_EXTRA = "Tel";
+
 	static final int TIME_DIALOG_ID = 1;
 	private static final int VOICE_RECOGNITION_REQUEST_CODE = 1234;
 	private LinearLayout bubblelayoutreceivedplay;
@@ -320,15 +320,7 @@ public class MessagingActivity extends SherlockActivity implements
 				public void onClick(View v) {
 
 					// plays the audio.
-					TextToSpeechManager.getInstance().setLocale(language);
 					TextToSpeechManager.getInstance().say(datesmsplayed);
-
-					Date currentDate = new Date(System.currentTimeMillis());
-					String date = (String) android.text.format.DateFormat
-							.format("yyyy-MM-dd'T'kk:mm:ss'Z'", currentDate);
-					writeSettings(getApplicationContext(), "<action><date>"
-							+ date + "</date>" + "<details>"
-							+ "Play the date of a sms." + "</details></action>");
 
 				}
 			});
@@ -362,16 +354,7 @@ public class MessagingActivity extends SherlockActivity implements
 					public void onClick(View v) {
 
 						// plays the audio.
-						TextToSpeechManager.getInstance().setLocale(language);
 						TextToSpeechManager.getInstance().say(toSay);
-
-						Date currentDate = new Date(System.currentTimeMillis());
-						String date = (String) android.text.format.DateFormat
-								.format("yyyy-MM-dd'T'kk:mm:ss'Z'", currentDate);
-						writeSettings(getApplicationContext(), "<action><date>"
-								+ date + "</date>" + "<details>"
-								+ "Play the word of a sms: " + toSay
-								+ "</details></action>");
 
 					}
 				});
@@ -398,12 +381,6 @@ public class MessagingActivity extends SherlockActivity implements
 						Date currentDate = new Date(System.currentTimeMillis());
 						String date = (String) android.text.format.DateFormat
 								.format("yyyy-MM-dd'T'kk:mm:ss'Z'", currentDate);
-						writeSettings(getApplicationContext(),
-								"<action><date>" + date + "</date>"
-										+ "<details>"
-										+ "Recomposition. Reused the word: "
-										+ bouton.getText()
-										+ "</details></action>");
 
 						// play each button
 						bouton.setOnClickListener(new OnClickListener() {
@@ -411,8 +388,6 @@ public class MessagingActivity extends SherlockActivity implements
 							public void onClick(View v) {
 
 								// plays the audio.
-								TextToSpeechManager.getInstance().setLocale(
-										language);
 								TextToSpeechManager.getInstance().say(toSay);
 
 								Date currentDate = new Date(System
@@ -420,14 +395,6 @@ public class MessagingActivity extends SherlockActivity implements
 								String date = (String) android.text.format.DateFormat
 										.format("yyyy-MM-dd'T'kk:mm:ss'Z'",
 												currentDate);
-								writeSettings(
-										getApplicationContext(),
-										"<action><date>"
-												+ date
-												+ "</date>"
-												+ "<details>"
-												+ "Play the word of the sms in the bubble composition: "
-												+ toSay + "</details></action>");
 
 							}
 						});
@@ -445,15 +412,6 @@ public class MessagingActivity extends SherlockActivity implements
 								String date = (String) android.text.format.DateFormat
 										.format("yyyy-MM-dd'T'kk:mm:ss'Z'",
 												currentDate);
-								writeSettings(
-										getApplicationContext(),
-										"<action><date>"
-												+ date
-												+ "</date>"
-												+ "<details>"
-												+ "Delete the word of the sms in the bubble composition: "
-												+ bouton.getText()
-												+ "</details></action>");
 
 								return true;
 							}
@@ -567,7 +525,6 @@ public class MessagingActivity extends SherlockActivity implements
 			public void run() {
 
 				// plays the audio.
-				TextToSpeechManager.getInstance().setLocale(Locale.FRENCH);
 				TextToSpeechManager.getInstance().say("Parlez après le bip.");
 
 				try {
@@ -615,12 +572,6 @@ public class MessagingActivity extends SherlockActivity implements
 	private boolean MenuChoice(MenuItem item) {
 		String select = "Vous avez sélectionné";
 		String langue = "";
-		Date currentDate = new Date(System.currentTimeMillis());
-		String date = (String) android.text.format.DateFormat.format(
-				"yyyy-MM-dd'T'kk:mm:ss'Z'", currentDate);
-
-		// sets the locale.
-		TextToSpeechManager.getInstance().setLocale(Locale.FRENCH);
 
 		switch (item.getItemId()) {
 		case 0:
@@ -630,11 +581,6 @@ public class MessagingActivity extends SherlockActivity implements
 
 			// plays the audio.
 			TextToSpeechManager.getInstance().say(select + langue);
-
-			writeSettings(getApplicationContext(), "<action><date>" + date
-					+ "</date>" + "<details>"
-					+ "Change the language settings and set French."
-					+ "</details></action>");
 
 			return true;
 
@@ -646,11 +592,6 @@ public class MessagingActivity extends SherlockActivity implements
 			// plays the audio.
 			TextToSpeechManager.getInstance().say(select + langue);
 
-			writeSettings(getApplicationContext(), "<action><date>" + date
-					+ "</date>" + "<details>"
-					+ "Change the language settings and set English."
-					+ "</details></action>");
-
 			return true;
 
 		case 2:
@@ -660,11 +601,6 @@ public class MessagingActivity extends SherlockActivity implements
 
 			// plays the audio.
 			TextToSpeechManager.getInstance().say(select + langue);
-
-			writeSettings(getApplicationContext(), "<action><date>" + date
-					+ "</date>" + "<details>"
-					+ "Change the language settings and set Italian."
-					+ "</details></action>");
 
 			return true;
 
@@ -676,11 +612,6 @@ public class MessagingActivity extends SherlockActivity implements
 
 			// plays the audio.
 			TextToSpeechManager.getInstance().say(select + langue);
-
-			writeSettings(getApplicationContext(), "<action><date>" + date
-					+ "</date>" + "<details>"
-					+ "Change the language settings and set German."
-					+ "</details></action>");
 			return true;
 
 		}
@@ -760,10 +691,6 @@ public class MessagingActivity extends SherlockActivity implements
 				String str = matches.get(it).toString();
 				// write the 3 voice recognition results
 
-				writeSettings(getApplicationContext(), "<action><date>" + date
-						+ "</date>" + "<details>" + "Voice recognition result "
-						+ it + ": " + str + "</details></action>");
-
 				StringTokenizer st = new StringTokenizer(str);
 				String[] tabWords = new String[100];
 				int nbWords = 0;
@@ -794,23 +721,7 @@ public class MessagingActivity extends SherlockActivity implements
 							// btn.setBackgroundColor(Color.RED);
 
 							// plays the audio.
-							TextToSpeechManager.getInstance().setLocale(
-									language);
 							TextToSpeechManager.getInstance().say(toSay);
-
-							Date currentDate = new Date(System
-									.currentTimeMillis());
-							String date = (String) android.text.format.DateFormat
-									.format("yyyy-MM-dd'T'kk:mm:ss'Z'",
-											currentDate);
-							writeSettings(
-									getApplicationContext(),
-									"<action><date>"
-											+ date
-											+ "</date>"
-											+ "<details>"
-											+ "Play a word in the voice recognition results: "
-											+ toSay + "</details></action>");
 
 						}
 					});
@@ -819,20 +730,6 @@ public class MessagingActivity extends SherlockActivity implements
 					btn.setOnLongClickListener(new OnLongClickListener() {
 						@Override
 						public boolean onLongClick(View v) {
-
-							Date currentDate = new Date(System
-									.currentTimeMillis());
-							String date = (String) android.text.format.DateFormat
-									.format("yyyy-MM-dd'T'kk:mm:ss'Z'",
-											currentDate);
-							writeSettings(
-									getApplicationContext(),
-									"<action><date>"
-											+ date
-											+ "</date>"
-											+ "<details>"
-											+ "Add a word from the voice recognition result to the bubble composition."
-											+ "</details></action>");
 
 							final Button bouton = new Button(getBaseContext());
 							bouton.setText(btn.getText());
@@ -848,24 +745,7 @@ public class MessagingActivity extends SherlockActivity implements
 
 									// plays the audio.
 									TextToSpeechManager.getInstance()
-											.setLocale(language);
-									TextToSpeechManager.getInstance()
 											.say(toSay);
-
-									Date currentDate = new Date(System
-											.currentTimeMillis());
-									String date = (String) android.text.format.DateFormat
-											.format("yyyy-MM-dd'T'kk:mm:ss'Z'",
-													currentDate);
-									writeSettings(
-											getApplicationContext(),
-											"<action><date>"
-													+ date
-													+ "</date>"
-													+ "<details>"
-													+ "Play a word in the bubble composition: "
-													+ toSay
-													+ "</details></action>");
 
 								}
 							});
@@ -876,21 +756,6 @@ public class MessagingActivity extends SherlockActivity implements
 								@Override
 								public boolean onLongClick(View v) {
 									flowlayout.removeView(bouton);
-
-									Date currentDate = new Date(System
-											.currentTimeMillis());
-									String date = (String) android.text.format.DateFormat
-											.format("yyyy-MM-dd'T'kk:mm:ss'Z'",
-													currentDate);
-									writeSettings(
-											getApplicationContext(),
-											"<action><date>"
-													+ date
-													+ "</date>"
-													+ "<details>"
-													+ "Remove button from bubble composition"
-													+ bouton.getText()
-													+ "</details></action>");
 
 									vibrationdelete.vibrate(200);
 									return true;
@@ -954,18 +819,6 @@ public class MessagingActivity extends SherlockActivity implements
 
 						}
 						vibrationvoicerecog.vibrate(200);
-						Date currentDate = new Date(System.currentTimeMillis());
-						String date = (String) android.text.format.DateFormat
-								.format("yyyy-MM-dd'T'kk:mm:ss'Z'", currentDate);
-						writeSettings(
-								getApplicationContext(),
-								"<action><date>"
-										+ date
-										+ "</date>"
-										+ "<details>"
-										+ "Add one of the sentence choice from the voice recognition: "
-										+ sentenceChoosen
-										+ "</details></action>");
 
 						return true;
 					}
@@ -997,18 +850,6 @@ public class MessagingActivity extends SherlockActivity implements
 
 						}
 						vibrationvoicerecog.vibrate(200);
-						Date currentDate = new Date(System.currentTimeMillis());
-						String date = (String) android.text.format.DateFormat
-								.format("yyyy-MM-dd'T'kk:mm:ss'Z'", currentDate);
-						writeSettings(
-								getApplicationContext(),
-								"<action><date>"
-										+ date
-										+ "</date>"
-										+ "<details>"
-										+ "Add one of the sentence choice from the voice recognition: "
-										+ sentenceChoosen
-										+ "</details></action>");
 
 						return true;
 					}
@@ -1020,13 +861,6 @@ public class MessagingActivity extends SherlockActivity implements
 
 		else if (requestCode == PICK_CONTACT) {
 			if (resultCode == Activity.RESULT_OK) {
-
-				Date currentDate = new Date(System.currentTimeMillis());
-				String date = (String) android.text.format.DateFormat.format(
-						"yyyy-MM-dd'T'kk:mm:ss'Z'", currentDate);
-				writeSettings(getApplicationContext(), "<action><date>" + date
-						+ "</date>" + "<details>"
-						+ "Succeded to pick a contact" + "</details></action>");
 
 				phoneNo = "";
 				Uri contactData = data.getData();
@@ -1158,9 +992,7 @@ public class MessagingActivity extends SherlockActivity implements
 				}
 			}
 		} else {
-
 			// plays the audio.
-			TextToSpeechManager.getInstance().setLocale(Locale.FRENCH);
 			TextToSpeechManager.getInstance().say(
 					"Il n'y a pas de connection internete.");
 
@@ -1186,18 +1018,15 @@ public class MessagingActivity extends SherlockActivity implements
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
+		// sets the theme used throughout the application.
+		setTheme(EasySmsApp.THEME);
+
 		// checks the bundle to handle correctly the two cases.
 		Bundle bundle = getIntent().getExtras();
 		newMsg = bundle.getBoolean(NEW_MESSAGE_EXTRA);
 
 		if (newMsg) { // if new message don't display the message details page
 			setContentView(R.layout.messagecomposition);
-			Date currentDate = new Date(System.currentTimeMillis());
-			String date = (String) android.text.format.DateFormat.format(
-					"yyyy-MM-dd'T'kk:mm:ss'Z'", currentDate);
-			writeSettings(getApplicationContext(), "<action><date>" + date
-					+ "</date>" + "<details>" + "Start writing a new message."
-					+ "</details></action>");
 
 			profile = (ImageView) findViewById(R.id.selectcontact);
 			profile.setOnClickListener(new OnClickListener() {
@@ -1207,13 +1036,6 @@ public class MessagingActivity extends SherlockActivity implements
 					Intent intent = new Intent(Intent.ACTION_PICK,
 							ContactsContract.Contacts.CONTENT_URI);
 					startActivityForResult(intent, PICK_CONTACT);
-
-					Date currentDate = new Date(System.currentTimeMillis());
-					String date = (String) android.text.format.DateFormat
-							.format("yyyy-MM-dd'T'kk:mm:ss'Z'", currentDate);
-					writeSettings(getApplicationContext(), "<action><date>"
-							+ date + "</date>" + "<details>" + "pick a contact"
-							+ "</details></action>");
 
 				}
 
@@ -1228,6 +1050,14 @@ public class MessagingActivity extends SherlockActivity implements
 			// obtains the user info from the extras.
 			nameContact = (String) bundle.get("Name");
 			phoneNumContact = (String) bundle.get("Tel");
+
+			// allows the top bar to be different.
+			ActionBar actionBar = getSupportActionBar();
+			actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+
+			View view = View.inflate(getApplicationContext(),
+					R.layout.actionbar, null);
+			actionBar.setCustomView(view);
 
 			// sets the data in the action bar.
 			getSupportActionBar().setTitle(nameContact);
@@ -1326,19 +1156,8 @@ public class MessagingActivity extends SherlockActivity implements
 				public void onClick(View v) {
 
 					// plays the audio.
-					TextToSpeechManager.getInstance().setLocale(Locale.FRENCH);
 					TextToSpeechManager.getInstance().say(
 							but.getText().toString());
-
-					Date currentDate = new Date(System.currentTimeMillis());
-					// Time currentTime = new Time();
-					String date = (String) android.text.format.DateFormat
-							.format("yyyy-MM-dd'T'kk:mm:ss'Z'", currentDate);
-					// currentTime.setToNow();
-					writeSettings(getApplicationContext(), "<action><date>"
-							+ date + "</date>" + "<details>"
-							+ "play single word in voice recognition help"
-							+ "</details></action>");
 
 				}
 
@@ -1400,23 +1219,8 @@ public class MessagingActivity extends SherlockActivity implements
 					String sentence = LABELS[position];
 
 					// plays the audio.
-					TextToSpeechManager.getInstance().setLocale(language);
 					TextToSpeechManager.getInstance().say(sentence);
-
-					Date currentDate = new Date(System.currentTimeMillis());
-					String date = (String) android.text.format.DateFormat
-							.format("yyyy-MM-dd'T'kk:mm:ss'Z'", currentDate);
-					writeSettings(
-							getApplicationContext(),
-							"<action><date>"
-									+ date
-									+ "</date>"
-									+ "<details>"
-									+ "Single click on icon quick sender. Sentence played: "
-									+ sentence + "</details></action>");
-
 				}
-
 			}
 		});
 
@@ -1424,18 +1228,6 @@ public class MessagingActivity extends SherlockActivity implements
 			public boolean onItemLongClick(AdapterView<?> parent, View v,
 					int position, long id) {
 				if (position < LABELS.length) {
-
-					Date currentDate = new Date(System.currentTimeMillis());
-					String date = (String) android.text.format.DateFormat
-							.format("yyyy-MM-dd'T'kk:mm:ss'Z'", currentDate);
-					writeSettings(
-							getApplicationContext(),
-							"<action><date>"
-									+ date
-									+ "</date>"
-									+ "<details>"
-									+ "Long click on icon quick sender. Sentence added to bubble: "
-									+ LABELS[position] + "</details></action>");
 
 					// parse the sentence into words and put it into an array of
 					// words
@@ -1468,28 +1260,9 @@ public class MessagingActivity extends SherlockActivity implements
 						btn.setOnClickListener(new OnClickListener() {
 							@Override
 							public void onClick(View v) {
-								// TODO Auto-generated method stub
-								// String sentence = tabWords[i];
-								// btn.setBackgroundColor(Color.RED);
 
 								// plays the audio.
-								TextToSpeechManager.getInstance().setLocale(
-										language);
 								TextToSpeechManager.getInstance().say(toSay);
-
-								Date currentDate = new Date(System
-										.currentTimeMillis());
-								String date = (String) android.text.format.DateFormat
-										.format("yyyy-MM-dd'T'kk:mm:ss'Z'",
-												currentDate);
-								writeSettings(
-										getApplicationContext(),
-										"<action><date>"
-												+ date
-												+ "</date>"
-												+ "<details>"
-												+ "Play one word of the bubble: "
-												+ toSay + "</details></action>");
 
 							}
 						});
@@ -1500,20 +1273,6 @@ public class MessagingActivity extends SherlockActivity implements
 							public boolean onLongClick(View v) {
 								flowlayout.removeView(btn);
 								vibrationdelete.vibrate(200);
-								Date currentDate = new Date(System
-										.currentTimeMillis());
-								String date = (String) android.text.format.DateFormat
-										.format("yyyy-MM-dd'T'kk:mm:ss'Z'",
-												currentDate);
-								writeSettings(
-										getApplicationContext(),
-										"<action><date>"
-												+ date
-												+ "</date>"
-												+ "<details>"
-												+ "Remove word from the bubble: "
-												+ btn.getText()
-												+ "</details></action>");
 
 								return true;
 							}
@@ -1525,23 +1284,7 @@ public class MessagingActivity extends SherlockActivity implements
 									Toast.LENGTH_SHORT).show();
 
 							// plays the audio.
-							TextToSpeechManager.getInstance().setLocale(
-									Locale.FRENCH);
 							TextToSpeechManager.getInstance().say(sentence);
-
-							Date currentDate2 = new Date(System
-									.currentTimeMillis());
-							String date2 = (String) android.text.format.DateFormat
-									.format("yyyy-MM-dd'T'kk:mm:ss'Z'",
-											currentDate2);
-							writeSettings(
-									getApplicationContext(),
-									"<action><date>"
-											+ date2
-											+ "</date>"
-											+ "<details>"
-											+ "Try to enter a message too long."
-											+ "</details></action>");
 
 						} else {
 							flowlayout.addView(btn, new LayoutParams(
@@ -1605,6 +1348,16 @@ public class MessagingActivity extends SherlockActivity implements
 		MenuInflater inflater = getSupportMenuInflater();
 		inflater.inflate(R.menu.view_message, menu);
 
+		// RelativeLayout relativeLayout = (RelativeLayout) menu.findItem(
+		// R.id.layout_item).getActionView();
+		//
+		// View inflatedView = getLayoutInflater().inflate(
+		// R.layout.media_bottombar, null);
+		//
+		// relativeLayout.addView(inflatedView);
+		//
+		// return true;
+
 		return true;
 	}
 
@@ -1633,14 +1386,6 @@ public class MessagingActivity extends SherlockActivity implements
 			return true;
 
 		case R.id.menu_send:
-
-			Date currentDate = new Date(System.currentTimeMillis());
-			String date = (String) android.text.format.DateFormat.format(
-					"yyyy-MM-dd'T'kk:mm:ss'Z'", currentDate);
-			writeSettings(getApplicationContext(), "<action><date>" + date
-					+ "</date>" + "<details>"
-					+ "Click on send message icon in the menu. "
-					+ "</details></action>");
 
 			if (phoneNo.length() > 0 && flowlayout.getChildCount() > 1) {
 				// retrieve SMS body
@@ -1689,17 +1434,8 @@ public class MessagingActivity extends SherlockActivity implements
 						Toast.LENGTH_SHORT).show();
 
 				// plays the audio.
-				TextToSpeechManager.getInstance().setLocale(Locale.FRENCH);
 				TextToSpeechManager.getInstance().say(
 						"Entrez un message s'il vous plait.");
-
-				Date currentDate1 = new Date(System.currentTimeMillis());
-				String date1 = (String) android.text.format.DateFormat.format(
-						"yyyy-MM-dd'T'kk:mm:ss'Z'", currentDate1);
-				writeSettings(getApplicationContext(), "<action><date>" + date1
-						+ "</date>" + "<details>"
-						+ "Try to send a sms without entering the content"
-						+ "</details></action>");
 
 			} else if (phoneNo.length() > 0) {
 				Toast.makeText(getBaseContext(),
@@ -1707,21 +1443,8 @@ public class MessagingActivity extends SherlockActivity implements
 						.show();
 
 				// plays the audio.
-				TextToSpeechManager.getInstance().setLocale(Locale.FRENCH);
 				TextToSpeechManager.getInstance().say(
 						"Entrez un message s'il vous plait.");
-
-				Date currentDate2 = new Date(System.currentTimeMillis());
-				String date2 = (String) android.text.format.DateFormat.format(
-						"yyyy-MM-dd'T'kk:mm:ss'Z'", currentDate2);
-				writeSettings(
-						getApplicationContext(),
-						"<action><date>"
-								+ date2
-								+ "</date>"
-								+ "<details>"
-								+ "Try to send a sms without entering the phone number."
-								+ "</details></action>");
 
 			}
 			return true;
@@ -1761,8 +1484,6 @@ public class MessagingActivity extends SherlockActivity implements
 					public void run() {
 
 						// plays the audio.
-						TextToSpeechManager.getInstance().setLocale(
-								Locale.FRENCH);
 						TextToSpeechManager.getInstance().say(
 								"Parlez maintenant.");
 
@@ -1823,10 +1544,6 @@ public class MessagingActivity extends SherlockActivity implements
 		timesKaraoke++;
 
 		if (timesKaraoke <= 1) {
-			// KARAOKE
-
-			// sets the locale.
-			TextToSpeechManager.getInstance().setLocale(Locale.FRENCH);
 
 			// Do something long
 			Runnable runnable = new Runnable() {
@@ -1868,16 +1585,7 @@ public class MessagingActivity extends SherlockActivity implements
 				final Button btn = (Button) fl.getChildAt(i);
 				wholesentenceplayed += btn.getText();
 			}
-
-			Date currentDate = new Date(System.currentTimeMillis());
-			String date = (String) android.text.format.DateFormat.format(
-					"yyyy-MM-dd'T'kk:mm:ss'Z'", currentDate);
-			writeSettings(getApplicationContext(), "<action><date>" + date
-					+ "</date>" + "<details>" + "tap on play button karaoke"
-					+ wholesentenceplayed + "</details></action>");
-
 		}
-
 	}
 
 	private List<Conversation> populateList(List<Sms> allSMS) {
@@ -1953,18 +1661,10 @@ public class MessagingActivity extends SherlockActivity implements
 				switch (getResultCode()) {
 				case Activity.RESULT_OK: // message sent
 
-					Date currentDate = new Date(System.currentTimeMillis());
-					String date = (String) android.text.format.DateFormat.format(
-							"yyyy-MM-dd'T'kk:mm:ss'Z'", currentDate);
-					writeSettings(getApplicationContext(), "<action><date>"
-							+ date + "</date>" + "<details>" + "Message sent."
-							+ "</details></action>");
-
 					// vocal feedback when message sent
 					String sentence = "Message envoyé";
 
 					// plays the audio.
-					TextToSpeechManager.getInstance().setLocale(language);
 					TextToSpeechManager.getInstance().say(sentence);
 
 					break;
@@ -1973,19 +1673,10 @@ public class MessagingActivity extends SherlockActivity implements
 							"Erreur d'envoi du message", Toast.LENGTH_SHORT)
 							.show();
 
-					Date currentDate1 = new Date(System.currentTimeMillis());
-					String date1 = (String) android.text.format.DateFormat.format(
-							"yyyy-MM-dd'T'kk:mm:ss'Z'", currentDate1);
-					writeSettings(getApplicationContext(), "<action><date>"
-							+ date1 + "</date>" + "<details>"
-							+ "Error in the sending of the message."
-							+ "</details></action>");
-
 					break;
 				case SmsManager.RESULT_ERROR_NO_SERVICE:
 					Toast.makeText(getBaseContext(), "Erreur, pas de  service",
 							Toast.LENGTH_SHORT).show();
-
 					break;
 				case SmsManager.RESULT_ERROR_NULL_PDU:
 					Toast.makeText(getBaseContext(), "Null PDU",
@@ -2152,33 +1843,5 @@ public class MessagingActivity extends SherlockActivity implements
 			intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "en-EN");
 
 		startActivityForResult(intent, VOICE_RECOGNITION_REQUEST_CODE);
-	}
-
-	public void writeSettings(Context context, String content) {
-		String filename = "logdata.txt";
-		String packageName = this.getPackageName();
-		String path = Environment.getExternalStorageDirectory()
-				.getAbsolutePath() + "/Android/data/" + packageName + "/files/";
-		try {
-			boolean exists = (new File(path)).exists();
-			if (!exists) {
-				new File(path).mkdirs();
-			}
-			// Open output stream
-			FileOutputStream fOut = new FileOutputStream(path + filename, true);
-			// write integers as separated ascii's
-			fOut.write((String.valueOf(content).toString() + " ").getBytes());
-			// Toast.makeText(context,
-			// "Settings saved",Toast.LENGTH_SHORT).show();
-			// fOut.write((String.valueOf(content).toString() +
-			// " ").getBytes());
-			// Close output stream
-			fOut.flush();
-			fOut.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-			// Toast.makeText(context,
-			// "Settings not saved",Toast.LENGTH_SHORT).show();
-		}
 	}
 }

@@ -5,10 +5,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 import org.easysms.android.data.Conversation;
 import org.easysms.android.data.Sms;
-import org.easysms.android.ui.FlowLayout;
 import org.easysms.android.util.ApplicationTracker;
 import org.easysms.android.util.ApplicationTracker.EventType;
 import org.easysms.android.util.TextToSpeechManager;
@@ -24,15 +24,9 @@ import android.os.Handler;
 import android.provider.ContactsContract.CommonDataKinds.Photo;
 import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.PhoneLookup;
-import android.util.TypedValue;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.ViewGroup.LayoutParams;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 
@@ -44,28 +38,25 @@ import com.actionbarsherlock.view.MenuItem;
 @TargetApi(8)
 public class InboxActivity extends SherlockListActivity {
 
-	/** Flag used to determine if the help message has already being shown. */
-	public static boolean HELP_MESSAGE = false;
-
 	// list of hash map for the message threads
 	private static final ArrayList<HashMap<String, Object>> mMessageList = new ArrayList<HashMap<String, Object>>();
+	/** Flag used to determine if the refresh is complete. */
 	protected Boolean mIsComplete = false;
 	/** Timer used to refresh the Message list. */
 	protected Handler mTaskHandler = new Handler();
-	/** LinearLayout used to show the help message. */
-	private LinearLayout mThreadPage;
 
-	public void displayListSMS() {
+	private void displayListSMS() {
 
 		smsAllRetrieve();
+
 		final ListView lv = getListView();
 		lv.setTextFilterEnabled(true);
 
 		lv.setOnItemClickListener(new OnItemClickListener() {
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
-				Intent i = new Intent(InboxActivity.this,
-						MessagingActivity.class);
+
+				// opens the new message.
 
 				Object selectedFromList = (lv.getItemAtPosition(position));
 				HashMap<String, Object> o = (HashMap<String, Object>) mMessageList
@@ -80,12 +71,15 @@ public class InboxActivity extends SherlockListActivity {
 					name = nameobj.toString();
 				}
 
+				// activity use to show the message.
+				Intent i = new Intent(InboxActivity.this,
+						MessagingActivity.class);
 				// Next create the bundle and initialize it
 				Bundle bundle = new Bundle();
 				// Add the parameters to bundle
-				bundle.putString("Name", name);
-				bundle.putString("Tel", telnum);
-				bundle.putBoolean("NewMsg", false);
+				bundle.putString(MessagingActivity.NAME_EXTRA, name);
+				bundle.putString(MessagingActivity.PHONENUMBER_EXTRA, telnum);
+				bundle.putBoolean(MessagingActivity.NEW_MESSAGE_EXTRA, false);
 				// Add this bundle to the intent
 				i.putExtras(bundle);
 				startActivity(i);
@@ -93,10 +87,10 @@ public class InboxActivity extends SherlockListActivity {
 			}
 		});
 		final SimpleAdapter adapter = new SimpleAdapter(this, mMessageList,
-				R.layout.custom_row_view, new String[] { "avatar", "telnumber",
-						"date", "name", "message", "sent" }, new int[] {
-						R.id.contact_image, R.id.text1, R.id.text2, R.id.text3,
-						R.id.text4, R.id.isent });
+				R.layout.row_inbox_message, new String[] { "avatar",
+						"telnumber", "date", "name", "message", "sent" },
+				new int[] { R.id.contact_image, R.id.text1, R.id.text2,
+						R.id.text3, R.id.text4, R.id.isent });
 
 		setListAdapter(adapter);
 	}
@@ -167,28 +161,33 @@ public class InboxActivity extends SherlockListActivity {
 		setTheme(EasySmsApp.THEME);
 
 		// sets the desired layout for the activity.
-		setContentView(R.layout.act_main);
+		setContentView(R.layout.act_inbox);
 
 		// initializes the TextToSpeech
 		TextToSpeechManager.init(getApplicationContext());
+		// sets the default language locale.
+		TextToSpeechManager.getInstance().setLocale(Locale.FRENCH);
 
 		// sets the device id which will be used to track the activity of all
 		// phones.
 		ApplicationTracker.getInstance().setDeviceId(
 				((EasySmsApp) getApplication()).getDeviceId());
 
-		mThreadPage = (LinearLayout) findViewById(R.id.threadpage);
-
+		// loads the available messages.
 		displayListSMS();
 
+		// starts thread that updates the layout.
+		createUpdateThread();
+
+	}
+
+	private void createUpdateThread() {
 		// le timer fait ramer toute l'application!!! trouver un autre moyen
 		// ==> retrieve a signal when a new msg is received.
 		// -------------------timer------------------------
 		final long elapse = 10000;
 		Runnable t = new Runnable() {
 			public void run() {
-				// Toast.makeText(getApplicationContext(), "dans timer",
-				// Toast.LENGTH_SHORT).show();
 				mMessageList.clear();
 				displayListSMS();
 				if (!mIsComplete) {
@@ -232,34 +231,6 @@ public class InboxActivity extends SherlockListActivity {
 		default:
 			return super.onOptionsItemSelected(item);
 		}
-	}
-
-	public void playKaraoke(final FlowLayout fl) {
-		Runnable runnable = new Runnable() {
-			@Override
-			public void run() {
-				for (int i = 1; i < fl.getChildCount(); ++i) {
-					final Button btn = (Button) fl.getChildAt(i);
-					btn.setFocusableInTouchMode(true);
-					try {
-						Thread.sleep(800);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-					// mHandler.post(new Runnable() {
-					// @Override
-					// public void run() {
-					// // progress.setProgress(value);
-					// btn.requestFocus();
-					// TextToSpeechManager.getInstance().say(
-					// (String) btn.getText());
-					// }
-					// });
-				}
-			}
-		};
-		new Thread(runnable).start();
-
 	}
 
 	private List<Conversation> populateList(List<Sms> allSMS) {
@@ -353,7 +324,7 @@ public class InboxActivity extends SherlockListActivity {
 	}
 
 	// return a list with all the SMS and for each sms a status sent: yes or no
-	public void smsAllRetrieve() {
+	private void smsAllRetrieve() {
 		// we put all the SMS sent and received in a list
 		List<Sms> allSMSlocal = new ArrayList<Sms>();
 		Uri uriSMSURIinbox = Uri.parse("content://sms/");
@@ -429,82 +400,6 @@ public class InboxActivity extends SherlockListActivity {
 			} while (curinbox.moveToNext());
 		}
 
-		List<Conversation> listconv = populateList(allSMSlocal);
-		if (listconv.isEmpty() && !HELP_MESSAGE) {
-
-			// sets the flag.
-			HELP_MESSAGE = true;
-
-			LinearLayout wholeLayout = new LinearLayout(this);
-			wholeLayout.setLayoutParams(new LayoutParams((int) TypedValue
-					.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 260,
-							getResources().getDisplayMetrics()),
-					LayoutParams.WRAP_CONTENT));
-			// for the speech to text
-			// bubble conversation.
-			final FlowLayout flowlayoutspeechrecog1 = new FlowLayout(this);
-			flowlayoutspeechrecog1.setLayoutParams(new LayoutParams(
-					(int) TypedValue.applyDimension(
-							TypedValue.COMPLEX_UNIT_DIP, 310, getResources()
-									.getDisplayMetrics()),
-					LayoutParams.WRAP_CONTENT));
-			flowlayoutspeechrecog1.setBackgroundResource(R.drawable.bubblelast);
-			// microphone button
-			ImageView speakButton = new ImageView(this);
-			speakButton.setBackgroundResource(R.drawable.emptyinbox);
-			LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
-					LinearLayout.LayoutParams.MATCH_PARENT,
-					LinearLayout.LayoutParams.WRAP_CONTENT);
-			layoutParams.setMargins((int) TypedValue.applyDimension(
-					TypedValue.COMPLEX_UNIT_SP, 2, getResources()
-							.getDisplayMetrics()), 0, 0, 0);
-			flowlayoutspeechrecog1.addView(speakButton, layoutParams);
-			// play button
-			ImageView helpplay = new ImageView(this);
-			helpplay.setBackgroundResource(R.drawable.playsms);
-			helpplay.setOnClickListener(new OnClickListener() {
-
-				@Override
-				public void onClick(View v) {
-					playKaraoke(flowlayoutspeechrecog1);
-				}
-
-			});
-
-			String[] messageHelp = new String[] { "Boîte", "de", "réception",
-					"vide.", "Pour", "écrire", "un", "nouveau", "message",
-					"cliquez", "sur", "le", "bouton", "en", "bas", "de",
-					"l'écran." };
-			for (int j = 0; j < messageHelp.length; ++j) {
-				final Button but = new Button(this);
-				but.setText(messageHelp[j]);
-				but.setBackgroundResource(R.drawable.button);
-				but.setOnClickListener(new OnClickListener() {
-					@Override
-					public void onClick(View v) {
-
-						TextToSpeechManager.getInstance().say(
-								but.getText().toString());
-					}
-				});
-				flowlayoutspeechrecog1.addView(but);
-			}
-
-			LinearLayout.LayoutParams layoutParams2 = new LinearLayout.LayoutParams(
-					LinearLayout.LayoutParams.MATCH_PARENT,
-					LinearLayout.LayoutParams.WRAP_CONTENT);
-			layoutParams2.setMargins((int) TypedValue.applyDimension(
-					TypedValue.COMPLEX_UNIT_SP, 10, getResources()
-							.getDisplayMetrics()), (int) TypedValue
-					.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 2,
-							getResources().getDisplayMetrics()), 0,
-					(int) TypedValue.applyDimension(
-							TypedValue.COMPLEX_UNIT_DIP, 2, getResources()
-									.getDisplayMetrics()));
-
-			wholeLayout.addView(flowlayoutspeechrecog1);
-			wholeLayout.addView(helpplay);
-			mThreadPage.addView(wholeLayout, layoutParams2);
-		}
+		populateList(allSMSlocal);
 	}
 }
