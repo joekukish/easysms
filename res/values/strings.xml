@@ -6,6 +6,13 @@
     <string name="main_description">Boîte de réception</string>
     <string name="languages">Choose a language</string>
     <string name="button_new">New Message</string>
+    
+    <!-- Menu -->
+    <string name="menu_new_message">New Message</string>
+    <string name="menu_voice">Voice Recognition</string>
+    <string name="menu_delete">Delete Thread</string>
+    <string name="menu_send">Send</string>
+    <string name="menu_call">Call</string>
 
     <string-array name="languages_array">
         <item>English</item>
