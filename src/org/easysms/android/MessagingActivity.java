@@ -1622,6 +1622,16 @@ public class MessagingActivity extends SherlockActivity implements
 			com.actionbarsherlock.view.MenuItem item) {
 
 		switch (item.getItemId()) {
+		case android.R.id.home:
+
+			// goes back to the home upon the back button click.
+			Intent intent = new Intent();
+			intent.setClass(this, InboxActivity.class);
+			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			startActivity(intent);
+
+			return true;
+
 		case R.id.menu_send:
 
 			Date currentDate = new Date(System.currentTimeMillis());
