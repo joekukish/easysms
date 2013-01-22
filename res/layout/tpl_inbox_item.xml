@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="?android:attr/listPreferredItemHeight"
+    android:background="@android:color/white"
+    android:paddingRight="@dimen/margin" >
+
+    <ImageView
+        android:id="@+id/inbox_item_image_contact"
+        android:layout_width="?android:attr/listPreferredItemHeight"
+        android:layout_height="?android:attr/listPreferredItemHeight"
+        android:layout_alignParentLeft="true"
+        android:layout_marginRight="@dimen/margin"
+        android:contentDescription="@string/description_contact_image"
+        android:scaleType="centerCrop"
+        android:src="@drawable/nophotostored" />
+
+    <TextView
+        android:id="@+id/inbox_item_text_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginRight="@dimen/margin"
+        android:layout_marginTop="@dimen/margin"
+        android:layout_toRightOf="@+id/inbox_item_image_contact"
+        android:text="@string/placeholder_name"
+        android:textSize="@dimen/font_medium"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/inbox_item_text_phonenumber"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin"
+        android:layout_toRightOf="@+id/inbox_item_text_name"
+        android:text="@string/placeholder_phonenumber"
+        android:textColor="#FFFF00"
+        android:textSize="@dimen/font_medium" />
+
+    <TextView
+        android:id="@+id/inbox_item_text_message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/inbox_item_text_name"
+        android:layout_marginBottom="@dimen/margin"
+        android:layout_marginTop="@dimen/margin"
+        android:layout_toRightOf="@+id/inbox_item_image_contact"
+        android:singleLine="false"
+        android:text="@string/placeholder_text"
+        android:textSize="@dimen/font_small"
+        android:textStyle="italic" />
+
+    <TextView
+        android:id="@+id/inbox_item_text_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="@dimen/margin"
+        android:text="@string/placeholder_date"
+        android:textSize="@dimen/font_small"
+        android:textStyle="bold" />
+
+</RelativeLayout>

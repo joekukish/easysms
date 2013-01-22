@@ -9,6 +9,7 @@ import java.util.Locale;
 
 import org.easysms.android.data.Conversation;
 import org.easysms.android.data.Sms;
+import org.easysms.android.provider.SmsContentProvider;
 import org.easysms.android.util.ApplicationTracker;
 import org.easysms.android.util.ApplicationTracker.EventType;
 import org.easysms.android.util.TextToSpeechManager;
@@ -23,7 +24,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.provider.ContactsContract.CommonDataKinds.Photo;
 import android.provider.ContactsContract.Data;
-import android.provider.ContactsContract.PhoneLookup;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -40,10 +40,29 @@ public class InboxActivity extends SherlockListActivity {
 
 	// list of hash map for the message threads
 	private static final ArrayList<HashMap<String, Object>> mMessageList = new ArrayList<HashMap<String, Object>>();
+	/** Data provider used to manage the Messages. */
+	protected SmsContentProvider mContentProvider;
 	/** Flag used to determine if the refresh is complete. */
 	protected Boolean mIsComplete = false;
 	/** Timer used to refresh the Message list. */
 	protected Handler mTaskHandler = new Handler();
+
+	private void createUpdateThread() {
+		// le timer fait ramer toute l'application!!! trouver un autre moyen
+		// ==> retrieve a signal when a new msg is received.
+		// -------------------timer------------------------
+		final long elapse = 10000;
+		Runnable t = new Runnable() {
+			public void run() {
+				mMessageList.clear();
+				displayListSMS();
+				if (!mIsComplete) {
+					mTaskHandler.postDelayed(this, elapse);
+				}
+			}
+		};
+		mTaskHandler.postDelayed(t, elapse);
+	}
 
 	private void displayListSMS() {
 
@@ -74,73 +93,28 @@ public class InboxActivity extends SherlockListActivity {
 				// activity use to show the message.
 				Intent i = new Intent(InboxActivity.this,
 						MessagingActivity.class);
-				// Next create the bundle and initialize it
+				// creates and initializes the bundle.
 				Bundle bundle = new Bundle();
-				// Add the parameters to bundle
+				// adds the parameters to bundle
 				bundle.putString(MessagingActivity.NAME_EXTRA, name);
 				bundle.putString(MessagingActivity.PHONENUMBER_EXTRA, telnum);
 				bundle.putBoolean(MessagingActivity.NEW_MESSAGE_EXTRA, false);
-				// Add this bundle to the intent
+				// adds this bundle to the intent
 				i.putExtras(bundle);
 				startActivity(i);
 
 			}
 		});
+		// creates the adapter that handles the message list.
 		final SimpleAdapter adapter = new SimpleAdapter(this, mMessageList,
-				R.layout.row_inbox_message, new String[] { "avatar",
-						"telnumber", "date", "name", "message", "sent" },
-				new int[] { R.id.contact_image, R.id.text1, R.id.text2,
-						R.id.text3, R.id.text4, R.id.isent });
+				R.layout.tpl_inbox_item, new String[] { "avatar", "telnumber",
+						"date", "name", "message" }, new int[] {
+						R.id.inbox_item_image_contact,
+						R.id.inbox_item_text_phonenumber,
+						R.id.inbox_item_text_date, R.id.inbox_item_text_name,
+						R.id.inbox_item_text_message });
 
 		setListAdapter(adapter);
-	}
-
-	private String getContactNameFromNumber(String number) {
-		/*
-		 * We have a phone number and we want to grab the name of the contact
-		 * with that number, if such a contact exists
-		 */
-		Uri lookupUri = Uri.withAppendedPath(PhoneLookup.CONTENT_FILTER_URI,
-				Uri.encode(number));
-		/* phoneNumber here being a variable with the phone number stored. */
-		Cursor c = getBaseContext().getContentResolver().query(lookupUri,
-				new String[] { PhoneLookup.DISPLAY_NAME }, null, null, null);
-		/*
-		 * If we want to get something other than the displayed name for the
-		 * contact, then just use something else instead of DISPLAY_NAME
-		 */
-		String name = "Contact inconnu";
-		while (c.moveToNext()) {
-			// if we find a match we put it in a String.
-			name = c.getString(c
-					.getColumnIndexOrThrow(PhoneLookup.DISPLAY_NAME));
-		}
-		return name;
-	}
-
-	private String getContactPhotoFromNumber(String number) {
-		/*
-		 * We have a phone number and we want to grab the name of the contact
-		 * with that number, if such a contact exists
-		 */
-		Uri lookupUri = Uri.withAppendedPath(PhoneLookup.CONTENT_FILTER_URI,
-				Uri.encode(number));
-		/* phoneNumber here being a variable with the phone number stored. */
-		Cursor c = getBaseContext().getContentResolver().query(lookupUri,
-				new String[] { PhoneLookup.PHOTO_ID }, null, null, null);
-		// long photo =
-		// c.getLong(c.getColumnIndexOrThrow(ContactsContract.Contacts.PHOTO_ID));
-		/*
-		 * If we want to get something other than the displayed name for the
-		 * contact, then just use something else instead of DISPLAY_NAME
-		 */
-		String photoId = null;
-		while (c.moveToNext()) {
-			// if we find a match we put it in a String.
-			photoId = c
-					.getString(c.getColumnIndexOrThrow(PhoneLookup.PHOTO_ID));
-		}
-		return photoId;
 	}
 
 	/**
@@ -173,29 +147,15 @@ public class InboxActivity extends SherlockListActivity {
 		ApplicationTracker.getInstance().setDeviceId(
 				((EasySmsApp) getApplication()).getDeviceId());
 
+		// initializes the provider.
+		mContentProvider = new SmsContentProvider();
+
 		// loads the available messages.
 		displayListSMS();
 
 		// starts thread that updates the layout.
 		createUpdateThread();
 
-	}
-
-	private void createUpdateThread() {
-		// le timer fait ramer toute l'application!!! trouver un autre moyen
-		// ==> retrieve a signal when a new msg is received.
-		// -------------------timer------------------------
-		final long elapse = 10000;
-		Runnable t = new Runnable() {
-			public void run() {
-				mMessageList.clear();
-				displayListSMS();
-				if (!mIsComplete) {
-					mTaskHandler.postDelayed(this, elapse);
-				}
-			}
-		};
-		mTaskHandler.postDelayed(t, elapse);
 	}
 
 	@Override
@@ -265,8 +225,10 @@ public class InboxActivity extends SherlockListActivity {
 
 			Sms firstsms = conv.listsms.get(0);
 			// get name associated to phone number
-			String name = getContactNameFromNumber(firstsms.contact);
-			String photoid = getContactPhotoFromNumber(firstsms.contact);
+			String name = mContentProvider
+					.getContactNameFromNumber(firstsms.contact);
+			String photoid = mContentProvider
+					.getContactPhotoFromNumber(firstsms.contact);
 			if (photoid == null) {
 				temp2.put("avatar", R.drawable.nophotostored);
 
@@ -339,6 +301,7 @@ public class InboxActivity extends SherlockListActivity {
 			String timestring = "Heure inconnue";
 			Date dateFromSms = null;
 			int type = -1;
+
 			int read = -1;
 			String dateTimeString = "erreur date";
 			// return -1 if the column does not exist.
@@ -353,14 +316,10 @@ public class InboxActivity extends SherlockListActivity {
 					datesms = curinbox.getLong(dateColumn);
 					dateTimeString = (String) android.text.format.DateFormat
 							.format("yyyy-MM-dd'T'kk:mm:ss'Z'", datesms);
-					// datestring = (String)
-					// android.text.format.DateFormat.format("yyyy-MM-dd",datesms);
 					datestring = (String) android.text.format.DateFormat
 							.format("dd-MM-yyyy", datesms);
 					timestring = (String) android.text.format.DateFormat
 							.format("kk:mm", datesms);
-					// Toast.makeText(getApplicationContext(), datestring,
-					// Toast.LENGTH_SHORT).show();
 					dateFromSms = new Date(datesms);
 
 				}
