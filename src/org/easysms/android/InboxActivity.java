@@ -24,6 +24,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.provider.ContactsContract.CommonDataKinds.Photo;
 import android.provider.ContactsContract.Data;
+import android.provider.ContactsContract.PhoneLookup;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -40,8 +41,6 @@ public class InboxActivity extends SherlockListActivity {
 
 	// list of hash map for the message threads
 	private static final ArrayList<HashMap<String, Object>> mMessageList = new ArrayList<HashMap<String, Object>>();
-	/** Data provider used to manage the Messages. */
-	protected SmsContentProvider mContentProvider;
 	/** Flag used to determine if the refresh is complete. */
 	protected Boolean mIsComplete = false;
 	/** Timer used to refresh the Message list. */
@@ -147,15 +146,63 @@ public class InboxActivity extends SherlockListActivity {
 		ApplicationTracker.getInstance().setDeviceId(
 				((EasySmsApp) getApplication()).getDeviceId());
 
-		// initializes the provider.
-		mContentProvider = new SmsContentProvider();
-
 		// loads the available messages.
 		displayListSMS();
 
 		// starts thread that updates the layout.
 		createUpdateThread();
+	}
 
+	public String getContactNameFromNumber(String number) {
+		/*
+		 * We have a phone number and we want to grab the name of the contact
+		 * with that number, if such a contact exists
+		 */
+		Uri lookupUri = Uri.withAppendedPath(PhoneLookup.CONTENT_FILTER_URI,
+				Uri.encode(number));
+
+		/* phoneNumber here being a variable with the phone number stored. */
+		Cursor c = getContentResolver().query(lookupUri,
+				new String[] { PhoneLookup.DISPLAY_NAME }, null, null, null);
+		/*
+		 * If we want to get something other than the displayed name for the
+		 * contact, then just use something else instead of DISPLAY_NAME
+		 */
+		String name = "Contact inconnu";
+		while (c.moveToNext()) {
+			// if we find a match we put it in a String.
+			name = c.getString(c
+					.getColumnIndexOrThrow(PhoneLookup.DISPLAY_NAME));
+		}
+		c.close();
+		return name;
+
+	}
+
+	public String getContactPhotoFromNumber(String number) {
+		/*
+		 * We have a phone number and we want to grab the name of the contact
+		 * with that number, if such a contact exists
+		 */
+		Uri lookupUri = Uri.withAppendedPath(PhoneLookup.CONTENT_FILTER_URI,
+				Uri.encode(number));
+		/* phoneNumber here being a variable with the phone number stored. */
+		Cursor c = getContentResolver().query(lookupUri,
+				new String[] { PhoneLookup.PHOTO_ID }, null, null, null);
+		// long photo =
+		// c.getLong(c.getColumnIndexOrThrow(ContactsContract.Contacts.PHOTO_ID));
+		/*
+		 * If we want to get something other than the displayed name for the
+		 * contact, then just use something else instead of DISPLAY_NAME
+		 */
+		String photoId = null;
+		while (c.moveToNext()) {
+			// if we find a match we put it in a String.
+			photoId = c
+					.getString(c.getColumnIndexOrThrow(PhoneLookup.PHOTO_ID));
+		}
+		c.close();
+		return photoId;
 	}
 
 	@Override
@@ -225,10 +272,8 @@ public class InboxActivity extends SherlockListActivity {
 
 			Sms firstsms = conv.listsms.get(0);
 			// get name associated to phone number
-			String name = mContentProvider
-					.getContactNameFromNumber(firstsms.contact);
-			String photoid = mContentProvider
-					.getContactPhotoFromNumber(firstsms.contact);
+			String name = getContactNameFromNumber(firstsms.contact);
+			String photoid = getContactPhotoFromNumber(firstsms.contact);
 			if (photoid == null) {
 				temp2.put("avatar", R.drawable.nophotostored);
 
@@ -347,11 +392,9 @@ public class InboxActivity extends SherlockListActivity {
 					} else if (type == 1) { // INBOX
 						smsnew.sent = "no";
 					}
-					if (read == 0) { // message is not read
-						smsnew.read = 0;
-					} else if (read == 1) { // message is read
-						smsnew.read = 1;
-					}
+
+					smsnew.read = read;
+
 					// we add this SMS to the list of all the SMS
 					allSMSlocal.add(smsnew);
 				}
