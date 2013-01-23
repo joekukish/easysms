@@ -306,7 +306,7 @@ public class MessagingActivity extends SherlockActivity implements
 
 			Button dateButton = new Button(this);
 			dateButton.setSingleLine(false);
-			String textButton = sms.getDate(); // + "\n" + sms.timesms;
+			String textButton = sms.getDate(this); // + "\n" + sms.timesms;
 			dateButton.setText(textButton);
 			dateButton.setLayoutParams(new LayoutParams(
 					LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
@@ -321,7 +321,6 @@ public class MessagingActivity extends SherlockActivity implements
 
 					// plays the audio.
 					TextToSpeechManager.getInstance().say(datesmsplayed);
-
 				}
 			});
 			fl.addView(dateButton);

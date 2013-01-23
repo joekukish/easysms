@@ -8,6 +8,13 @@
     <string name="button_new">New Message</string>
     <string name="activity_inbox_title">Inbox</string>
 
+    <!-- Dates -->
+    <string name="date_format">yyyy-MM-dd</string>
+    <string name="date_today">today</string>
+    <string name="date_yesterday">yesterday</string>
+    <string name="date_last_week">%d days ago</string>
+    <string name="date_more_than_a_week">%d weeks ago</string>
+
     <!-- Menu -->
     <string name="menu_new_message">New Message</string>
     <string name="menu_voice">Voice Recognition</string>

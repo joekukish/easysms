@@ -10,7 +10,7 @@ public class EasySmsApp extends Application {
 	 */
 	public static final String DEFAULT_DEVICE_ID = "#default_id#";
 	/** Defines the theme that will be used. */
-	public static final int THEME = R.style.Theme_Sherlock;
+	public static final int THEME = R.style.Theme_Sherlock_Light_DarkActionBar;
 
 	/** DeviceId of the current phone where the App is running. */
 	private String mDeviceId;

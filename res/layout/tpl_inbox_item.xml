@@ -15,48 +15,44 @@
         android:scaleType="centerCrop"
         android:src="@drawable/nophotostored" />
 
-    <TextView
-        android:id="@+id/inbox_item_text_name"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_marginRight="@dimen/margin"
-        android:layout_toLeftOf="@+id/inbox_item_text_date"
+        android:layout_height="match_parent"
         android:layout_toRightOf="@+id/inbox_item_image_contact"
-        android:text="@string/placeholder_name"
-        android:textSize="@dimen/font_medium"
-        android:textStyle="bold" />
+        android:orientation="vertical" >
 
-    <TextView
-        android:id="@+id/inbox_item_text_phonenumber"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/inbox_item_text_name"
-        android:layout_toRightOf="@+id/inbox_item_image_contact"
-        android:text="@string/placeholder_phonenumber"
-        android:textColor="#FFFF00"
-        android:textSize="@dimen/font_small" />
+        <TextView
+            android:id="@+id/inbox_item_text_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="@dimen/margin"
+            android:text="@string/placeholder_name"
+            android:textSize="@dimen/font_medium" />
 
-    <TextView
-        android:id="@+id/inbox_item_text_message"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/inbox_item_text_phonenumber"
-        android:layout_marginBottom="@dimen/margin"
-        android:layout_toRightOf="@+id/inbox_item_image_contact"
-        android:singleLine="false"
-        android:text="@string/placeholder_text"
-        android:textSize="@dimen/font_small"
-        android:textStyle="italic" />
+        <TextView
+            android:id="@+id/inbox_item_text_phonenumber"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:text="@string/placeholder_phonenumber"
+            android:textColor="@android:color/darker_gray"
+            android:textSize="@dimen/font_small" />
+
+        <TextView
+            android:id="@+id/inbox_item_text_message"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:singleLine="false"
+            android:text="@string/placeholder_text"
+            android:textSize="@dimen/font_medium" />
+    </LinearLayout>
 
     <TextView
         android:id="@+id/inbox_item_text_date"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/inbox_item_text_name"
         android:layout_alignParentRight="true"
         android:text="@string/placeholder_date"
-        android:textSize="@dimen/font_small"
-        android:textStyle="bold" />
+        android:textSize="@dimen/font_medium" />
 
 </RelativeLayout>

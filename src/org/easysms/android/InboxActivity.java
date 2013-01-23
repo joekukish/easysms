@@ -1,7 +1,6 @@
 package org.easysms.android;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -74,7 +73,6 @@ public class InboxActivity extends SherlockListActivity {
 		smsAllRetrieve();
 
 		final ListView lv = getListView();
-		lv.setTextFilterEnabled(true);
 
 		lv.setOnItemClickListener(new OnItemClickListener() {
 			public void onItemClick(AdapterView<?> parent, View view,
@@ -314,7 +312,7 @@ public class InboxActivity extends SherlockListActivity {
 
 			// adds the objects to display of the message.
 			temp2.put("telnumber", firstsms.contact);
-			temp2.put("date", firstsms.getDate());
+			temp2.put("date", firstsms.getDate(this));
 			temp2.put("name", name);
 			temp2.put("message", firstsms.body);
 			temp2.put("sent", firstsms.isSent ? R.drawable.ic_action_send
