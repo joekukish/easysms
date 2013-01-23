@@ -336,10 +336,8 @@ public class InboxActivity extends SherlockListActivity {
 			String phoneNumber = null;
 			String body = null;
 			String threadid;
-			String datestring = "Date inconnue";
-			String timestring = "Heure inconnue";
-			int type = -1;
 
+			int type = -1;
 			int read = -1;
 			// return -1 if the column does not exist.
 			int dateColumn = curinbox.getColumnIndex("date");
