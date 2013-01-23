@@ -28,6 +28,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaPlayer;
@@ -1088,7 +1089,6 @@ public class MessagingActivity extends SherlockActivity implements
 
 			}
 
-			// populateConversationTest(conversationtest);
 			List<Conversation> listallconv = populateList(smsAllRetrieve());
 			String threadidconv = retrieveThreadIdFromNumberContact(phoneNumContact);
 			// Toast.makeText(getApplicationContext(),threadidconv,
@@ -1631,7 +1631,8 @@ public class MessagingActivity extends SherlockActivity implements
 	public String retrieveThreadIdFromNumberContact(String phoneNumContact) {
 		for (Sms sms : smsAllRetrieve()) {
 			String smscontact = sms.contact;
-			if (smscontact.equals(phoneNumContact))
+			// TODO: could it really be null?
+			if (smscontact != null && smscontact.equals(phoneNumContact))
 				return sms.threadid;
 		}
 		return "error";
@@ -1716,16 +1717,15 @@ public class MessagingActivity extends SherlockActivity implements
 		Cursor curinbox = getContentResolver().query(uriSMSURIinbox, null,
 				null, null, null);
 		if (curinbox.moveToFirst()) {
+			
+			DatabaseUtils.dumpCurrentRow(curinbox);
 			long datesms = 0;
 			String phoneNumber = null;
 			String body = null;
 			String threadid;
-			String datestring = "Date inconnue";
-			String timestring = "Heure inconnue";
 
 			int type = -1;
 			int read = -1;
-			String dateTimeString = "erreur date";
 			// return -1 if the column does not exist.
 			int dateColumn = curinbox.getColumnIndex("date");
 			int numberColumn = curinbox.getColumnIndex("address");
