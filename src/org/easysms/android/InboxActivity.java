@@ -1,15 +1,14 @@
 package org.easysms.android;
 
-import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
 import org.easysms.android.data.Conversation;
 import org.easysms.android.data.Sms;
-import org.easysms.android.provider.SmsContentProvider;
 import org.easysms.android.util.ApplicationTracker;
 import org.easysms.android.util.ApplicationTracker.EventType;
 import org.easysms.android.util.TextToSpeechManager;
@@ -43,10 +42,17 @@ public class InboxActivity extends SherlockListActivity {
 	private static final ArrayList<HashMap<String, Object>> mMessageList = new ArrayList<HashMap<String, Object>>();
 	/** Flag used to determine if the refresh is complete. */
 	protected Boolean mIsComplete = false;
-	/** Timer used to refresh the Message list. */
-	protected Handler mTaskHandler = new Handler();
+	/** Handler used to update the list as new messages arrive. */
+	protected Handler mTaskHandler;
 
+	/**
+	 * Creates a thread that updates the message list every 10 seconds.
+	 */
 	private void createUpdateThread() {
+
+		// creates the handler used to process the message update.
+		mTaskHandler = new Handler();
+
 		// le timer fait ramer toute l'application!!! trouver un autre moyen
 		// ==> retrieve a signal when a new msg is received.
 		// -------------------timer------------------------
@@ -76,7 +82,7 @@ public class InboxActivity extends SherlockListActivity {
 
 				// opens the new message.
 
-				Object selectedFromList = (lv.getItemAtPosition(position));
+				// Object selectedFromList = (lv.getItemAtPosition(position));
 				HashMap<String, Object> o = (HashMap<String, Object>) mMessageList
 						.get(position);
 				String telnum = "unknown";
@@ -122,7 +128,7 @@ public class InboxActivity extends SherlockListActivity {
 	 * 
 	 * @return the tag that represents the class.
 	 */
-	public String getLogTag() {
+	protected String getLogTag() {
 		return this.getClass().getSimpleName();
 	}
 
@@ -146,6 +152,10 @@ public class InboxActivity extends SherlockListActivity {
 		ApplicationTracker.getInstance().setDeviceId(
 				((EasySmsApp) getApplication()).getDeviceId());
 
+		// tracks that the activity was opened.
+		ApplicationTracker.getInstance().logEvent(EventType.ACTIVITY_VIEW,
+				getLogTag());
+
 		// loads the available messages.
 		displayListSMS();
 
@@ -153,7 +163,7 @@ public class InboxActivity extends SherlockListActivity {
 		createUpdateThread();
 	}
 
-	public String getContactNameFromNumber(String number) {
+	private String getContactNameFromNumber(String number) {
 		/*
 		 * We have a phone number and we want to grab the name of the contact
 		 * with that number, if such a contact exists
@@ -179,7 +189,7 @@ public class InboxActivity extends SherlockListActivity {
 
 	}
 
-	public String getContactPhotoFromNumber(String number) {
+	private String getContactPhotoFromNumber(String number) {
 		/*
 		 * We have a phone number and we want to grab the name of the contact
 		 * with that number, if such a contact exists
@@ -209,7 +219,7 @@ public class InboxActivity extends SherlockListActivity {
 	public boolean onCreateOptionsMenu(Menu menu) {
 
 		MenuInflater inflater = getSupportMenuInflater();
-		inflater.inflate(R.menu.main_activity, menu);
+		inflater.inflate(R.menu.menu_inbox, menu);
 
 		return true;
 	}
@@ -301,28 +311,14 @@ public class InboxActivity extends SherlockListActivity {
 				photo2.close();
 
 			}
-			temp2.put("telnumber", firstsms.contact);
 
-			final Calendar c = Calendar.getInstance();
-			// int date = Calendar.DATE;
-			int mYear = c.get(Calendar.YEAR);
-			int mMonth = c.get(Calendar.MONTH) + 1;
-			int mDay = c.get(Calendar.DAY_OF_MONTH);
-			// String dateToday = mYear + "-" + mMonth + "-" + mDay;
-			String dateToday = mDay + "-" + mMonth + "-" + mYear;
-			String datesms = firstsms.datesms;
-			if (dateToday.equals(datesms)) {
-				temp2.put("date", firstsms.timesms);
-			} else {
-				temp2.put("date", firstsms.datesms);
-			}
+			// adds the objects to display of the message.
+			temp2.put("telnumber", firstsms.contact);
+			temp2.put("date", firstsms.getDate());
 			temp2.put("name", name);
 			temp2.put("message", firstsms.body);
-			if (firstsms.sent == "yes") {
-				temp2.put("sent", R.drawable.ic_action_send);
-			} else if (firstsms.sent == "no") {
-				temp2.put("sent", R.drawable.received);
-			}
+			temp2.put("sent", firstsms.isSent ? R.drawable.ic_action_send
+					: R.drawable.received);
 
 			mMessageList.add(temp2);
 		}
@@ -344,11 +340,9 @@ public class InboxActivity extends SherlockListActivity {
 			String threadid;
 			String datestring = "Date inconnue";
 			String timestring = "Heure inconnue";
-			Date dateFromSms = null;
 			int type = -1;
 
 			int read = -1;
-			String dateTimeString = "erreur date";
 			// return -1 if the column does not exist.
 			int dateColumn = curinbox.getColumnIndex("date");
 			int numberColumn = curinbox.getColumnIndex("address");
@@ -359,14 +353,6 @@ public class InboxActivity extends SherlockListActivity {
 			do {
 				if (dateColumn != -1) {
 					datesms = curinbox.getLong(dateColumn);
-					dateTimeString = (String) android.text.format.DateFormat
-							.format("yyyy-MM-dd'T'kk:mm:ss'Z'", datesms);
-					datestring = (String) android.text.format.DateFormat
-							.format("dd-MM-yyyy", datesms);
-					timestring = (String) android.text.format.DateFormat
-							.format("kk:mm", datesms);
-					dateFromSms = new Date(datesms);
-
 				}
 				if (typeRead != -1)
 					read = curinbox.getInt(typeRead);
@@ -383,17 +369,18 @@ public class InboxActivity extends SherlockListActivity {
 				Sms smsnew;
 
 				if (phoneNumber != null) {
-					smsnew = new Sms("unknown", threadid, datestring,
-							timestring, phoneNumber, body, read);
+					smsnew = new Sms(threadid, new Date(datesms), phoneNumber,
+							body);
 
 					// to know if it is a message sent or received
 					if (type == 2) { // SENT
-						smsnew.sent = "yes";
+						smsnew.isSent = true;
 					} else if (type == 1) { // INBOX
-						smsnew.sent = "no";
+						smsnew.isSent = false;
 					}
 
-					smsnew.read = read;
+					// indicates whether it was read or not.
+					smsnew.isRead = read == 1;
 
 					// we add this SMS to the list of all the SMS
 					allSMSlocal.add(smsnew);

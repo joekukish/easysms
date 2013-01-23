@@ -19,7 +19,7 @@ public class ApplicationTracker {
 
 	/** Defines the event types that are trackable through out the application. */
 	public enum EventType {
-		ACTIVITY_VIEW, CLICK, ERROR, LONG_CLICK, SYNC
+		ACTIVITY_VIEW, CLICK, ERROR, LONG_CLICK
 	}
 
 	/**
@@ -68,15 +68,12 @@ public class ApplicationTracker {
 	 * Set this value to -1 to disable this feature.
 	 */
 	public int mMaxLogSize;
-	/** Data structure used to store the sync events. */
-	private LinkedList<String> mSyncLog;
 
 	private ApplicationTracker() {
 		// creates the date formatter.
 		mDateFormat = new SimpleDateFormat(DATE_FORMAT);
 		// initializes the list where the data will be stored.
 		mActivityLog = new LinkedList<String>();
-		mSyncLog = new LinkedList<String>();
 		// initializes the value with the default
 		mMaxLogSize = DEFAULT_MAX_LOG_SIZE;
 	}
@@ -165,22 +162,12 @@ public class ApplicationTracker {
 
 		if (args.length == 0) {
 
-			switch (eventType) {
-			case SYNC:
-				synchronized (mSyncLog) {
-					mActivityLog.add(String.format(DATA_ENTRY_FORMAT_SMALL,
-							mDateFormat.format(new Date()), mDeviceId, eventType,
-							activityName));
-				}
-				break;
-			default:
-				// synchronized access to the log since concurrent access could
-				// be enabled.
-				synchronized (mActivityLog) {
-					mActivityLog.add(String.format(DATA_ENTRY_FORMAT_SMALL,
-							mDateFormat.format(new Date()), mDeviceId, eventType,
-							activityName));
-				}
+			// synchronized access to the log since concurrent access could
+			// be enabled.
+			synchronized (mActivityLog) {
+				mActivityLog.add(String.format(DATA_ENTRY_FORMAT_SMALL,
+						mDateFormat.format(new Date()), mDeviceId, eventType,
+						activityName));
 			}
 
 		} else {

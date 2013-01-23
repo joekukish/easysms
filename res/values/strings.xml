@@ -6,6 +6,7 @@
     <string name="main_description">Boîte de réception</string>
     <string name="languages">Choose a language</string>
     <string name="button_new">New Message</string>
+    <string name="activity_inbox_title">Inbox</string>
 
     <!-- Menu -->
     <string name="menu_new_message">New Message</string>
@@ -16,7 +17,7 @@
 
     <!-- Placeholders -->
     <string name="placeholder_date">today</string>
-    <string name="placeholder_name">John Doe</string>
+    <string name="placeholder_name">John William Doe</string>
     <string name="placeholder_phonenumber">+41762348225</string>
     <string name="placeholder_text">This is a really long message, this way we test what happends if the length exceeds the size of the text field.</string>
 

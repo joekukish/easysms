@@ -291,11 +291,13 @@ public class MessagingActivity extends SherlockActivity implements
 					LayoutParams.WRAP_CONTENT));
 			// linlayout.setBackgroundResource(R.drawable.bubblelast);
 			linlayout.setOrientation(LinearLayout.HORIZONTAL);
-			if (sms.sent == "no") {
-				linlayout.setGravity(Gravity.LEFT);
-			} else if (sms.sent == "yes") {
+
+			if (sms.isSent) {
 				linlayout.setGravity(Gravity.RIGHT);
+			} else {
+				linlayout.setGravity(Gravity.LEFT);
 			}
+
 			// FLOWLAYOUT
 			final FlowLayout fl = new FlowLayout(this);
 			fl.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,
@@ -304,16 +306,14 @@ public class MessagingActivity extends SherlockActivity implements
 
 			Button dateButton = new Button(this);
 			dateButton.setSingleLine(false);
-			String textButton = sms.datesms + "\n" + sms.timesms;
+			String textButton = sms.getDate(); // + "\n" + sms.timesms;
 			dateButton.setText(textButton);
 			dateButton.setLayoutParams(new LayoutParams(
 					LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
 			dateButton.setBackgroundResource(R.drawable.datebutton);
 			dateButton.setGravity(Gravity.RIGHT);
-			String datetimesms = sms.datesms;
-			if (language == Locale.FRENCH)
-				datetimesms += "a";
-			datetimesms += sms.timesms;
+
+			// TODO: test how date is represented.
 			final String datesmsplayed = textButton;
 			dateButton.setOnClickListener(new OnClickListener() {
 				@Override
@@ -451,22 +451,18 @@ public class MessagingActivity extends SherlockActivity implements
 				public void onClick(View v) {
 					playKaraoke(fl);
 				}
-
 			});
 
 			linlayout.addView(fl);
-			if (sms.sent == "yes") {
+			if (sms.isSent) {
 				wholelayout.addView(playButton);
 				wholelayout.addView(linlayout);
-
 			} else {
 				wholelayout.addView(linlayout);
 				wholelayout.addView(playButton);
 			}
-
 			msgdetailslayout.addView(wholelayout);
 		}
-
 	}
 
 	private String getContactNameFromNumber(String number) {
@@ -1346,7 +1342,7 @@ public class MessagingActivity extends SherlockActivity implements
 	public boolean onCreateOptionsMenu(Menu menu) {
 
 		MenuInflater inflater = getSupportMenuInflater();
-		inflater.inflate(R.menu.view_message, menu);
+		inflater.inflate(R.menu.menu_view_message, menu);
 
 		// RelativeLayout relativeLayout = (RelativeLayout) menu.findItem(
 		// R.id.layout_item).getActionView();
@@ -1727,7 +1723,7 @@ public class MessagingActivity extends SherlockActivity implements
 			String threadid;
 			String datestring = "Date inconnue";
 			String timestring = "Heure inconnue";
-			Date dateFromSms = null;
+
 			int type = -1;
 			int read = -1;
 			String dateTimeString = "erreur date";
@@ -1741,20 +1737,6 @@ public class MessagingActivity extends SherlockActivity implements
 			do {
 				if (dateColumn != -1) {
 					datesms = curinbox.getLong(dateColumn);
-					dateTimeString = (String) android.text.format.DateFormat
-							.format("yyyy-MM-dd'T'kk:mm:ss'Z'", datesms);
-					datestring = (String) android.text.format.DateFormat
-							.format("yyyy-MM-dd", datesms);
-					timestring = (String) android.text.format.DateFormat
-							.format("kk:mm", datesms);
-					// Toast.makeText(getApplicationContext(),datestring,
-					// Toast.LENGTH_SHORT).show();
-					dateFromSms = new Date(datesms);
-					final Calendar c = Calendar.getInstance();
-					int mYear = c.get(Calendar.YEAR);
-					int mMonth = c.get(Calendar.MONTH) + 1;
-					int mDay = c.get(Calendar.DAY_OF_MONTH);
-					// String dateToday = mYear + "-" + mMonth + "-" + mDay;
 
 				}
 				if (typeRead != -1)
@@ -1771,20 +1753,18 @@ public class MessagingActivity extends SherlockActivity implements
 					threadid = "nada";
 
 				// we create a new SMS
-				Sms smsnew = new Sms("unknown", threadid, datestring,
-						timestring, phoneNumber, body, read);
+				Sms smsnew = new Sms(threadid, new Date(datesms), phoneNumber,
+						body);
+
 				// to know if it is a message sent or received
 				if (type == 2) { // SENT
-					smsnew.sent = "yes";
+					smsnew.isSent = true;
 				} else if (type == 1) { // INBOX
-					smsnew.sent = "no";
+					smsnew.isSent = false;
 				}
-				if (read == 0) { // message is not read
-					smsnew.read = 0;
 
-				} else if (read == 1) { // message is read
-					smsnew.read = 1;
-				}
+				smsnew.isRead = read == 1;
+
 				// we add this SMS to the list of all the SMS
 				allSMSlocal.add(smsnew);
 
