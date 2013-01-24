@@ -53,7 +53,6 @@ import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
@@ -441,10 +440,8 @@ public class MessagingActivity extends SherlockActivity implements
 			}
 
 			// PLAYBUTTON
-
 			ImageView playButton = new ImageView(this);
 			playButton.setBackgroundResource(R.drawable.playsmsclick);
-			playButton.setOnCreateContextMenuListener(this);
 			playButton.setOnCreateContextMenuListener(this);
 			playButton.setOnClickListener(new OnClickListener() {
 				@Override
@@ -562,56 +559,6 @@ public class MessagingActivity extends SherlockActivity implements
 			// System.out.println(“Not Connected”);
 			return false;
 		}
-		return false;
-	}
-
-	private boolean MenuChoice(MenuItem item) {
-		String select = "Vous avez sélectionné";
-		String langue = "";
-
-		switch (item.getItemId()) {
-		case 0:
-			language = Locale.FRENCH;
-			langue = "français";
-			flaglanguage.setBackgroundResource(R.drawable.frenchflag);
-
-			// plays the audio.
-			TextToSpeechManager.getInstance().say(select + langue);
-
-			return true;
-
-		case 1:
-			language = Locale.ENGLISH;
-			langue = "anglais";
-			flaglanguage.setBackgroundResource(R.drawable.americanflag);
-
-			// plays the audio.
-			TextToSpeechManager.getInstance().say(select + langue);
-
-			return true;
-
-		case 2:
-			language = Locale.ITALIAN;
-			langue = "italien";
-			flaglanguage.setBackgroundResource(R.drawable.italianflag);
-
-			// plays the audio.
-			TextToSpeechManager.getInstance().say(select + langue);
-
-			return true;
-
-		case 3:
-
-			language = Locale.GERMAN;
-			langue = "allemand";
-			flaglanguage.setBackgroundResource(R.drawable.germanflag);
-
-			// plays the audio.
-			TextToSpeechManager.getInstance().say(select + langue);
-			return true;
-
-		}
-
 		return false;
 	}
 
@@ -1003,12 +950,6 @@ public class MessagingActivity extends SherlockActivity implements
 
 	}
 
-	@Override
-	public boolean onContextItemSelected(MenuItem item) {
-
-		return MenuChoice(item);
-	}
-
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -1044,20 +985,27 @@ public class MessagingActivity extends SherlockActivity implements
 			setContentView(R.layout.act_view_message);
 
 			// obtains the user info from the extras.
-			nameContact = (String) bundle.get("Name");
-			phoneNumContact = (String) bundle.get("Tel");
+			nameContact = (String) bundle.get(NAME_EXTRA);
+			phoneNumContact = (String) bundle.get(PHONENUMBER_EXTRA);
 
 			// allows the top bar to be different.
 			ActionBar actionBar = getSupportActionBar();
-			actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+			// adds the menu items to the bottom part while preserving the
+			// home button.
+			actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_HOME
+					| ActionBar.DISPLAY_SHOW_CUSTOM);
 
-			View view = View.inflate(getApplicationContext(),
-					R.layout.actionbar, null);
-			actionBar.setCustomView(view);
+			// sets the custom top bar.
+			actionBar.setCustomView(R.layout.topbar_view_message);
+
+			TextView nameTextView = (TextView) actionBar.getCustomView()
+					.findViewById(R.id.topbar_view_message_name);
+			TextView phonenumberTextView = (TextView) actionBar.getCustomView()
+					.findViewById(R.id.topbar_view_message_phonenumber);
 
 			// sets the data in the action bar.
-			getSupportActionBar().setTitle(nameContact);
-			getSupportActionBar().setSubtitle(phoneNumContact);
+			nameTextView.setText(nameContact);
+			phonenumberTextView.setText(phoneNumContact);
 
 			// enables the icon to serve as back.
 			getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -1717,7 +1665,7 @@ public class MessagingActivity extends SherlockActivity implements
 		Cursor curinbox = getContentResolver().query(uriSMSURIinbox, null,
 				null, null, null);
 		if (curinbox.moveToFirst()) {
-			
+
 			DatabaseUtils.dumpCurrentRow(curinbox);
 			long datesms = 0;
 			String phoneNumber = null;
@@ -1770,6 +1718,9 @@ public class MessagingActivity extends SherlockActivity implements
 			} while (curinbox.moveToNext());
 
 		}
+
+		// closes the current cursor.
+		curinbox.close();
 
 		return allSMSlocal;
 

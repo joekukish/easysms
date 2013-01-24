@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingLeft="@dimen/margin" >
+
+    <TextView
+        android:id="@+id/topbar_view_message_name"
+        style="?android:attr/titleTextStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/placeholder_name" />
+
+    <TextView
+        android:id="@+id/topbar_view_message_phonenumber"
+        style="?android:attr/subtitleTextStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/topbar_view_message_name"
+        android:text="@string/placeholder_phonenumber" />
+
+    <ImageButton
+        android:id="@+id/menu_call"
+        style="?android:attr/actionButtonStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:src="@android:drawable/ic_menu_call" />
+
+</RelativeLayout>
