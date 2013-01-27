@@ -6,18 +6,26 @@
 
     <TextView
         android:id="@+id/topbar_view_message_name"
-        style="?android:attr/titleTextStyle"
+        style="@style/TextAppearance.Sherlock.Widget.ActionBar.Title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/placeholder_name" />
 
     <TextView
         android:id="@+id/topbar_view_message_phonenumber"
-        style="?android:attr/subtitleTextStyle"
+        style="@style/TextAppearance.Sherlock.Widget.ActionBar.Subtitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/topbar_view_message_name"
         android:text="@string/placeholder_phonenumber" />
+
+    <!--
+         <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:src="@drawable/nophotostored" />
+    -->
+
 
     <ImageButton
         android:id="@+id/menu_call"
@@ -25,6 +33,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
+        android:contentDescription="@string/menu_call"
         android:src="@android:drawable/ic_menu_call" />
 
 </RelativeLayout>

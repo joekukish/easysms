@@ -384,6 +384,8 @@ public class InboxActivity extends SherlockListActivity {
 
 			} while (curinbox.moveToNext());
 		}
+		
+		curinbox.close();
 
 		populateList(allSMSlocal);
 	}

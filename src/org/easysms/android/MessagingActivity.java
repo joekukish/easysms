@@ -482,6 +482,7 @@ public class MessagingActivity extends SherlockActivity implements
 			name = c.getString(c
 					.getColumnIndexOrThrow(PhoneLookup.DISPLAY_NAME));
 		}
+		c.close();
 		return name;
 
 	}
@@ -508,6 +509,8 @@ public class MessagingActivity extends SherlockActivity implements
 			photoId = c
 					.getString(c.getColumnIndexOrThrow(PhoneLookup.PHOTO_ID));
 		}
+
+		c.close();
 		return photoId;
 	}
 
@@ -876,14 +879,9 @@ public class MessagingActivity extends SherlockActivity implements
 							if (mobilePhone != "Inconnu") {
 								no = mobilePhone;
 							}
-							/*
-							 * else if (homePhone != "Inconnu") { no =
-							 * homePhone; } else if (workPhone != "Inconnu") {
-							 * no = workPhone; } else if (otherPhone !=
-							 * "Inconnu") { no = otherPhone; }
-							 */
-
 						}
+
+						pCur.close();
 					}
 
 					photoId = cur.getString(cur
@@ -930,6 +928,7 @@ public class MessagingActivity extends SherlockActivity implements
 					no = null;
 
 					contect_resolver = null;
+					cur.close();
 					cur = null;
 
 				}
@@ -963,7 +962,7 @@ public class MessagingActivity extends SherlockActivity implements
 		newMsg = bundle.getBoolean(NEW_MESSAGE_EXTRA);
 
 		if (newMsg) { // if new message don't display the message details page
-			setContentView(R.layout.messagecomposition);
+			setContentView(R.layout.act_new_message);
 
 			profile = (ImageView) findViewById(R.id.selectcontact);
 			profile.setOnClickListener(new OnClickListener() {
@@ -973,7 +972,6 @@ public class MessagingActivity extends SherlockActivity implements
 					Intent intent = new Intent(Intent.ACTION_PICK,
 							ContactsContract.Contacts.CONTENT_URI);
 					startActivityForResult(intent, PICK_CONTACT);
-
 				}
 
 			});
@@ -1013,6 +1011,7 @@ public class MessagingActivity extends SherlockActivity implements
 			phoneNo = phoneNumContact;
 			msgdetailslayout = (LinearLayout) findViewById(R.id.msgdetailslayout);
 
+			// gets the contact image.
 			String photoid = getContactPhotoFromNumber(phoneNumContact);
 			// profile = (ImageView) findViewById(R.id.selectcontact);
 			if (photoid == null) {
@@ -1034,19 +1033,17 @@ public class MessagingActivity extends SherlockActivity implements
 
 				}
 				photo2.close();
-
 			}
 
+			// gets all the sms of the conversation, that match the same phone
+			// number.
 			List<Conversation> listallconv = populateList(smsAllRetrieve());
 			String threadidconv = retrieveThreadIdFromNumberContact(phoneNumContact);
-			// Toast.makeText(getApplicationContext(),threadidconv,
-			// Toast.LENGTH_LONG).show();
 			Conversation conv = retrieveConvFromThreadId(listallconv,
 					threadidconv);
 			createLayoutbubbleconv(conv);
-			// }
 
-		} // end of else
+		}
 
 		speechrecolayout = (LinearLayout) findViewById(R.id.elsalayout);
 		LinearLayout wholeLayout = new LinearLayout(this);
@@ -1054,8 +1051,8 @@ public class MessagingActivity extends SherlockActivity implements
 				.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 310,
 						getResources().getDisplayMetrics()),
 				LayoutParams.WRAP_CONTENT));
-		// for the speech to text
 
+		// for the speech to text
 		flowlayoutspeechrecog1 = new FlowLayout(this);// bubble conversation
 		flowlayoutspeechrecog1.setLayoutParams(new LayoutParams(
 				(int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,

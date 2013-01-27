@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res/org.easysms.android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical" >
@@ -115,14 +114,16 @@
                 android:orientation="vertical" >
             </LinearLayout>
         </ScrollView>
-
-        <LinearLayout
-            android:id="@+id/bubblelayout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom"
-            android:orientation="vertical" >
-        </LinearLayout>
     </org.easysms.android.ui.FlingAndScrollViewer>
+
+    <LinearLayout
+        android:id="@+id/bubblelayout"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:layout_alignParentBottom="true"
+        android:layout_below="@+id/flingScrollViewer"
+        android:layout_gravity="bottom"
+        android:orientation="vertical" >
+    </LinearLayout>
 
 </RelativeLayout>
