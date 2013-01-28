@@ -1,6 +1,5 @@
 package org.easysms.android;
 
-import java.io.OutputStreamWriter;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +23,6 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaPlayer;
-import android.media.MediaPlayer.OnCompletionListener;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -43,7 +41,6 @@ import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -120,14 +117,9 @@ public class MessagingActivity extends SherlockActivity {
 	private SmsContentProvider mContentProvider;
 	private Handler handler;
 	private ArrayList<String> matches;
-	// Button btnSend;
 	private Handler mHandler;
-	private MediaPlayer mMediaPlayer;
 	private LinearLayout msgdetailslayout;;
 	private String nameContact;
-	private InboxActivity ob;
-	private MessagingActivity objectTest;
-	private OutputStreamWriter osw = null;
 	private String phoneNo = "";
 	private String phoneNumContact;
 	private int PICK_CONTACT;
@@ -136,8 +128,6 @@ public class MessagingActivity extends SherlockActivity {
 	private TextView recipientnum;
 	private ImageView speakButton;
 	private LinearLayout speechrecolayout;
-	private int timesKaraoke = 0;
-	private EditText txtMessage;
 
 	// displays all the SMSs in a conversation.
 	private void createLayoutbubbleconv(Conversation conv) {
@@ -835,33 +825,6 @@ public class MessagingActivity extends SherlockActivity {
 
 	}
 
-	@Override
-	protected void onDestroy() {
-		super.onDestroy();
-		if (mMediaPlayer != null) {
-			mMediaPlayer.release();
-			mMediaPlayer = null;
-		}
-	}
-
-	private void playAudio() {
-
-		try {
-
-			mMediaPlayer = MediaPlayer.create(this, R.raw.beep);
-			mMediaPlayer.setLooping(false);
-			Log.e("beep", "started0");
-			mMediaPlayer.start();
-			mMediaPlayer.setOnCompletionListener(new OnCompletionListener() {
-				public void onCompletion(MediaPlayer arg0) {
-					finish();
-				}
-			});
-		} catch (Exception e) {
-			Log.e("beep", "error: " + e.getMessage(), e);
-		}
-	}
-
 	private List<Conversation> populateList(List<Sms> allSMS) {
 
 		// list with all the conversations
@@ -916,10 +879,4 @@ public class MessagingActivity extends SherlockActivity {
 		}
 		return "error";
 	}
-
-	// for the page navigation
-	public void setOb(InboxActivity obA) {
-		this.ob = obA;
-	}
-
 }

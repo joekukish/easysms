@@ -17,6 +17,8 @@ import android.widget.ImageView;
 
 public class KaraokeLayout extends ViewGroup {
 
+	private int timesKaraoke = 0;
+
 	public void playKaraoke(final KaraokeLayout fl) {
 		// timesKaraoke++;
 		//
