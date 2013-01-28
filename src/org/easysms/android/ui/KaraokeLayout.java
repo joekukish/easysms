@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.os.Handler;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,53 +19,54 @@ import android.widget.ImageView;
 public class KaraokeLayout extends ViewGroup {
 
 	private int timesKaraoke = 0;
+	private Handler handler;
 
 	public void playKaraoke(final KaraokeLayout fl) {
-		// timesKaraoke++;
-		//
-		// if (timesKaraoke <= 1) {
-		//
-		// // Do something long
-		// Runnable runnable = new Runnable() {
-		// @Override
-		// public void run() {
-		//
-		// for (int i = 1; i < fl.getChildCount(); ++i) {
-		// final Button btn = (Button) fl.getChildAt(i);
-		// // wholesentenceplayed += btn.getText();
-		// btn.setFocusableInTouchMode(true);
-		// try {
-		// Thread.sleep(1000);
-		// } catch (InterruptedException e) {
-		// e.printStackTrace();
-		// }
-		// handler.post(new Runnable() {
-		// @Override
-		// public void run() {
-		// // progress.setProgress(value);
-		// btn.requestFocus();
-		// // drop all pending entries in the playback
-		// // queue.
-		//
-		// // plays the audio.
-		// TextToSpeechManager.getInstance().say(
-		// (String) btn.getText());
-		// }
-		// });
-		//
-		// }
-		// timesKaraoke = 0;
-		//
-		// }
-		// };
-		// new Thread(runnable).start();
-		//
-		// String wholesentenceplayed = "";
-		// for (int i = 1; i < fl.getChildCount(); ++i) {
-		// final Button btn = (Button) fl.getChildAt(i);
-		// wholesentenceplayed += btn.getText();
-		// }
-		// }
+		timesKaraoke++;
+
+		if (timesKaraoke <= 1) {
+
+			// Do something long
+			Runnable runnable = new Runnable() {
+				@Override
+				public void run() {
+
+					for (int i = 1; i < fl.getChildCount(); ++i) {
+						final Button btn = (Button) fl.getChildAt(i);
+						// wholesentenceplayed += btn.getText();
+						btn.setFocusableInTouchMode(true);
+						try {
+							Thread.sleep(1000);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+						handler.post(new Runnable() {
+							@Override
+							public void run() {
+								// progress.setProgress(value);
+								btn.requestFocus();
+								// drop all pending entries in the playback
+								// queue.
+
+								// plays the audio.
+								TextToSpeechManager.getInstance().say(
+										(String) btn.getText());
+							}
+						});
+
+					}
+					timesKaraoke = 0;
+
+				}
+			};
+			new Thread(runnable).start();
+
+			String wholesentenceplayed = "";
+			for (int i = 1; i < fl.getChildCount(); ++i) {
+				final Button btn = (Button) fl.getChildAt(i);
+				wholesentenceplayed += btn.getText();
+			}
+		}
 	}
 
 	public static class LayoutParams extends ViewGroup.LayoutParams {

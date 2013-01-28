@@ -22,7 +22,6 @@ import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -115,7 +114,7 @@ public class MessagingActivity extends SherlockActivity {
 
 	private KaraokeLayout flowlayout;
 	private SmsContentProvider mContentProvider;
-	private Handler handler;
+
 	private ArrayList<String> matches;
 	private Handler mHandler;
 	private LinearLayout msgdetailslayout;;
@@ -819,9 +818,6 @@ public class MessagingActivity extends SherlockActivity {
 		// (i.e., different from the system locale), the application does not
 		// need to read the voice settings.
 		// refreshVoiceSettings();
-
-		// for the karaoke
-		handler = new Handler();
 
 	}
 
