@@ -7,6 +7,8 @@
     <string name="languages">Choose a language</string>
     <string name="button_new">New Message</string>
     <string name="activity_inbox_title">Inbox</string>
+    <string name="voice_help">To record your message click on the microphone at bottom left.</string>
+    <string name="message_sent">Message Sent</string>
 
     <!-- Dates -->
     <string name="date_format">yyyy-MM-dd</string>
@@ -31,6 +33,34 @@
     <!-- Content Descriptions -->
     <string name="description_contact_image">Contact Image</string>
 
+    <string-array name="icons_array">
+        <item>Ok</item>
+        <item>No</item>
+        <item>Late</item>
+        <item>Call</item>
+        <item>Empty</item>
+        <item>Busy</item>
+        <item>Hurry!</item>
+        <item>How are you?</item>
+        <item>Love</item>
+        <item>Car</item>
+        <item>Date?</item>
+        <item>Time?</item>
+    </string-array>
+    <string-array name="sentenses_array">
+        <item>Ok</item>
+        <item>No</item>
+        <item>"I'm late"</item>
+        <item>Call me!</item>
+        <item>"I don't have more battery"</item>
+        <item>"I can't answer, I'm busy"</item>
+        <item>Hurry up!</item>
+        <item>How are you?</item>
+        <item>"I'm thinking of you"</item>
+        <item>"I'm driving"</item>
+        <item>When?</item>
+        <item>At what time?</item>
+    </string-array>
     <string-array name="languages_array">
         <item>English</item>
         <item>French</item>

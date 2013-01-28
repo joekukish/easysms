@@ -85,7 +85,7 @@ public class DateHelper {
 			return new SimpleDateFormat("kk:mm").format(date);
 		// returns short date
 		else
-			return new SimpleDateFormat("dd/MM").format(date);
+			return new SimpleDateFormat("MMM dd").format(date);
 	}
 
 	public static String formatWithDay(String date) {

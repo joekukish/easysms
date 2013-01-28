@@ -1,28 +1,23 @@
 package org.easysms.android;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
 import org.easysms.android.data.Conversation;
 import org.easysms.android.data.Sms;
+import org.easysms.android.provider.SmsContentProvider;
 import org.easysms.android.util.ApplicationTracker;
 import org.easysms.android.util.ApplicationTracker.EventType;
 import org.easysms.android.util.TextToSpeechManager;
 
 import android.annotation.TargetApi;
 import android.content.Intent;
-import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.provider.ContactsContract.CommonDataKinds.Photo;
-import android.provider.ContactsContract.Data;
-import android.provider.ContactsContract.PhoneLookup;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -43,6 +38,8 @@ public class InboxActivity extends SherlockListActivity {
 	protected Boolean mIsComplete = false;
 	/** Handler used to update the list as new messages arrive. */
 	protected Handler mTaskHandler;
+	/** Class that handles the SMS extraction. */
+	protected SmsContentProvider mContentProvider;
 
 	/**
 	 * Creates a thread that updates the message list every 10 seconds.
@@ -70,7 +67,9 @@ public class InboxActivity extends SherlockListActivity {
 
 	private void displayListSMS() {
 
-		smsAllRetrieve();
+		// gets the messages from the provider and groups them into
+		// conversations.
+		populateList(mContentProvider.getMessages());
 
 		final ListView lv = getListView();
 
@@ -78,30 +77,25 @@ public class InboxActivity extends SherlockListActivity {
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
 
-				// opens the new message.
-
 				// Object selectedFromList = (lv.getItemAtPosition(position));
 				HashMap<String, Object> o = (HashMap<String, Object>) mMessageList
 						.get(position);
-				String telnum = "unknown";
-				String name = "unknown";
-				Object telnumobj = o.get("telnumber");
-				if (telnumobj != null)
-					telnum = telnumobj.toString();
-				Object nameobj = o.get("name");
-				if (nameobj != null) {
-					name = nameobj.toString();
-				}
+
+				// TODO: should we pass the threadid? this approach will not
+				// work if multiple destinatary messages are allowed.
+
+				// gets the parameters from the selected message
+				String telnum = (String) o.get("telnumber");
+				String name = (String) o.get("name");
 
 				// activity use to show the message.
-				Intent i = new Intent(InboxActivity.this,
-						MessagingActivity.class);
+				Intent i = new Intent(InboxActivity.this, MessageActivity.class);
 				// creates and initializes the bundle.
 				Bundle bundle = new Bundle();
 				// adds the parameters to bundle
-				bundle.putString(MessagingActivity.NAME_EXTRA, name);
-				bundle.putString(MessagingActivity.PHONENUMBER_EXTRA, telnum);
-				bundle.putBoolean(MessagingActivity.NEW_MESSAGE_EXTRA, false);
+				bundle.putString(MessageActivity.NAME_EXTRA, name);
+				bundle.putString(MessageActivity.PHONENUMBER_EXTRA, telnum);
+				bundle.putBoolean(MessageActivity.NEW_MESSAGE_EXTRA, false);
 				// adds this bundle to the intent
 				i.putExtras(bundle);
 				startActivity(i);
@@ -140,10 +134,16 @@ public class InboxActivity extends SherlockListActivity {
 		// sets the desired layout for the activity.
 		setContentView(R.layout.act_inbox);
 
+		// objects the provider from the application.
+		mContentProvider = ((EasySmsApp) getApplication()).getContentProvider();
+
+		getContentResolver().registerContentObserver(
+				Uri.parse("content://sms/"), true, mContentProvider);
+
 		// initializes the TextToSpeech
 		TextToSpeechManager.init(getApplicationContext());
 		// sets the default language locale.
-		TextToSpeechManager.getInstance().setLocale(Locale.FRENCH);
+		TextToSpeechManager.getInstance().setLocale(Locale.ENGLISH);
 
 		// sets the device id which will be used to track the activity of all
 		// phones.
@@ -159,58 +159,6 @@ public class InboxActivity extends SherlockListActivity {
 
 		// starts thread that updates the layout.
 		createUpdateThread();
-	}
-
-	private String getContactNameFromNumber(String number) {
-		/*
-		 * We have a phone number and we want to grab the name of the contact
-		 * with that number, if such a contact exists
-		 */
-		Uri lookupUri = Uri.withAppendedPath(PhoneLookup.CONTENT_FILTER_URI,
-				Uri.encode(number));
-
-		/* phoneNumber here being a variable with the phone number stored. */
-		Cursor c = getContentResolver().query(lookupUri,
-				new String[] { PhoneLookup.DISPLAY_NAME }, null, null, null);
-		/*
-		 * If we want to get something other than the displayed name for the
-		 * contact, then just use something else instead of DISPLAY_NAME
-		 */
-		String name = "Contact inconnu";
-		while (c.moveToNext()) {
-			// if we find a match we put it in a String.
-			name = c.getString(c
-					.getColumnIndexOrThrow(PhoneLookup.DISPLAY_NAME));
-		}
-		c.close();
-		return name;
-
-	}
-
-	private String getContactPhotoFromNumber(String number) {
-		/*
-		 * We have a phone number and we want to grab the name of the contact
-		 * with that number, if such a contact exists
-		 */
-		Uri lookupUri = Uri.withAppendedPath(PhoneLookup.CONTENT_FILTER_URI,
-				Uri.encode(number));
-		/* phoneNumber here being a variable with the phone number stored. */
-		Cursor c = getContentResolver().query(lookupUri,
-				new String[] { PhoneLookup.PHOTO_ID }, null, null, null);
-		// long photo =
-		// c.getLong(c.getColumnIndexOrThrow(ContactsContract.Contacts.PHOTO_ID));
-		/*
-		 * If we want to get something other than the displayed name for the
-		 * contact, then just use something else instead of DISPLAY_NAME
-		 */
-		String photoId = null;
-		while (c.moveToNext()) {
-			// if we find a match we put it in a String.
-			photoId = c
-					.getString(c.getColumnIndexOrThrow(PhoneLookup.PHOTO_ID));
-		}
-		c.close();
-		return photoId;
 	}
 
 	@Override
@@ -229,11 +177,11 @@ public class InboxActivity extends SherlockListActivity {
 		case R.id.menu_new_message:
 
 			// creates an intent for the next screen.
-			Intent i = new Intent(InboxActivity.this, MessagingActivity.class);
+			Intent i = new Intent(InboxActivity.this, MessageActivity.class);
 			// creates and initializes a new bundle.
 			Bundle bundle = new Bundle();
 			// indicates that a new message is being created.
-			bundle.putBoolean(MessagingActivity.NEW_MESSAGE_EXTRA, true);
+			bundle.putBoolean(MessageActivity.NEW_MESSAGE_EXTRA, true);
 			// adds the bundle to the intent.
 			i.putExtras(bundle);
 			startActivity(i);
@@ -276,38 +224,24 @@ public class InboxActivity extends SherlockListActivity {
 
 		for (Conversation conv : allconversations) {
 			HashMap<String, Object> temp2 = new HashMap<String, Object>();
-			// on regarde le 1er sms de chaque liste
 
+			// we use the first message of the list.
 			Sms firstsms = conv.listsms.get(0);
 			// get name associated to phone number
-			String name = getContactNameFromNumber(firstsms.contact);
-			String photoid = getContactPhotoFromNumber(firstsms.contact);
-			if (photoid == null) {
-				temp2.put("avatar", R.drawable.nophotostored);
+			String name = mContentProvider
+					.getContactNameFromNumber(firstsms.contact);
+			String photoId = mContentProvider
+					.getContactPhotoFromNumber(firstsms.contact);
 
-			} else {
+			temp2.put("avatar", R.drawable.nophotostored);
 
-				Cursor photo2 = getContentResolver().query(Data.CONTENT_URI,
-						new String[] { Photo.PHOTO }, // column for the blob
-						Data._ID + "=?", // select row by id
-						new String[] { photoid }, // filter by photoId
-						null);
-				Bitmap photoBitmap = null;
-				if (photo2.moveToFirst()) {
-					byte[] photoBlob = photo2.getBlob(photo2
-							.getColumnIndex(Photo.PHOTO));
-					photoBitmap = BitmapFactory.decodeByteArray(photoBlob, 0,
-							photoBlob.length);
+			// loads the photo bitmap.
+			if (photoId != null) {
 
-					if (photoBitmap != null) {
-						temp2.put("avatar", R.drawable.nophotostored);
-					} else {
-						temp2.put("avatar", R.drawable.nophotostored);
-					}
-
+				Bitmap photo = mContentProvider.getContactPhotoWithId(photoId);
+				if (photo != null) {
+					temp2.put("avatar", photo);
 				}
-				photo2.close();
-
 			}
 
 			// adds the objects to display of the message.
@@ -322,71 +256,5 @@ public class InboxActivity extends SherlockListActivity {
 		}
 
 		return allconversations;
-	}
-
-	// return a list with all the SMS and for each sms a status sent: yes or no
-	private void smsAllRetrieve() {
-		// we put all the SMS sent and received in a list
-		List<Sms> allSMSlocal = new ArrayList<Sms>();
-		Uri uriSMSURIinbox = Uri.parse("content://sms/");
-		Cursor curinbox = getContentResolver().query(uriSMSURIinbox, null,
-				null, null, null);
-		if (curinbox.moveToFirst()) {
-			long datesms = 0;
-			String phoneNumber = null;
-			String body = null;
-			String threadid;
-
-			int type = -1;
-			int read = -1;
-			// return -1 if the column does not exist.
-			int dateColumn = curinbox.getColumnIndex("date");
-			int numberColumn = curinbox.getColumnIndex("address");
-			int bodyColumn = curinbox.getColumnIndex("body");
-			int threadColumn = curinbox.getColumnIndex("thread_id");
-			int typeColumn = curinbox.getColumnIndex("type");
-			int typeRead = curinbox.getColumnIndex("read");
-			do {
-				if (dateColumn != -1) {
-					datesms = curinbox.getLong(dateColumn);
-				}
-				if (typeRead != -1)
-					read = curinbox.getInt(typeRead);
-				if (typeColumn != -1)
-					type = curinbox.getInt(typeColumn);
-				if (bodyColumn != -1)
-					body = curinbox.getString(bodyColumn);
-				if (numberColumn != -1)
-					phoneNumber = curinbox.getString(numberColumn);
-				if (threadColumn != -1)
-					threadid = curinbox.getString(threadColumn);
-				else
-					threadid = "nada";
-				Sms smsnew;
-
-				if (phoneNumber != null) {
-					smsnew = new Sms(threadid, new Date(datesms), phoneNumber,
-							body);
-
-					// to know if it is a message sent or received
-					if (type == 2) { // SENT
-						smsnew.isSent = true;
-					} else if (type == 1) { // INBOX
-						smsnew.isSent = false;
-					}
-
-					// indicates whether it was read or not.
-					smsnew.isRead = read == 1;
-
-					// we add this SMS to the list of all the SMS
-					allSMSlocal.add(smsnew);
-				}
-
-			} while (curinbox.moveToNext());
-		}
-		
-		curinbox.close();
-
-		populateList(allSMSlocal);
 	}
 }

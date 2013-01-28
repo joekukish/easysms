@@ -1,6 +1,9 @@
 package org.easysms.android.ui;
 
+import java.util.StringTokenizer;
+
 import org.easysms.android.R;
+import org.easysms.android.util.TextToSpeechManager;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -9,8 +12,59 @@ import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageView;
 
-public class FlowLayout extends ViewGroup {
+public class KaraokeLayout extends ViewGroup {
+
+	public void playKaraoke(final KaraokeLayout fl) {
+		// timesKaraoke++;
+		//
+		// if (timesKaraoke <= 1) {
+		//
+		// // Do something long
+		// Runnable runnable = new Runnable() {
+		// @Override
+		// public void run() {
+		//
+		// for (int i = 1; i < fl.getChildCount(); ++i) {
+		// final Button btn = (Button) fl.getChildAt(i);
+		// // wholesentenceplayed += btn.getText();
+		// btn.setFocusableInTouchMode(true);
+		// try {
+		// Thread.sleep(1000);
+		// } catch (InterruptedException e) {
+		// e.printStackTrace();
+		// }
+		// handler.post(new Runnable() {
+		// @Override
+		// public void run() {
+		// // progress.setProgress(value);
+		// btn.requestFocus();
+		// // drop all pending entries in the playback
+		// // queue.
+		//
+		// // plays the audio.
+		// TextToSpeechManager.getInstance().say(
+		// (String) btn.getText());
+		// }
+		// });
+		//
+		// }
+		// timesKaraoke = 0;
+		//
+		// }
+		// };
+		// new Thread(runnable).start();
+		//
+		// String wholesentenceplayed = "";
+		// for (int i = 1; i < fl.getChildCount(); ++i) {
+		// final Button btn = (Button) fl.getChildAt(i);
+		// wholesentenceplayed += btn.getText();
+		// }
+		// }
+	}
+
 	public static class LayoutParams extends ViewGroup.LayoutParams {
 		private static int NO_SPACING = -1;
 		private int horizontalSpacing = NO_SPACING;
@@ -68,27 +122,106 @@ public class FlowLayout extends ViewGroup {
 	}
 
 	public static final int HORIZONTAL = 0;
+
 	public static final int VERTICAL = 1;
 	private boolean debugDraw = false;
 	private int horizontalSpacing = 0;
 	private int orientation = 0;
 	private int verticalSpacing = 0;
 
-	public FlowLayout(Context context) {
+	public KaraokeLayout(Context context) {
 		super(context);
 		this.readStyleParameters(context, null);
+
+		addPlayButton();
 	}
 
-	public FlowLayout(Context context, AttributeSet attributeSet) {
+	public KaraokeLayout(Context context, AttributeSet attributeSet) {
 		super(context, attributeSet);
 
 		this.readStyleParameters(context, attributeSet);
+
+		addPlayButton();
 	}
 
-	public FlowLayout(Context context, AttributeSet attributeSet, int defStyle) {
+	public KaraokeLayout(Context context, AttributeSet attributeSet,
+			int defStyle) {
 		super(context, attributeSet, defStyle);
 
 		this.readStyleParameters(context, attributeSet);
+
+		addPlayButton();
+	}
+
+	private ImageView mPlayButton;
+
+	private void addPlayButton() {
+		// creates the button used to play the text
+		mPlayButton = new ImageView(this.getContext());
+		mPlayButton.setBackgroundResource(R.drawable.playsmsclick);
+		mPlayButton.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				// playKaraoke(instructionsBubble);
+			}
+		});
+
+		// adds the button.
+		addView(mPlayButton);
+	}
+
+	public void addText(String text) {
+		// parse the sentence into words and put it into an array of words
+		StringTokenizer st = new StringTokenizer(text);
+
+		String[] tabWords = new String[100];
+		int nbWords = 0;
+		while (st.hasMoreElements()) {
+			tabWords[nbWords] = (String) st.nextElement();
+			nbWords++;
+		}
+
+		// create a button for each words and append it to the
+		// bubble composition
+		for (int i = 0; i < nbWords; ++i) {
+			final Button btn = new Button(getContext());
+			btn.setText(tabWords[i]);
+
+			// btn.setTextSize( (int)
+			// TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP,
+			// 10, getResources().getDisplayMetrics()));
+			btn.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,
+					LayoutParams.WRAP_CONTENT));
+			btn.setTextColor(getResources().getColor(android.R.color.black));
+
+			// before being clicked the button is grey
+			btn.setBackgroundResource(R.drawable.button);
+
+			final String toSay = tabWords[i];
+
+			// play each button
+			btn.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					// plays the audio.
+					TextToSpeechManager.getInstance().say(toSay);
+				}
+			});
+
+			// on long click, delete the button
+			btn.setOnLongClickListener(new OnLongClickListener() {
+				@Override
+				public boolean onLongClick(View v) {
+					KaraokeLayout.this.removeView(btn);
+					return true;
+				}
+			});
+
+			// adds the button to the container.
+			addView(btn, new LayoutParams(LayoutParams.WRAP_CONTENT,
+					LayoutParams.WRAP_CONTENT));
+
+		}
 	}
 
 	@Override

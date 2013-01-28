@@ -38,6 +38,11 @@
             android:screenOrientation="portrait"
             android:uiOptions="splitActionBarWhenNarrow" >
         </activity>
+        <activity
+            android:name=".MessageActivity"
+            android:screenOrientation="portrait"
+            android:uiOptions="splitActionBarWhenNarrow" >
+        </activity>
 
         <receiver
             android:name=".receiver.SmsReceiver"
