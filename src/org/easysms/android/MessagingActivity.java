@@ -3,14 +3,12 @@ package org.easysms.android;
 import java.io.OutputStreamWriter;
 import java.sql.Date;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.StringTokenizer;
 
 import org.easysms.android.data.Conversation;
 import org.easysms.android.data.Sms;
 import org.easysms.android.provider.SmsContentProvider;
-import org.easysms.android.ui.FlingAndScrollViewer;
 import org.easysms.android.ui.KaraokeLayout;
 import org.easysms.android.util.TextToSpeechManager;
 
@@ -48,8 +46,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListView;
-import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.actionbarsherlock.app.ActionBar;
@@ -119,7 +115,7 @@ public class MessagingActivity extends SherlockActivity {
 
 	static final int TIME_DIALOG_ID = 1;
 	private static final int VOICE_RECOGNITION_REQUEST_CODE = 1234;
-	private FlingAndScrollViewer flingAndScrollViewer;
+
 	private KaraokeLayout flowlayout;
 	private SmsContentProvider mContentProvider;
 	private Handler handler;
@@ -348,10 +344,6 @@ public class MessagingActivity extends SherlockActivity {
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (requestCode == VOICE_RECOGNITION_REQUEST_CODE
 				&& resultCode == RESULT_OK) {
-
-			// in this case we scroll to the right page (if we are on quick
-			// sender)
-			flingAndScrollViewer.scrollBy(500, 10);
 
 			// fill the list view with the strings the recognizer thought it
 			// could have heard
