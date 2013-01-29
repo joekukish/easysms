@@ -19,15 +19,16 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Vibrator;
 import android.speech.RecognizerIntent;
 import android.support.v4.view.ViewPager;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
@@ -45,25 +46,40 @@ public class MessageActivity extends SherlockActivity {
 	/** Code used to detect the Voice Recognition Intent. */
 	private static final int VOICE_RECOGNITION_REQUEST_CODE = 1234;
 
+	/** Handler used to execute actions in another thread. */
 	private Handler handler;
 	private String mContactName;
 	private String mContactPhonenumber;
-	private Vibrator mVibrationService;
+	// private Vibrator mVibrationService;
 
 	/** Provider used to manage the underlying SMS data. */
 	private SmsContentProvider mContentProvider;
-
 	/** Default Locale used through the application. */
 	private Locale mCurrentLocale = Locale.ENGLISH;
-
 	/** KaraokeLayout where the message to send is composed. */
 	private KaraokeLayout mSendLayout;
-	private String phoneNo = "";
 
+	/**
+	 * Adds the given text into the send bubble.
+	 * 
+	 * @param text
+	 *            text to add.
+	 */
 	public void addTextToMessage(String text) {
-
 		// adds the text in karaoke mode.
 		mSendLayout.addText(text);
+	}
+
+	public String getContactName() {
+		return mContactName;
+	}
+
+	public String getContactPhonenumber() {
+		return mContactPhonenumber;
+	}
+
+	public SmsContentProvider getContentProvider() {
+		return mContentProvider;
 	}
 
 	public final boolean isInternetOn() {
@@ -95,7 +111,8 @@ public class MessageActivity extends SherlockActivity {
 		setTheme(EasySmsApp.THEME);
 
 		// gets the service from the system.
-		mVibrationService = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+		// mVibrationService = (Vibrator)
+		// getSystemService(Context.VIBRATOR_SERVICE);
 
 		// objects the provider from the application.
 		mContentProvider = ((EasySmsApp) getApplication()).getContentProvider();
@@ -103,19 +120,46 @@ public class MessageActivity extends SherlockActivity {
 		Bundle bundle = getIntent().getExtras();
 		Boolean newMsg = bundle.getBoolean(NEW_MESSAGE_EXTRA);
 
-		setContentView(R.layout.act_view_message);
-
-		// obtains the user info from the extras.
-		mContactName = (String) bundle.get(NAME_EXTRA);
-		mContactPhonenumber = (String) bundle.get(PHONENUMBER_EXTRA);
-
-		MyPagerAdapter adapter = new MyPagerAdapter(this);
-		ViewPager myPager = (ViewPager) findViewById(R.id.view_message_view_pager);
-		myPager.setAdapter(adapter);
-		myPager.setCurrentItem(2);
-
 		// gets the area where the message is composed.
 		mSendLayout = (KaraokeLayout) findViewById(R.id.view_message_compose_bubble);
+
+		if (!newMsg) {
+			// shows and existing thread.
+			setContentView(R.layout.act_view_message);
+
+			// obtains the user info from the extras.
+			mContactName = (String) bundle.get(MessageActivity.NAME_EXTRA);
+			mContactPhonenumber = (String) bundle
+					.get(MessageActivity.PHONENUMBER_EXTRA);
+
+			// sets the adapter of the ViewPager.
+			MyPagerAdapter adapter = new MyPagerAdapter(this);
+			ViewPager myPager = (ViewPager) findViewById(R.id.view_message_view_pager);
+			myPager.setAdapter(adapter);
+			myPager.setCurrentItem(0);
+
+			// allows the top bar to be different.
+			ActionBar actionBar = getSupportActionBar();
+			// adds the menu items to the bottom part while preserving the
+			// home button.
+			actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_HOME
+					| ActionBar.DISPLAY_SHOW_CUSTOM);
+
+			// sets the custom top bar.
+			actionBar.setCustomView(R.layout.topbar_view_message);
+
+			TextView nameTextView = (TextView) actionBar.getCustomView()
+					.findViewById(R.id.topbar_view_message_name);
+			TextView phonenumberTextView = (TextView) actionBar.getCustomView()
+					.findViewById(R.id.topbar_view_message_phonenumber);
+
+			// sets the data in the action bar.
+			nameTextView.setText(mContactName);
+			phonenumberTextView.setText(mContactPhonenumber);
+
+			// enables the icon to serve as back.
+			getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+		}
 
 	}
 
@@ -159,7 +203,8 @@ public class MessageActivity extends SherlockActivity {
 
 		case R.id.menu_send:
 
-			if (phoneNo.length() > 0 && mSendLayout.getChildCount() > 1) {
+			if (mContactPhonenumber.length() > 0
+					&& mSendLayout.getChildCount() > 1) {
 				// retrieve SMS body
 				String message = "";
 				for (int i = 1; i < mSendLayout.getChildCount(); ++i) {
@@ -169,27 +214,27 @@ public class MessageActivity extends SherlockActivity {
 					message += " ";
 				}
 				// send SMS
-				mContentProvider.sendSMS(phoneNo, message);
+				mContentProvider.sendSMS(mContactPhonenumber, message);
 				// insert SMS sent into DB
 				// final Calendar c = Calendar.getInstance();
-				String threadid = retrieveThreadIdFromNumberContact(phoneNo);
+				String threadid = retrieveThreadIdFromNumberContact(mContactPhonenumber);
 				// right after the msg is sent, navigate to the message
 				// details page
 				Intent i = new Intent(MessageActivity.this,
 						MessageActivity.class);
 				String name = mContentProvider
-						.getContactNameFromNumber(phoneNo);
+						.getContactNameFromNumber(mContactPhonenumber);
 				Bundle bundle = new Bundle();
 				// Add the parameters to bundle
 				bundle.putString("Name", name);
-				bundle.putString("Tel", phoneNo);
+				bundle.putString("Tel", mContactPhonenumber);
 				bundle.putBoolean("NewMsg", false);
 				// Add this bundle to the intent
 				i.putExtras(bundle);
 				startActivity(i);
 				// insert SMS in the data base content provider
 				ContentValues values = new ContentValues();
-				values.put("address", phoneNo);
+				values.put("address", mContactPhonenumber);
 				// values.put("date",dateToday);
 				values.put("read", 1);
 				values.put("thread_id", threadid);
@@ -208,7 +253,7 @@ public class MessageActivity extends SherlockActivity {
 				TextToSpeechManager.getInstance().say(
 						"Entrez un message s'il vous plait.");
 
-			} else if (phoneNo.length() > 0) {
+			} else if (mContactPhonenumber.length() > 0) {
 				Toast.makeText(getBaseContext(),
 						"Entrez un numéro s'il vous plait.", Toast.LENGTH_SHORT)
 						.show();

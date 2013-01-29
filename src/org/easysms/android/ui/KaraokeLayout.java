@@ -18,57 +18,6 @@ import android.widget.ImageView;
 
 public class KaraokeLayout extends ViewGroup {
 
-	private int timesKaraoke = 0;
-	private Handler handler;
-
-	public void playKaraoke(final KaraokeLayout fl) {
-		timesKaraoke++;
-
-		if (timesKaraoke <= 1) {
-
-			// Do something long
-			Runnable runnable = new Runnable() {
-				@Override
-				public void run() {
-
-					for (int i = 1; i < fl.getChildCount(); ++i) {
-						final Button btn = (Button) fl.getChildAt(i);
-						// wholesentenceplayed += btn.getText();
-						btn.setFocusableInTouchMode(true);
-						try {
-							Thread.sleep(1000);
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}
-						handler.post(new Runnable() {
-							@Override
-							public void run() {
-								// progress.setProgress(value);
-								btn.requestFocus();
-								// drop all pending entries in the playback
-								// queue.
-
-								// plays the audio.
-								TextToSpeechManager.getInstance().say(
-										(String) btn.getText());
-							}
-						});
-
-					}
-					timesKaraoke = 0;
-
-				}
-			};
-			new Thread(runnable).start();
-
-			String wholesentenceplayed = "";
-			for (int i = 1; i < fl.getChildCount(); ++i) {
-				final Button btn = (Button) fl.getChildAt(i);
-				wholesentenceplayed += btn.getText();
-			}
-		}
-	}
-
 	public static class LayoutParams extends ViewGroup.LayoutParams {
 		private static int NO_SPACING = -1;
 		private int horizontalSpacing = NO_SPACING;
@@ -126,11 +75,14 @@ public class KaraokeLayout extends ViewGroup {
 	}
 
 	public static final int HORIZONTAL = 0;
-
 	public static final int VERTICAL = 1;
+
 	private boolean debugDraw = false;
+	private Handler handler;
 	private int horizontalSpacing = 0;
+	private ImageView mPlayButton;
 	private int orientation = 0;
+	private int timesKaraoke = 0;
 	private int verticalSpacing = 0;
 
 	public KaraokeLayout(Context context) {
@@ -138,6 +90,9 @@ public class KaraokeLayout extends ViewGroup {
 		this.readStyleParameters(context, null);
 
 		addPlayButton();
+
+		// handler used in the karaoke.
+		handler = new Handler();
 	}
 
 	public KaraokeLayout(Context context, AttributeSet attributeSet) {
@@ -146,6 +101,9 @@ public class KaraokeLayout extends ViewGroup {
 		this.readStyleParameters(context, attributeSet);
 
 		addPlayButton();
+
+		// handler used in the karaoke.
+		handler = new Handler();
 	}
 
 	public KaraokeLayout(Context context, AttributeSet attributeSet,
@@ -155,9 +113,10 @@ public class KaraokeLayout extends ViewGroup {
 		this.readStyleParameters(context, attributeSet);
 
 		addPlayButton();
-	}
 
-	private ImageView mPlayButton;
+		// handler used in the karaoke.
+		handler = new Handler();
+	}
 
 	private void addPlayButton() {
 		// creates the button used to play the text
@@ -166,7 +125,7 @@ public class KaraokeLayout extends ViewGroup {
 		mPlayButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				// playKaraoke(instructionsBubble);
+				playKaraoke();
 			}
 		});
 
@@ -466,6 +425,47 @@ public class KaraokeLayout extends ViewGroup {
 			this.setMeasuredDimension(
 					resolveSize(controlMaxThickness, widthMeasureSpec),
 					resolveSize(controlMaxLength, heightMeasureSpec));
+		}
+	}
+
+	public void playKaraoke() {
+		timesKaraoke++;
+
+		if (timesKaraoke <= 1) {
+
+			Runnable runnable = new Runnable() {
+				@Override
+				public void run() {
+
+					for (int i = 1; i < getChildCount(); ++i) {
+						final Button btn = (Button) getChildAt(i);
+						btn.setFocusableInTouchMode(true);
+						try {
+							Thread.sleep(1000);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+						handler.post(new Runnable() {
+							@Override
+							public void run() {
+								// progress.setProgress(value);
+								btn.requestFocus();
+								// drop all pending entries in the playback
+								// queue.
+
+								// plays the audio.
+								TextToSpeechManager.getInstance().say(
+										(String) btn.getText());
+							}
+						});
+
+					}
+					timesKaraoke = 0;
+
+				}
+			};
+			new Thread(runnable).start();
+
 		}
 	}
 

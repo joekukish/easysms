@@ -5,16 +5,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import org.easysms.android.data.Conversation;
-import org.easysms.android.data.Sms;
-import org.easysms.android.provider.SmsContentProvider;
 import org.easysms.android.ui.KaraokeLayout;
 import org.easysms.android.util.TextToSpeechManager;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -34,7 +30,6 @@ import android.provider.ContactsContract.Data;
 import android.speech.RecognizerIntent;
 import android.util.Log;
 import android.util.TypedValue;
-import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
@@ -44,7 +39,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockActivity;
 
 @TargetApi(8)
@@ -109,222 +103,18 @@ public class MessagingActivity extends SherlockActivity {
 		}
 	}
 
-	static final int TIME_DIALOG_ID = 1;
+	private static final int PICK_CONTACT = 4321;
 	private static final int VOICE_RECOGNITION_REQUEST_CODE = 1234;
 
 	private KaraokeLayout flowlayout;
-	private SmsContentProvider mContentProvider;
-
 	private ArrayList<String> matches;
 	private Handler mHandler;
-	private LinearLayout msgdetailslayout;;
-	private String nameContact;
 	private String phoneNo = "";
-	private String phoneNumContact;
-	private int PICK_CONTACT;
 	private ImageView profile;
 	private TextView recipient;
 	private TextView recipientnum;
 	private ImageView speakButton;
 	private LinearLayout speechrecolayout;
-
-	// displays all the SMSs in a conversation.
-	private void createLayoutbubbleconv(Conversation conv) {
-
-		for (final Sms sms : conv.listsms) {
-
-			LinearLayout wholelayout = new LinearLayout(this);
-
-			LinearLayout.LayoutParams layoutParamsWhole = new LinearLayout.LayoutParams(
-					(int) TypedValue.applyDimension(
-							TypedValue.COMPLEX_UNIT_DIP, 310, getResources()
-									.getDisplayMetrics()),
-					LinearLayout.LayoutParams.WRAP_CONTENT);
-			layoutParamsWhole.setMargins(0, (int) TypedValue.applyDimension(
-					TypedValue.COMPLEX_UNIT_DIP, 2, getResources()
-							.getDisplayMetrics()), 0, (int) TypedValue
-					.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 2,
-							getResources().getDisplayMetrics()));
-			wholelayout.setLayoutParams(layoutParamsWhole);
-			wholelayout.setOrientation(LinearLayout.HORIZONTAL);
-			// LINEAR LAYOUT
-			LinearLayout linlayout = new LinearLayout(this);
-			linlayout.setLayoutParams(new LayoutParams((int) TypedValue
-					.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 260,
-							getResources().getDisplayMetrics()),
-					LayoutParams.WRAP_CONTENT));
-			// linlayout.setBackgroundResource(R.drawable.bubblelast);
-			linlayout.setOrientation(LinearLayout.HORIZONTAL);
-
-			if (sms.isSent) {
-				linlayout.setGravity(Gravity.RIGHT);
-			} else {
-				linlayout.setGravity(Gravity.LEFT);
-			}
-
-			// FLOWLAYOUT
-			final KaraokeLayout fl = new KaraokeLayout(this);
-			fl.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,
-					LayoutParams.MATCH_PARENT));
-			fl.setBackgroundResource(R.drawable.bubblelast);
-
-			Button dateButton = new Button(this);
-			dateButton.setSingleLine(false);
-			String textButton = sms.getDate(this); // + "\n" + sms.timesms;
-			dateButton.setText(textButton);
-			dateButton.setLayoutParams(new LayoutParams(
-					LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
-			dateButton.setBackgroundResource(R.drawable.datebutton);
-			dateButton.setGravity(Gravity.RIGHT);
-
-			// TODO: test how date is represented.
-			final String datesmsplayed = textButton;
-			dateButton.setOnClickListener(new OnClickListener() {
-				@Override
-				public void onClick(View v) {
-
-					// plays the audio.
-					TextToSpeechManager.getInstance().say(datesmsplayed);
-				}
-			});
-			fl.addView(dateButton);
-
-			StringTokenizer st = new StringTokenizer(sms.body);
-			String[] tabWords = new String[100];
-			int nbWords = 0;
-			while (st.hasMoreElements()) {
-				tabWords[nbWords] = (String) st.nextElement();
-				nbWords++;
-			}
-			// create a button for each words and append it to the bubble
-			// composition
-			for (int i = 0; i < nbWords; ++i) {
-				final Button btn = new Button(this);
-				btn.setText(tabWords[i]);
-				// btn.setTextSize((int)
-				// TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP,10,
-				// getResources().getDisplayMetrics()));
-				btn.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,
-						LayoutParams.WRAP_CONTENT));
-				btn.setBackgroundResource(R.drawable.button);
-				// btn.setTextSize(16);
-
-				final String toSay = tabWords[i];
-
-				// play each button
-				btn.setOnClickListener(new OnClickListener() {
-					@Override
-					public void onClick(View v) {
-
-						// plays the audio.
-						TextToSpeechManager.getInstance().say(toSay);
-
-					}
-				});
-				final Vibrator vibrationrecomp = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-				// recomposition
-				btn.setOnLongClickListener(new OnLongClickListener() {
-
-					@Override
-					public boolean onLongClick(View v) {
-						final Button bouton = new Button(getBaseContext());
-						bouton.setText(btn.getText());
-						// bouton.setTextSize((int)
-						// TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP,10,
-						// getResources().getDisplayMetrics()));
-						bouton.setLayoutParams(new LayoutParams(
-								LayoutParams.WRAP_CONTENT,
-								LayoutParams.WRAP_CONTENT));
-						bouton.setBackgroundResource(R.drawable.button);
-						flowlayout.addView(bouton, new LayoutParams(
-								LayoutParams.WRAP_CONTENT,
-								LayoutParams.WRAP_CONTENT));
-						vibrationrecomp.vibrate(200);
-
-						Date currentDate = new Date(System.currentTimeMillis());
-						String date = (String) android.text.format.DateFormat
-								.format("yyyy-MM-dd'T'kk:mm:ss'Z'", currentDate);
-
-						// play each button
-						bouton.setOnClickListener(new OnClickListener() {
-							@Override
-							public void onClick(View v) {
-
-								// plays the audio.
-								TextToSpeechManager.getInstance().say(toSay);
-
-								Date currentDate = new Date(System
-										.currentTimeMillis());
-								String date = (String) android.text.format.DateFormat
-										.format("yyyy-MM-dd'T'kk:mm:ss'Z'",
-												currentDate);
-
-							}
-						});
-
-						final Vibrator vibrationdelete = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-						// on long click, delete the button
-						bouton.setOnLongClickListener(new OnLongClickListener() {
-							@Override
-							public boolean onLongClick(View v) {
-								flowlayout.removeView(bouton);
-								vibrationdelete.vibrate(200);
-
-								Date currentDate = new Date(System
-										.currentTimeMillis());
-								String date = (String) android.text.format.DateFormat
-										.format("yyyy-MM-dd'T'kk:mm:ss'Z'",
-												currentDate);
-
-								return true;
-							}
-						});
-						return true;
-					}
-
-				});
-
-				LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
-						LinearLayout.LayoutParams.MATCH_PARENT,
-						LinearLayout.LayoutParams.WRAP_CONTENT);
-
-				layoutParams.setMargins((int) TypedValue.applyDimension(
-						TypedValue.COMPLEX_UNIT_SP, 50, getResources()
-								.getDisplayMetrics()), (int) TypedValue
-						.applyDimension(TypedValue.COMPLEX_UNIT_SP, 80,
-								getResources().getDisplayMetrics()),
-						(int) TypedValue.applyDimension(
-								TypedValue.COMPLEX_UNIT_SP, 50, getResources()
-										.getDisplayMetrics()), (int) TypedValue
-								.applyDimension(TypedValue.COMPLEX_UNIT_SP, 80,
-										getResources().getDisplayMetrics()));
-
-				fl.addView(btn, layoutParams);
-
-			}
-
-			// PLAYBUTTON
-			ImageView playButton = new ImageView(this);
-			playButton.setBackgroundResource(R.drawable.playsmsclick);
-			playButton.setOnCreateContextMenuListener(this);
-			playButton.setOnClickListener(new OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					// playKaraoke(fl);
-				}
-			});
-
-			linlayout.addView(fl);
-			if (sms.isSent) {
-				wholelayout.addView(playButton);
-				wholelayout.addView(linlayout);
-			} else {
-				wholelayout.addView(linlayout);
-				wholelayout.addView(playButton);
-			}
-			msgdetailslayout.addView(wholelayout);
-		}
-	}
 
 	/**
 	 * Handle the results from the recognition activity.
@@ -569,7 +359,6 @@ public class MessagingActivity extends SherlockActivity {
 				Uri contactData = data.getData();
 				Cursor cur = getContentResolver().query(contactData, null,
 						null, null, null);
-				ContentResolver contect_resolver = getContentResolver();
 				String nameContact = "Nom inconnu";
 				String photoId = null;
 				if (cur.moveToFirst()) {
@@ -684,7 +473,6 @@ public class MessagingActivity extends SherlockActivity {
 					nameContact = null;
 					no = null;
 
-					contect_resolver = null;
 					cur.close();
 					cur = null;
 
@@ -727,76 +515,7 @@ public class MessagingActivity extends SherlockActivity {
 			recipient = (TextView) findViewById(R.id.contactname);
 			recipientnum = (TextView) findViewById(R.id.contactnumber);
 
-		} else {
-			// shows and existing thread.
-			setContentView(R.layout.act_view_message);
-
-			// obtains the user info from the extras.
-			nameContact = (String) bundle.get(MessageActivity.NAME_EXTRA);
-			phoneNumContact = (String) bundle
-					.get(MessageActivity.PHONENUMBER_EXTRA);
-
-			// allows the top bar to be different.
-			ActionBar actionBar = getSupportActionBar();
-			// adds the menu items to the bottom part while preserving the
-			// home button.
-			actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_HOME
-					| ActionBar.DISPLAY_SHOW_CUSTOM);
-
-			// sets the custom top bar.
-			actionBar.setCustomView(R.layout.topbar_view_message);
-
-			TextView nameTextView = (TextView) actionBar.getCustomView()
-					.findViewById(R.id.topbar_view_message_name);
-			TextView phonenumberTextView = (TextView) actionBar.getCustomView()
-					.findViewById(R.id.topbar_view_message_phonenumber);
-
-			// sets the data in the action bar.
-			nameTextView.setText(nameContact);
-			phonenumberTextView.setText(phoneNumContact);
-
-			// enables the icon to serve as back.
-			getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-			phoneNo = phoneNumContact;
-			msgdetailslayout = (LinearLayout) findViewById(R.id.msgdetailslayout);
-
-			// gets the contact image.
-			String photoid = mContentProvider
-					.getContactPhotoFromNumber(phoneNumContact);
-			// profile = (ImageView) findViewById(R.id.selectcontact);
-			if (photoid == null) {
-				// profile.setBackgroundResource(R.drawable.nophotostored);
-			} else {
-
-				Cursor photo2 = getContentResolver().query(Data.CONTENT_URI,
-						new String[] { Photo.PHOTO }, // column for the blob
-						Data._ID + "=?", // select row by id
-						new String[] { photoid }, // filter by photoId
-						null);
-				Bitmap photoBitmap = null;
-				if (photo2.moveToFirst()) {
-					byte[] photoBlob = photo2.getBlob(photo2
-							.getColumnIndex(Photo.PHOTO));
-					photoBitmap = BitmapFactory.decodeByteArray(photoBlob, 0,
-							photoBlob.length);
-					// profile.setImageBitmap(photoBitmap);
-
-				}
-				photo2.close();
-			}
-
-			// gets all the sms of the conversation, that match the same phone
-			// number.
-			List<Conversation> listallconv = populateList(mContentProvider
-					.getMessages());
-			String threadidconv = retrieveThreadIdFromNumberContact(phoneNumContact);
-			Conversation conv = retrieveConvFromThreadId(listallconv,
-					threadidconv);
-			createLayoutbubbleconv(conv);
-
 		}
-
 		// --------------------speech to text-------------------
 		mHandler = new Handler();
 		// Get display items for later interaction
@@ -821,58 +540,11 @@ public class MessagingActivity extends SherlockActivity {
 
 	}
 
-	private List<Conversation> populateList(List<Sms> allSMS) {
-
-		// list with all the conversations
-		List<Conversation> allconversations = new ArrayList<Conversation>();
-		for (Sms smsnew : allSMS) {
-			boolean add = false;
-			for (Conversation conv : allconversations) {
-				if (conv.threadid.equals(smsnew.threadid)) {
-					conv.listsms.add(smsnew);
-					add = true;
-				}
-
-			}
-			if (add == false) { // we create a new conversation
-				Conversation newconv = new Conversation();
-				List<Sms> newlist = new ArrayList<Sms>();
-				newlist.add(smsnew);
-				newconv.listsms = newlist;
-				newconv.threadid = smsnew.threadid;
-				allconversations.add(newconv);
-			}
-		}
-		return allconversations;
-	}
-
 	protected void refreshVoiceSettings() {
 		Log.i("MessageActivity", "Sending broadcast");
 		sendOrderedBroadcast(RecognizerIntent.getVoiceDetailsIntent(this),
 				null, new SupportedLanguageBroadcastReceiver(), null,
 				Activity.RESULT_OK, null, null);
 
-	}
-
-	public Conversation retrieveConvFromThreadId(List<Conversation> allConv,
-			String threadid) {
-		for (Conversation conv : allConv) {
-			String convthreadid = conv.threadid;
-			if (convthreadid.equals(threadid)) {
-				return conv;
-			}
-		}
-
-		return null;
-	}
-
-	public String retrieveThreadIdFromNumberContact(String phoneNumContact) {
-		for (Sms sms : mContentProvider.getMessages()) {
-			String smscontact = sms.contact;
-			// TODO: could it really be null?
-			if (smscontact != null && smscontact.equals(phoneNumContact))
-				return sms.threadid;
-		}
-		return "error";
 	}
 }
