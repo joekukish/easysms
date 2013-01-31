@@ -12,6 +12,7 @@ import org.easysms.android.ui.KaraokeLayout;
 import org.easysms.android.util.TextToSpeechManager;
 
 import android.annotation.TargetApi;
+import android.app.ActionBar.LayoutParams;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -24,9 +25,11 @@ import android.speech.RecognizerIntent;
 import android.support.v4.view.ViewPager;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -155,9 +158,26 @@ public class MessageActivity extends SherlockActivity {
 			TextView phonenumberTextView = (TextView) actionBar.getCustomView()
 					.findViewById(R.id.topbar_view_message_phonenumber);
 
-			// sets the data in the action bar.
-			nameTextView.setText(mContactName);
-			phonenumberTextView.setText(mContactPhonenumber);
+			// modifies layout depending if name is available or not.
+			if (mContactName == null || mContactName.trim().equals("")) {
+				// sets the phone number instead of the name since it is not
+				// available.
+				nameTextView.setText(mContactPhonenumber);
+				// removes the phone text view.
+				phonenumberTextView.setVisibility(View.GONE);
+
+				// center the name line instead of having two.
+				RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
+						(int) LayoutParams.WRAP_CONTENT,
+						(int) LayoutParams.WRAP_CONTENT);
+
+				params.addRule(RelativeLayout.CENTER_VERTICAL);
+				nameTextView.setLayoutParams(params);
+
+			} else {
+				nameTextView.setText(mContactName);
+				phonenumberTextView.setText(mContactPhonenumber);
+			}
 
 			// sets the call button action.
 			ImageButton callButton = (ImageButton) findViewById(R.id.topbar_view_action_call);
@@ -175,7 +195,6 @@ public class MessageActivity extends SherlockActivity {
 			// enables the icon to serve as back.
 			getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		}
-
 	}
 
 	@Override
@@ -189,16 +208,6 @@ public class MessageActivity extends SherlockActivity {
 
 		MenuInflater inflater = getSupportMenuInflater();
 		inflater.inflate(R.menu.menu_view_message, menu);
-
-		// RelativeLayout relativeLayout = (RelativeLayout) menu.findItem(
-		// R.id.layout_item).getActionView();
-		//
-		// View inflatedView = getLayoutInflater().inflate(
-		// R.layout.media_bottombar, null);
-		//
-		// relativeLayout.addView(inflatedView);
-		//
-		// return true;
 
 		return true;
 	}
