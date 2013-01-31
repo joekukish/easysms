@@ -32,7 +32,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:layout_marginRight="@dimen/margin"
         android:layout_toRightOf="@+id/inbox_item_text_name"
         android:singleLine="true"
         android:text="@string/placeholder_counter"
@@ -59,7 +58,7 @@
         android:layout_toRightOf="@+id/inbox_item_image_contact"
         android:singleLine="true"
         android:text="@string/placeholder_text"
-        android:textColor="@android:color/primary_text_light"
+        android:textColor="#454545"
         android:textSize="@dimen/font_small" />
 
     <TextView

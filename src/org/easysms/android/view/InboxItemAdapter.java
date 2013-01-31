@@ -13,12 +13,18 @@ import android.widget.ArrayAdapter;
 
 public class InboxItemAdapter extends ArrayAdapter<HashMap<String, Object>> {
 
+	/** Inflater used to create the layout based on the xml. */
+	private LayoutInflater mLayoutInflater;
+
 	/**
 	 * Creates a new PlotItemAdapter instance.
 	 */
 	public InboxItemAdapter(Context context,
 			List<HashMap<String, Object>> conversations) {
 		super(context, android.R.layout.simple_list_item_1, conversations);
+
+		mLayoutInflater = (LayoutInflater) getContext().getSystemService(
+				Context.LAYOUT_INFLATER_SERVICE);
 	}
 
 	public View getView(int position, View convertView, ViewGroup parent) {
@@ -26,9 +32,8 @@ public class InboxItemAdapter extends ArrayAdapter<HashMap<String, Object>> {
 		InboxItemWrapper wrapper = null;
 		if (row == null) {
 
-			LayoutInflater li = (LayoutInflater) getContext().getSystemService(
-					Context.LAYOUT_INFLATER_SERVICE);
-			row = li.inflate(R.layout.tpl_inbox_item, parent, false);
+			row = mLayoutInflater.inflate(R.layout.tpl_inbox_item, parent,
+					false);
 			wrapper = new InboxItemWrapper(row);
 			row.setTag(wrapper);
 		} else {

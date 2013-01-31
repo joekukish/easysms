@@ -79,7 +79,8 @@
         </LinearLayout>
     </LinearLayout>
 
-    <!-- <org.easysms.android.ui.FlingAndScrollViewer
+    <!--
+    <org.easysms.android.ui.FlingAndScrollViewer
         android:id="@+id/flingScrollViewer"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -114,7 +115,8 @@
                 android:orientation="vertical" >
             </LinearLayout>
         </ScrollView>
-    </org.easysms.android.ui.FlingAndScrollViewer> -->
+    </org.easysms.android.ui.FlingAndScrollViewer>
+    -->
 
     <LinearLayout
         android:id="@+id/bubblelayout"

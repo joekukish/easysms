@@ -150,9 +150,6 @@ public class KaraokeLayout extends ViewGroup {
 			final Button btn = new Button(getContext());
 			btn.setText(tabWords[i]);
 
-			// btn.setTextSize( (int)
-			// TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP,
-			// 10, getResources().getDisplayMetrics()));
 			btn.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,
 					LayoutParams.WRAP_CONTENT));
 			btn.setTextColor(getResources().getColor(android.R.color.black));
