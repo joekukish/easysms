@@ -23,6 +23,7 @@
 
     <!-- Placeholders -->
     <string name="placeholder_date">today</string>
+    <string name="placeholder_counter">2</string>
     <string name="placeholder_name">John William Doe</string>
     <string name="placeholder_phonenumber">+41762348225</string>
     <string name="placeholder_text">This is a really long message, this way we test what happends if the length exceeds the size of the text field.</string>

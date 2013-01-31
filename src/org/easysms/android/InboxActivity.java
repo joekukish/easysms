@@ -5,12 +5,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
+import org.easysms.android.data.Contact;
 import org.easysms.android.data.Conversation;
 import org.easysms.android.data.Sms;
 import org.easysms.android.provider.SmsContentProvider;
 import org.easysms.android.util.ApplicationTracker;
 import org.easysms.android.util.ApplicationTracker.EventType;
 import org.easysms.android.util.TextToSpeechManager;
+import org.easysms.android.view.InboxItemAdapter;
 
 import android.annotation.TargetApi;
 import android.content.Intent;
@@ -22,15 +24,16 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
-import android.widget.SimpleAdapter;
 
 import com.actionbarsherlock.app.SherlockListActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
+import com.google.analytics.tracking.android.EasyTracker;
 
 @TargetApi(8)
-public class InboxActivity extends SherlockListActivity {
+public class InboxActivity extends SherlockListActivity implements
+		OnItemClickListener {
 
 	// list of hash map for the message threads
 	private static final ArrayList<HashMap<String, Object>> mMessageList = new ArrayList<HashMap<String, Object>>();
@@ -65,53 +68,69 @@ public class InboxActivity extends SherlockListActivity {
 		mTaskHandler.postDelayed(t, elapse);
 	}
 
+	@Override
+	public void onStart() {
+		super.onStart();
+
+		// tracks that the activity was opened.
+		ApplicationTracker.getInstance().logEvent(EventType.ACTIVITY_VIEW,
+				getLogTag());
+
+		// Google Analytics tracking.
+		EasyTracker.getInstance().activityStart(this);
+	}
+
+	@Override
+	public void onStop() {
+		super.onStop();
+
+		// Google Analytics tracking.
+		EasyTracker.getInstance().activityStop(this);
+	}
+
+	public void onItemClick(AdapterView<?> parent, View view, int position,
+			long id) {
+
+		// Object selectedFromList = (lv.getItemAtPosition(position));
+		HashMap<String, Object> o = (HashMap<String, Object>) mMessageList
+				.get(position);
+
+		// TODO: should we pass the threadid? this approach will not
+		// work if multiple destinatary messages are allowed.
+
+		// gets the parameters from the selected message
+		String telnum = (String) o.get("telnumber");
+		String name = (String) o.get("name");
+
+		// activity use to show the message.
+		Intent i = new Intent(InboxActivity.this, MessageActivity.class);
+		// creates and initializes the bundle.
+		Bundle bundle = new Bundle();
+		// adds the parameters to bundle
+		bundle.putString(MessageActivity.NAME_EXTRA, name);
+		bundle.putString(MessageActivity.PHONENUMBER_EXTRA, telnum);
+		bundle.putBoolean(MessageActivity.NEW_MESSAGE_EXTRA, false);
+
+		// adds this bundle to the intent
+		i.putExtras(bundle);
+		startActivity(i);
+
+	}
+
 	private void displayListSMS() {
+
+		// empties the current list.
+		mMessageList.clear();
 
 		// gets the messages from the provider and groups them into
 		// conversations.
 		populateList(mContentProvider.getMessages());
 
 		final ListView lv = getListView();
+		lv.setOnItemClickListener(this);
 
-		lv.setOnItemClickListener(new OnItemClickListener() {
-			public void onItemClick(AdapterView<?> parent, View view,
-					int position, long id) {
-
-				// Object selectedFromList = (lv.getItemAtPosition(position));
-				HashMap<String, Object> o = (HashMap<String, Object>) mMessageList
-						.get(position);
-
-				// TODO: should we pass the threadid? this approach will not
-				// work if multiple destinatary messages are allowed.
-
-				// gets the parameters from the selected message
-				String telnum = (String) o.get("telnumber");
-				String name = (String) o.get("name");
-
-				// activity use to show the message.
-				Intent i = new Intent(InboxActivity.this, MessageActivity.class);
-				// creates and initializes the bundle.
-				Bundle bundle = new Bundle();
-				// adds the parameters to bundle
-				bundle.putString(MessageActivity.NAME_EXTRA, name);
-				bundle.putString(MessageActivity.PHONENUMBER_EXTRA, telnum);
-				bundle.putBoolean(MessageActivity.NEW_MESSAGE_EXTRA, false);
-				// adds this bundle to the intent
-				i.putExtras(bundle);
-				startActivity(i);
-
-			}
-		});
-		// creates the adapter that handles the message list.
-		final SimpleAdapter adapter = new SimpleAdapter(this, mMessageList,
-				R.layout.tpl_inbox_item, new String[] { "avatar", "telnumber",
-						"date", "name", "message" }, new int[] {
-						R.id.inbox_item_image_contact,
-						R.id.inbox_item_text_phonenumber,
-						R.id.inbox_item_text_date, R.id.inbox_item_text_name,
-						R.id.inbox_item_text_message });
-
-		setListAdapter(adapter);
+		// sets the current content.
+		setListAdapter(new InboxItemAdapter(this, mMessageList));
 	}
 
 	/**
@@ -149,10 +168,6 @@ public class InboxActivity extends SherlockListActivity {
 		// phones.
 		ApplicationTracker.getInstance().setDeviceId(
 				((EasySmsApp) getApplication()).getDeviceId());
-
-		// tracks that the activity was opened.
-		ApplicationTracker.getInstance().logEvent(EventType.ACTIVITY_VIEW,
-				getLogTag());
 
 		// loads the available messages.
 		displayListSMS();
@@ -210,6 +225,7 @@ public class InboxActivity extends SherlockListActivity {
 						add = true;
 					}
 				}
+
 				if (add == false) { // we create a new conversation
 					Conversation newconv = new Conversation();
 					List<Sms> newlist = new ArrayList<Sms>();
@@ -218,7 +234,6 @@ public class InboxActivity extends SherlockListActivity {
 					newconv.threadid = smsnew.threadid;
 					allconversations.add(newconv);
 				}
-
 			}
 		}
 
@@ -227,27 +242,22 @@ public class InboxActivity extends SherlockListActivity {
 
 			// we use the first message of the list.
 			Sms firstsms = conv.listsms.get(0);
-			// get name associated to phone number
-			String name = mContentProvider
-					.getContactNameFromNumber(firstsms.contact);
-			String photoId = mContentProvider
-					.getContactPhotoFromNumber(firstsms.contact);
 
-			temp2.put("avatar", R.drawable.nophotostored);
+			// gets the contact using the number in the SMS.
+			Contact contact = mContentProvider.getContact(firstsms.contact);
 
 			// loads the photo bitmap.
-			if (photoId != null) {
+			Bitmap photo = mContentProvider
+					.getFacebookPhoto(contact.phoneNumber);
 
-				Bitmap photo = mContentProvider.getContactPhotoWithId(photoId);
-				if (photo != null) {
-					temp2.put("avatar", photo);
-				}
+			if (photo != null) {
+				temp2.put("avatar", photo);
 			}
 
 			// adds the objects to display of the message.
 			temp2.put("telnumber", firstsms.contact);
-			temp2.put("date", firstsms.getDate(this));
-			temp2.put("name", name);
+			temp2.put("date", firstsms.getDate());
+			temp2.put("name", contact.displayName);
 			temp2.put("message", firstsms.body);
 			temp2.put("sent", firstsms.isSent ? R.drawable.ic_action_send
 					: R.drawable.received);

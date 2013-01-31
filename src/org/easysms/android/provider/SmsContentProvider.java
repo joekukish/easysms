@@ -1,16 +1,19 @@
 package org.easysms.android.provider;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import org.easysms.android.R;
+import org.easysms.android.data.Contact;
 import org.easysms.android.data.Sms;
 import org.easysms.android.util.TextToSpeechManager;
 
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
+import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -20,10 +23,10 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Handler;
-import android.provider.ContactsContract.CommonDataKinds.Photo;
-import android.provider.ContactsContract.Data;
+import android.provider.ContactsContract;
 import android.provider.ContactsContract.PhoneLookup;
 import android.telephony.SmsManager;
+import android.util.Log;
 import android.widget.Toast;
 
 public class SmsContentProvider extends ContentObserver {
@@ -101,74 +104,110 @@ public class SmsContentProvider extends ContentObserver {
 		sms.sendTextMessage(phoneNumber, null, message, sentPI, deliveredPI);
 	}
 
-	public String getContactNameFromNumber(String number) {
-		/*
-		 * We have a phone number and we want to grab the name of the contact
-		 * with that number, if such a contact exists
-		 */
+	public Contact getContact(String number) {
+
+		// we want to take a contact that has the same phone number.
 		Uri lookupUri = Uri.withAppendedPath(PhoneLookup.CONTENT_FILTER_URI,
 				Uri.encode(number));
 
-		/* phoneNumber here being a variable with the phone number stored. */
-		Cursor c = mContext.getContentResolver().query(lookupUri,
-				new String[] { PhoneLookup.DISPLAY_NAME }, null, null, null);
-		/*
-		 * If we want to get something other than the displayed name for the
-		 * contact, then just use something else instead of DISPLAY_NAME
-		 */
-		String name = "";
-		while (c.moveToNext()) {
-			// if we find a match we put it in a String.
-			name = c.getString(c
-					.getColumnIndexOrThrow(PhoneLookup.DISPLAY_NAME));
-		}
-		c.close();
-		return name;
+		Cursor c = mContext.getContentResolver().query(
+				lookupUri,
+				new String[] { PhoneLookup._ID, PhoneLookup.PHOTO_URI,
+						PhoneLookup.PHOTO_ID, PhoneLookup.DISPLAY_NAME }, null,
+				null, null);
 
+		Contact tmpContact = new Contact();
+		tmpContact.phoneNumber = number;
+
+		if (c != null) {
+			while (c.moveToNext()) {
+				// if we find a match we put it in a String.
+				tmpContact.id = c.getInt(c
+						.getColumnIndexOrThrow(PhoneLookup._ID));
+				tmpContact.photoUri = c.getString(c
+						.getColumnIndexOrThrow(PhoneLookup.PHOTO_URI));
+				tmpContact.photoId = c.getLong(c
+						.getColumnIndexOrThrow(PhoneLookup.PHOTO_ID));
+				tmpContact.displayName = c.getString(c
+						.getColumnIndexOrThrow(PhoneLookup.DISPLAY_NAME));
+			}
+
+			// closes the cursor.
+			c.close();
+		}
+		return tmpContact;
 	}
 
-	public String getContactPhotoFromNumber(String number) {
-		/*
-		 * We have a phone number and we want to grab the name of the contact
-		 * with that number, if such a contact exists
-		 */
-		Uri lookupUri = Uri.withAppendedPath(PhoneLookup.CONTENT_FILTER_URI,
-				Uri.encode(number));
-		/* phoneNumber here being a variable with the phone number stored. */
-		Cursor c = mContext.getContentResolver().query(lookupUri,
-				new String[] { PhoneLookup.PHOTO_ID }, null, null, null);
-		// long photo =
-		// c.getLong(c.getColumnIndexOrThrow(ContactsContract.Contacts.PHOTO_ID));
-		/*
-		 * If we want to get something other than the displayed name for the
-		 * contact, then just use something else instead of DISPLAY_NAME
-		 */
-		String photoId = null;
-		while (c.moveToNext()) {
-			// if we find a match we put it in a String.
-			photoId = c
-					.getString(c.getColumnIndexOrThrow(PhoneLookup.PHOTO_ID));
-		}
-		c.close();
-		return photoId;
-	}
+	public Bitmap getFacebookPhoto(String phoneNumber) {
+		Uri phoneUri = Uri.withAppendedPath(PhoneLookup.CONTENT_FILTER_URI,
+				Uri.encode(phoneNumber));
+		Uri photoUri = null;
 
-	public Bitmap getContactPhotoWithId(String photoId) {
-		Cursor photo2 = mContext.getContentResolver().query(Data.CONTENT_URI,
-				new String[] { Photo.PHOTO }, // column for the blob
-				Data._ID + "=?", // select row by id
-				new String[] { photoId }, // filter by photoId
+		Cursor contact = mContext.getContentResolver().query(phoneUri,
+				new String[] { ContactsContract.Contacts._ID }, null, null,
 				null);
-		Bitmap photoBitmap = null;
-		if (photo2.moveToFirst()) {
-			byte[] photoBlob = photo2.getBlob(photo2
-					.getColumnIndex(Photo.PHOTO));
-			photoBitmap = BitmapFactory.decodeByteArray(photoBlob, 0,
-					photoBlob.length);
-		}
-		photo2.close();
 
-		return photoBitmap;
+		if (contact.moveToFirst()) {
+			long userId = contact.getLong(contact
+					.getColumnIndex(ContactsContract.Contacts._ID));
+			photoUri = ContentUris.withAppendedId(
+					ContactsContract.Contacts.CONTENT_URI, userId);
+
+		} else {
+			return null;
+		}
+		if (photoUri != null) {
+			InputStream input = ContactsContract.Contacts
+					.openContactPhotoInputStream(mContext.getContentResolver(),
+							photoUri);
+			if (input != null) {
+				return BitmapFactory.decodeStream(input);
+			}
+		} else {
+			return null;
+		}
+		return null;
+	}
+
+	public Bitmap getContactPhoto(int id, long photo_id) {
+
+		Uri uri = ContentUris.withAppendedId(
+				ContactsContract.Contacts.CONTENT_URI, id);
+		InputStream input = ContactsContract.Contacts
+				.openContactPhotoInputStream(mContext.getContentResolver(), uri);
+		if (input != null) {
+			return BitmapFactory.decodeStream(input);
+		} else {
+			Log.d("PHOTO", "first try failed to load photo");
+
+		}
+
+		byte[] photoBytes = null;
+
+		Uri photoUri = ContentUris.withAppendedId(
+				ContactsContract.Data.CONTENT_URI, photo_id);
+
+		Cursor c = mContext.getContentResolver().query(photoUri,
+				new String[] { ContactsContract.CommonDataKinds.Photo.PHOTO },
+				null, null, null);
+
+		try {
+			if (c.moveToFirst())
+				photoBytes = c.getBlob(0);
+
+		} catch (Exception e) {
+
+		} finally {
+
+			c.close();
+		}
+
+		if (photoBytes != null)
+			return BitmapFactory.decodeByteArray(photoBytes, 0,
+					photoBytes.length);
+		else
+			Log.d("PHOTO", "second try also failed");
+		return null;
 	}
 
 	public synchronized List<Sms> getMessages() {

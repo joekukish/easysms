@@ -160,14 +160,17 @@ public class ApplicationTracker {
 	public void logEvent(EventType eventType, String activityName,
 			Object... args) {
 
+		String entry;
 		if (args.length == 0) {
 
 			// synchronized access to the log since concurrent access could
 			// be enabled.
 			synchronized (mActivityLog) {
-				mActivityLog.add(String.format(DATA_ENTRY_FORMAT_SMALL,
+				entry = String.format(DATA_ENTRY_FORMAT_SMALL,
 						mDateFormat.format(new Date()), mDeviceId, eventType,
-						activityName));
+						activityName);
+				Log.i(LOG_TAG, entry);
+				mActivityLog.add(entry);
 			}
 
 		} else {
@@ -185,9 +188,11 @@ public class ApplicationTracker {
 			// synchronized access to the log since concurrent access could be
 			// enabled.
 			synchronized (mActivityLog) {
-				mActivityLog.add(String.format(DATA_ENTRY_FORMAT,
+				entry = String.format(DATA_ENTRY_FORMAT,
 						mDateFormat.format(new Date()), mDeviceId, eventType,
-						activityName, sb.toString()));
+						activityName, sb.toString());
+				Log.i(LOG_TAG, entry);
+				mActivityLog.add(entry);
 			}
 		}
 

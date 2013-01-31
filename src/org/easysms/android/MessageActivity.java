@@ -3,6 +3,7 @@ package org.easysms.android;
 import java.util.List;
 import java.util.Locale;
 
+import org.easysms.android.data.Contact;
 import org.easysms.android.data.Conversation;
 import org.easysms.android.data.Sms;
 import org.easysms.android.provider.MyPagerAdapter;
@@ -222,11 +223,13 @@ public class MessageActivity extends SherlockActivity {
 				// details page
 				Intent i = new Intent(MessageActivity.this,
 						MessageActivity.class);
-				String name = mContentProvider
-						.getContactNameFromNumber(mContactPhonenumber);
+
+				Contact contact = mContentProvider
+						.getContact(mContactPhonenumber);
+
 				Bundle bundle = new Bundle();
 				// Add the parameters to bundle
-				bundle.putString("Name", name);
+				bundle.putString("Name", contact.displayName);
 				bundle.putString("Tel", mContactPhonenumber);
 				bundle.putBoolean("NewMsg", false);
 				// Add this bundle to the intent

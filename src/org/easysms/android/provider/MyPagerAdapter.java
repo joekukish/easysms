@@ -1,6 +1,5 @@
 package org.easysms.android.provider;
 
-import java.sql.Date;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,13 +13,7 @@ import org.easysms.android.ui.KaraokeLayout;
 import org.easysms.android.util.TextToSpeechManager;
 
 import android.content.Context;
-import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Parcelable;
-import android.os.Vibrator;
-import android.provider.ContactsContract.Contacts.Photo;
-import android.provider.ContactsContract.Data;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.TypedValue;
@@ -111,7 +104,7 @@ public class MyPagerAdapter extends PagerAdapter {
 					.getContactPhonenumber());
 			Conversation conv = retrieveConvFromThreadId(listallconv,
 					threadidconv);
-			createLayoutbubbleconv(conv);
+			createLayoutbubbleconv(msgdetailslayout, conv);
 
 			break;
 		case 1:
@@ -252,31 +245,31 @@ public class MyPagerAdapter extends PagerAdapter {
 	}
 
 	// displays all the SMSs in a conversation.
-	private void createLayoutbubbleconv(Conversation conv) {
+	private void createLayoutbubbleconv(LinearLayout msgdetailslayout,
+			Conversation conv) {
 
 		for (final Sms sms : conv.listsms) {
 
-			LinearLayout wholelayout = new LinearLayout(this);
+			LinearLayout wholelayout = new LinearLayout(mParent);
 
 			LinearLayout.LayoutParams layoutParamsWhole = new LinearLayout.LayoutParams(
 					(int) TypedValue.applyDimension(
-							TypedValue.COMPLEX_UNIT_DIP, 310, getResources()
-									.getDisplayMetrics()),
+							TypedValue.COMPLEX_UNIT_DIP, 310, mParent
+									.getResources().getDisplayMetrics()),
 					LinearLayout.LayoutParams.WRAP_CONTENT);
 			layoutParamsWhole.setMargins(0, (int) TypedValue.applyDimension(
-					TypedValue.COMPLEX_UNIT_DIP, 2, getResources()
+					TypedValue.COMPLEX_UNIT_DIP, 2, mParent.getResources()
 							.getDisplayMetrics()), 0, (int) TypedValue
-					.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 2,
-							getResources().getDisplayMetrics()));
+					.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 2, mParent
+							.getResources().getDisplayMetrics()));
 			wholelayout.setLayoutParams(layoutParamsWhole);
 			wholelayout.setOrientation(LinearLayout.HORIZONTAL);
 			// LINEAR LAYOUT
-			LinearLayout linlayout = new LinearLayout(this);
+			LinearLayout linlayout = new LinearLayout(mParent);
 			linlayout.setLayoutParams(new LayoutParams((int) TypedValue
-					.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 260,
-							getResources().getDisplayMetrics()),
+					.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 260, mParent
+							.getResources().getDisplayMetrics()),
 					LayoutParams.WRAP_CONTENT));
-			// linlayout.setBackgroundResource(R.drawable.bubblelast);
 			linlayout.setOrientation(LinearLayout.HORIZONTAL);
 
 			if (sms.isSent) {
@@ -286,14 +279,14 @@ public class MyPagerAdapter extends PagerAdapter {
 			}
 
 			// FLOWLAYOUT
-			final KaraokeLayout fl = new KaraokeLayout(this);
+			final KaraokeLayout fl = new KaraokeLayout(mParent);
 			fl.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,
 					LayoutParams.MATCH_PARENT));
 			fl.setBackgroundResource(R.drawable.bubblelast);
 
-			Button dateButton = new Button(this);
+			Button dateButton = new Button(mParent);
 			dateButton.setSingleLine(false);
-			String textButton = sms.getDate(this); // + "\n" + sms.timesms;
+			String textButton = sms.getDate();
 			dateButton.setText(textButton);
 			dateButton.setLayoutParams(new LayoutParams(
 					LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
@@ -322,11 +315,8 @@ public class MyPagerAdapter extends PagerAdapter {
 			// create a button for each words and append it to the bubble
 			// composition
 			for (int i = 0; i < nbWords; ++i) {
-				final Button btn = new Button(this);
+				final Button btn = new Button(mParent);
 				btn.setText(tabWords[i]);
-				// btn.setTextSize((int)
-				// TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP,10,
-				// getResources().getDisplayMetrics()));
 				btn.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,
 						LayoutParams.WRAP_CONTENT));
 				btn.setBackgroundResource(R.drawable.button);
@@ -344,29 +334,21 @@ public class MyPagerAdapter extends PagerAdapter {
 
 					}
 				});
-				final Vibrator vibrationrecomp = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+
 				// recomposition
 				btn.setOnLongClickListener(new OnLongClickListener() {
 
 					@Override
 					public boolean onLongClick(View v) {
-						final Button bouton = new Button(getBaseContext());
+						final Button bouton = new Button(mParent);
 						bouton.setText(btn.getText());
-						// bouton.setTextSize((int)
-						// TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP,10,
-						// getResources().getDisplayMetrics()));
 						bouton.setLayoutParams(new LayoutParams(
 								LayoutParams.WRAP_CONTENT,
 								LayoutParams.WRAP_CONTENT));
 						bouton.setBackgroundResource(R.drawable.button);
-						flowlayout.addView(bouton, new LayoutParams(
-								LayoutParams.WRAP_CONTENT,
-								LayoutParams.WRAP_CONTENT));
-						vibrationrecomp.vibrate(200);
-
-						Date currentDate = new Date(System.currentTimeMillis());
-						String date = (String) android.text.format.DateFormat
-								.format("yyyy-MM-dd'T'kk:mm:ss'Z'", currentDate);
+						// flowlayout.addView(bouton, new LayoutParams(
+						// LayoutParams.WRAP_CONTENT,
+						// LayoutParams.WRAP_CONTENT));
 
 						// play each button
 						bouton.setOnClickListener(new OnClickListener() {
@@ -375,29 +357,14 @@ public class MyPagerAdapter extends PagerAdapter {
 
 								// plays the audio.
 								TextToSpeechManager.getInstance().say(toSay);
-
-								Date currentDate = new Date(System
-										.currentTimeMillis());
-								String date = (String) android.text.format.DateFormat
-										.format("yyyy-MM-dd'T'kk:mm:ss'Z'",
-												currentDate);
-
 							}
 						});
 
-						final Vibrator vibrationdelete = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 						// on long click, delete the button
 						bouton.setOnLongClickListener(new OnLongClickListener() {
 							@Override
 							public boolean onLongClick(View v) {
-								flowlayout.removeView(bouton);
-								vibrationdelete.vibrate(200);
-
-								Date currentDate = new Date(System
-										.currentTimeMillis());
-								String date = (String) android.text.format.DateFormat
-										.format("yyyy-MM-dd'T'kk:mm:ss'Z'",
-												currentDate);
+								// flowlayout.removeView(bouton);
 
 								return true;
 							}
@@ -412,24 +379,25 @@ public class MyPagerAdapter extends PagerAdapter {
 						LinearLayout.LayoutParams.WRAP_CONTENT);
 
 				layoutParams.setMargins((int) TypedValue.applyDimension(
-						TypedValue.COMPLEX_UNIT_SP, 50, getResources()
+						TypedValue.COMPLEX_UNIT_SP, 50, mParent.getResources()
 								.getDisplayMetrics()), (int) TypedValue
-						.applyDimension(TypedValue.COMPLEX_UNIT_SP, 80,
-								getResources().getDisplayMetrics()),
+						.applyDimension(TypedValue.COMPLEX_UNIT_SP, 80, mParent
+								.getResources().getDisplayMetrics()),
 						(int) TypedValue.applyDimension(
-								TypedValue.COMPLEX_UNIT_SP, 50, getResources()
-										.getDisplayMetrics()), (int) TypedValue
-								.applyDimension(TypedValue.COMPLEX_UNIT_SP, 80,
-										getResources().getDisplayMetrics()));
+								TypedValue.COMPLEX_UNIT_SP, 50, mParent
+										.getResources().getDisplayMetrics()),
+						(int) TypedValue.applyDimension(
+								TypedValue.COMPLEX_UNIT_SP, 80, mParent
+										.getResources().getDisplayMetrics()));
 
 				fl.addView(btn, layoutParams);
 
 			}
 
 			// PLAYBUTTON
-			ImageView playButton = new ImageView(this);
+			ImageView playButton = new ImageView(mParent);
 			playButton.setBackgroundResource(R.drawable.playsmsclick);
-			playButton.setOnCreateContextMenuListener(this);
+			playButton.setOnCreateContextMenuListener(mParent);
 			playButton.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {

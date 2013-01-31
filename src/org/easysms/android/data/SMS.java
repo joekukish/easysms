@@ -4,8 +4,6 @@ import java.util.Date;
 
 import org.easysms.android.util.DateHelper;
 
-import android.content.Context;
-
 public class Sms {
 	public String body;
 	public String contact;
@@ -26,7 +24,7 @@ public class Sms {
 		isRead = false;
 	}
 
-	public String getDate(Context context) {
+	public String getDate() {
 		return DateHelper.formatDateShort(date);
 	}
 }
