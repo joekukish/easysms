@@ -242,14 +242,11 @@ public class InboxActivity extends SherlockListActivity implements
 
 			// we use the first message of the list.
 			Sms firstsms = conv.listsms.get(0);
-
 			// gets the contact using the number in the SMS.
 			Contact contact = mContentProvider.getContact(firstsms.contact);
-
 			// loads the photo bitmap.
 			Bitmap photo = mContentProvider
 					.getFacebookPhoto(contact.phoneNumber);
-
 			if (photo != null) {
 				temp2.put("avatar", photo);
 			}

@@ -531,20 +531,5 @@ public class MessagingActivity extends SherlockActivity {
 			speakButton.setEnabled(false);
 			// speakButton.setText("Recognizer not present");
 		}
-
-		// Most of the applications do not have to handle the voice settings. If
-		// the application does not require a recognition in a specific language
-		// (i.e., different from the system locale), the application does not
-		// need to read the voice settings.
-		// refreshVoiceSettings();
-
-	}
-
-	protected void refreshVoiceSettings() {
-		Log.i("MessageActivity", "Sending broadcast");
-		sendOrderedBroadcast(RecognizerIntent.getVoiceDetailsIntent(this),
-				null, new SupportedLanguageBroadcastReceiver(), null,
-				Activity.RESULT_OK, null, null);
-
 	}
 }

@@ -25,7 +25,6 @@ import android.speech.RecognizerIntent;
 import android.support.v4.view.ViewPager;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
-import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -247,6 +246,7 @@ public class MessageActivity extends SherlockActivity {
 				Intent i = new Intent(MessageActivity.this,
 						MessageActivity.class);
 
+				// gets the contact data based on the phone number.
 				Contact contact = mContentProvider
 						.getContact(mContactPhonenumber);
 
@@ -338,10 +338,8 @@ public class MessageActivity extends SherlockActivity {
 							public void run() {
 
 								startVoiceRecognitionActivity();
-
 							}
 						});
-
 					}
 				};
 				new Thread(runnable2).start();
