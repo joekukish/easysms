@@ -3,11 +3,8 @@ package org.easysms.android.view;
 import java.util.HashMap;
 
 import org.easysms.android.R;
-import org.easysms.android.data.Conversation;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -21,19 +18,20 @@ import android.widget.TextView;
  */
 public class InboxItemWrapper {
 
-	/** Icon that represents the main crop inside that plot. */
+	/** ImageView that holds the Contact's Image. */
 	private ImageView mContactImage;
-	/** Description line of the plot. */
-	private TextView mDisplayName;
-	/** Number counter of the plot. */
+	/** TextView that holds the amount of messages inside the conversation. */
 	private TextView mCounter;
+	/** TextView that holds the Date of the last message. */
+	private TextView mDate;
+	/** TextView that holds the Display name. */
+	private TextView mDisplayName;
+	/** TextView that holds the last message. */
+	private TextView mMessage;
+	/** TextView that holds the phone number */
+	private TextView mPhoneNumber;
 	/** The View object that represents a single row inside the ListView. */
 	private View mRow;
-	/** Title line of the plot. */
-	private TextView mPhoneNumber;
-	private TextView mMessage;
-
-	private TextView mDate;
 
 	/**
 	 * Creates a new PlotItemWrapper instance.
@@ -53,14 +51,6 @@ public class InboxItemWrapper {
 		return (mContactImage);
 	}
 
-	public TextView getDisplayNameTextView() {
-		if (mDisplayName == null) {
-			mDisplayName = (TextView) mRow
-					.findViewById(R.id.inbox_item_text_name);
-		}
-		return (mDisplayName);
-	}
-
 	public TextView getCounterTextView() {
 		if (mCounter == null) {
 			mCounter = (TextView) mRow
@@ -74,6 +64,14 @@ public class InboxItemWrapper {
 			mDate = (TextView) mRow.findViewById(R.id.inbox_item_text_date);
 		}
 		return (mDate);
+	}
+
+	public TextView getDisplayNameTextView() {
+		if (mDisplayName == null) {
+			mDisplayName = (TextView) mRow
+					.findViewById(R.id.inbox_item_text_name);
+		}
+		return (mDisplayName);
 	}
 
 	public TextView getMessageTextView() {
@@ -94,6 +92,13 @@ public class InboxItemWrapper {
 
 	public void populateFrom(int position, HashMap<String, Object> conversation) {
 
+		// count is only set if the value is bigger than one.
+		if ((Integer) conversation.get("count") > 1) {
+			getCounterTextView().setText("" + conversation.get("count"));
+		} else {
+			getCounterTextView().setText("");
+		}
+
 		if (conversation.get("avatar") != null) {
 			getContactImageView().setImageBitmap(
 					(Bitmap) conversation.get("avatar"));
@@ -112,9 +117,9 @@ public class InboxItemWrapper {
 			getDisplayNameTextView().setText((String) conversation.get("name"));
 			getMessageTextView().setSingleLine(true);
 		}
+
+		// sets the rest of the values.
 		getDateTextView().setText((String) conversation.get("date"));
-		// getContactImageView().setImageResource(converstaion.);
-		getCounterTextView().setText((String) conversation.get("counter"));
 		getMessageTextView().setText((String) conversation.get("message"));
 
 	}

@@ -216,8 +216,8 @@ public class MessageActivity extends SherlockActivity {
 				}
 				// send SMS
 				mContentProvider.sendSMS(mContactPhonenumber, message);
+
 				// insert SMS sent into DB
-				// final Calendar c = Calendar.getInstance();
 				String threadid = retrieveThreadIdFromNumberContact(mContactPhonenumber);
 				// right after the msg is sent, navigate to the message
 				// details page

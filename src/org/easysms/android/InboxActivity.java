@@ -256,6 +256,7 @@ public class InboxActivity extends SherlockListActivity implements
 
 			// adds the objects to display of the message.
 			temp2.put("count", conv.listsms.size());
+			System.out.println("Count: " + conv.listsms.size());
 			temp2.put("telnumber", firstsms.contact);
 			temp2.put("date", firstsms.getDate());
 			temp2.put("name", contact.displayName);
