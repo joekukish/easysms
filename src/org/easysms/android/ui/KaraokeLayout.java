@@ -445,24 +445,19 @@ public class KaraokeLayout extends ViewGroup {
 						handler.post(new Runnable() {
 							@Override
 							public void run() {
-								// progress.setProgress(value);
+
 								btn.requestFocus();
-								// drop all pending entries in the playback
-								// queue.
 
 								// plays the audio.
 								TextToSpeechManager.getInstance().say(
 										(String) btn.getText());
 							}
 						});
-
 					}
 					timesKaraoke = 0;
-
 				}
 			};
 			new Thread(runnable).start();
-
 		}
 	}
 

@@ -26,9 +26,8 @@
         android:src="@drawable/nophotostored" />
     -->
 
-
     <ImageButton
-        android:id="@+id/menu_call"
+        android:id="@+id/topbar_view_action_call"
         style="?android:attr/actionButtonStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

@@ -26,6 +26,7 @@ import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -158,6 +159,19 @@ public class MessageActivity extends SherlockActivity {
 			nameTextView.setText(mContactName);
 			phonenumberTextView.setText(mContactPhonenumber);
 
+			// sets the call button action.
+			ImageButton callButton = (ImageButton) findViewById(R.id.topbar_view_action_call);
+			callButton.setOnClickListener(new View.OnClickListener() {
+
+				@Override
+				public void onClick(View v) {
+					String uri = "tel:" + mContactPhonenumber;
+					Intent intent = new Intent(Intent.ACTION_CALL);
+					intent.setData(Uri.parse(uri));
+					startActivity(intent);
+
+				}
+			});
 			// enables the icon to serve as back.
 			getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		}
@@ -191,17 +205,17 @@ public class MessageActivity extends SherlockActivity {
 
 	public boolean onOptionsItemSelected(MenuItem item) {
 
+		Intent intent;
 		switch (item.getItemId()) {
 		case android.R.id.home:
 
 			// goes back to the home upon the back button click.
-			Intent intent = new Intent();
+			intent = new Intent();
 			intent.setClass(this, InboxActivity.class);
 			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			startActivity(intent);
 
 			return true;
-
 		case R.id.menu_send:
 
 			if (mContactPhonenumber.length() > 0
@@ -267,8 +281,6 @@ public class MessageActivity extends SherlockActivity {
 
 			}
 			return true;
-		case R.id.menu_call:
-			return true;
 		case R.id.menu_delete:
 			// Do something long
 			Runnable runnable = new Runnable() {
@@ -330,10 +342,6 @@ public class MessageActivity extends SherlockActivity {
 		default:
 			return super.onOptionsItemSelected(item);
 		}
-	}
-
-	public void playKaraoke(KaraokeLayout fl) {
-
 	}
 
 	public Conversation retrieveConvFromThreadId(List<Conversation> allConv,
