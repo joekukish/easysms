@@ -4,11 +4,11 @@
     <item
         android:id="@+id/menu_voice"
         android:icon="@drawable/ic_action_voice"
-        android:showAsAction="ifRoom"
+        android:showAsAction="always"
         android:title="@string/menu_voice"/>
     <item
-        android:id="@+id/menu_send"
-        android:icon="@drawable/ic_action_send"
+        android:id="@+id/menu_call"
+        android:icon="@drawable/ic_action_call"
         android:showAsAction="always"
         android:title="@string/menu_send"/>
     <item

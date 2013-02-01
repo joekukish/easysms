@@ -18,7 +18,7 @@
 
     <uses-sdk
         android:minSdkVersion="8"
-        android:targetSdkVersion="14" />
+        android:targetSdkVersion="15" />
 
     <application
         android:name=".EasySmsApp"
@@ -36,14 +36,8 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".MessagingActivity"
-            android:screenOrientation="portrait"
-            android:uiOptions="splitActionBarWhenNarrow" >
-        </activity>
-        <activity
             android:name=".MessageActivity"
-            android:screenOrientation="portrait"
-            android:uiOptions="splitActionBarWhenNarrow" >
+            android:screenOrientation="portrait" >
         </activity>
 
         <receiver
