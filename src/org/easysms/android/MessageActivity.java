@@ -49,7 +49,7 @@ public class MessageActivity extends SherlockActivity {
 	/** Handler used to execute actions in another thread. */
 	private Handler handler;
 	private String mContactName;
-	private String mContactPhonenumber;
+	private String mContactPhoneNumber;
 	// private Vibrator mVibrationService;
 
 	/** Provider used to manage the underlying SMS data. */
@@ -75,7 +75,7 @@ public class MessageActivity extends SherlockActivity {
 	}
 
 	public String getContactPhonenumber() {
-		return mContactPhonenumber;
+		return mContactPhoneNumber;
 	}
 
 	public SmsContentProvider getContentProvider() {
@@ -129,7 +129,7 @@ public class MessageActivity extends SherlockActivity {
 
 			// obtains the user info from the extras.
 			mContactName = (String) bundle.get(MessageActivity.NAME_EXTRA);
-			mContactPhonenumber = (String) bundle
+			mContactPhoneNumber = (String) bundle
 					.get(MessageActivity.PHONENUMBER_EXTRA);
 
 			// sets the adapter of the ViewPager.
@@ -141,30 +141,17 @@ public class MessageActivity extends SherlockActivity {
 			// allows the top bar to be different.
 			ActionBar actionBar = getSupportActionBar();
 
-			actionBar.setTitle(mContactName);
-			actionBar.setSubtitle(mContactPhonenumber);
-
 			// modifies layout depending if name is available or not.
-			// if (mContactName == null || mContactName.trim().equals("")) {
-			// // sets the phone number instead of the name since it is not
-			// // available.
-			// nameTextView.setText(mContactPhonenumber);
-			// // removes the phone text view.
-			// phonenumberTextView.setVisibility(View.GONE);
-			//
-			// // center the name line instead of having two.
-			// RelativeLayout.LayoutParams params = new
-			// RelativeLayout.LayoutParams(
-			// (int) LayoutParams.WRAP_CONTENT,
-			// (int) LayoutParams.WRAP_CONTENT);
-			//
-			// params.addRule(RelativeLayout.CENTER_VERTICAL);
-			// nameTextView.setLayoutParams(params);
-			//
-			// } else {
-			// nameTextView.setText(mContactName);
-			// phonenumberTextView.setText(mContactPhonenumber);
-			// }
+			if (mContactName == null || mContactName.trim().equals("")) {
+				// sets the phone number instead of the name since it is not
+				// available.
+				// the action bar handles the layout change.
+				actionBar.setTitle(mContactPhoneNumber);
+
+			} else {
+				actionBar.setTitle(mContactName);
+				actionBar.setSubtitle(mContactPhoneNumber);
+			}
 
 			// enables the icon to serve as back.
 			getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -187,7 +174,7 @@ public class MessageActivity extends SherlockActivity {
 	}
 
 	protected void onSendButtonClick() {
-		if (mContactPhonenumber.length() > 0 && mSendLayout.getChildCount() > 1) {
+		if (mContactPhoneNumber.length() > 0 && mSendLayout.getChildCount() > 1) {
 			// retrieve SMS body
 			String message = "";
 			for (int i = 1; i < mSendLayout.getChildCount(); ++i) {
@@ -197,28 +184,28 @@ public class MessageActivity extends SherlockActivity {
 				message += " ";
 			}
 			// send SMS
-			mContentProvider.sendSMS(mContactPhonenumber, message);
+			mContentProvider.sendSMS(mContactPhoneNumber, message);
 
 			// insert SMS sent into DB
-			String threadid = retrieveThreadIdFromNumberContact(mContactPhonenumber);
+			String threadid = retrieveThreadIdFromNumberContact(mContactPhoneNumber);
 			// right after the msg is sent, navigate to the message
 			// details page
 			Intent i = new Intent(MessageActivity.this, MessageActivity.class);
 
 			// gets the contact data based on the phone number.
-			Contact contact = mContentProvider.getContact(mContactPhonenumber);
+			Contact contact = mContentProvider.getContact(mContactPhoneNumber);
 
 			Bundle bundle = new Bundle();
 			// Add the parameters to bundle
 			bundle.putString("Name", contact.displayName);
-			bundle.putString("Tel", mContactPhonenumber);
+			bundle.putString("Tel", mContactPhoneNumber);
 			bundle.putBoolean("NewMsg", false);
 			// Add this bundle to the intent
 			i.putExtras(bundle);
 			startActivity(i);
 			// insert SMS in the data base content provider
 			ContentValues values = new ContentValues();
-			values.put("address", mContactPhonenumber);
+			values.put("address", mContactPhoneNumber);
 			// values.put("date",dateToday);
 			values.put("read", 1);
 			values.put("thread_id", threadid);
@@ -237,7 +224,7 @@ public class MessageActivity extends SherlockActivity {
 			TextToSpeechManager.getInstance().say(
 					"Entrez un message s'il vous plait.");
 
-		} else if (mContactPhonenumber.length() > 0) {
+		} else if (mContactPhoneNumber.length() > 0) {
 			Toast.makeText(getBaseContext(),
 					"Entrez un numéro s'il vous plait.", Toast.LENGTH_SHORT)
 					.show();
@@ -264,7 +251,7 @@ public class MessageActivity extends SherlockActivity {
 			return true;
 
 		case R.id.menu_call:
-			String uri = "tel:" + mContactPhonenumber;
+			String uri = "tel:" + mContactPhoneNumber;
 
 			// creates a new intent with the call action.
 			intent = new Intent(Intent.ACTION_CALL);
