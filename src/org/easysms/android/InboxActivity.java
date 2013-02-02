@@ -36,14 +36,14 @@ import com.google.analytics.tracking.android.Tracker;
 public class InboxActivity extends SherlockListActivity implements
 		OnItemClickListener {
 
-	// list of hash map for the message threads
+	/** List of conversations that are displayed in the inbox. */
 	private static final ArrayList<HashMap<String, Object>> mMessageList = new ArrayList<HashMap<String, Object>>();
+	/** Class that handles the SMS extraction. */
+	protected SmsContentProvider mContentProvider;
 	/** Flag used to determine if the refresh is complete. */
 	protected Boolean mIsComplete = false;
 	/** Handler used to update the list as new messages arrive. */
 	protected Handler mTaskHandler;
-	/** Class that handles the SMS extraction. */
-	protected SmsContentProvider mContentProvider;
 	/** Tracker used for Google Analytics. */
 	protected Tracker mTracker;
 
@@ -52,6 +52,7 @@ public class InboxActivity extends SherlockListActivity implements
 	 */
 	private void createUpdateThread() {
 
+		// TODO: this needs to be removed and rely only on the content observer.
 		// creates the handler used to process the message update.
 		mTaskHandler = new Handler();
 
@@ -69,64 +70,6 @@ public class InboxActivity extends SherlockListActivity implements
 			}
 		};
 		mTaskHandler.postDelayed(t, elapse);
-	}
-
-	@Override
-	public void onStart() {
-		super.onStart();
-
-		// tracks that the activity was opened.
-		ApplicationTracker.getInstance()
-				.logEvent(EventType.ACTIVITY_VIEW, this);
-
-		// Google Analytics tracking.
-		EasyTracker.getInstance().activityStart(this);
-	}
-
-	@Override
-	public void onStop() {
-		super.onStop();
-
-		// Google Analytics tracking.
-		EasyTracker.getInstance().activityStop(this);
-	}
-
-	public void onItemClick(AdapterView<?> parent, View view, int position,
-			long id) {
-
-		// TODO: shouldn't we pass the thread id? this approach will not
-		// work if multiple recipients messages are allowed.
-
-		// Object selectedFromList = (lv.getItemAtPosition(position));
-		HashMap<String, Object> o = (HashMap<String, Object>) mMessageList
-				.get(position);
-
-		// tracks the user activity.
-		ApplicationTracker.getInstance().logEvent(EventType.CLICK, this,
-				"inbox_item", o.get("telnumber"), position);
-		// tracks using google analytics.
-		mTracker.sendEvent("ui_action", "inbox_item_press",
-				(String) o.get("telnumber"), (long) position);
-
-		// gets the parameters from the selected message
-		String telnum = (String) o.get("telnumber");
-		String name = (String) o.get("name");
-
-		// activity use to show the message.
-		Intent i = new Intent(InboxActivity.this, MessageActivity.class);
-
-		// creates and initializes the bundle.
-		Bundle bundle = new Bundle();
-
-		// adds the parameters to bundle
-		bundle.putString(MessageActivity.NAME_EXTRA, name);
-		bundle.putString(MessageActivity.PHONENUMBER_EXTRA, telnum);
-		bundle.putBoolean(MessageActivity.NEW_MESSAGE_EXTRA, false);
-
-		// adds this bundle to the intent
-		i.putExtras(bundle);
-		// starts the new activity.
-		startActivity(i);
 	}
 
 	private void displayListSMS() {
@@ -190,6 +133,44 @@ public class InboxActivity extends SherlockListActivity implements
 		return true;
 	}
 
+	public void onItemClick(AdapterView<?> parent, View view, int position,
+			long id) {
+
+		// TODO: shouldn't we pass the thread id? this approach will not
+		// work if multiple recipients messages are allowed.
+
+		// Object selectedFromList = (lv.getItemAtPosition(position));
+		HashMap<String, Object> o = (HashMap<String, Object>) mMessageList
+				.get(position);
+
+		// tracks the user activity.
+		ApplicationTracker.getInstance().logEvent(EventType.CLICK, this,
+				"inbox_item", o.get("telnumber"), position);
+		// tracks using google analytics.
+		mTracker.sendEvent("ui_action", "inbox_item_press",
+				(String) o.get("telnumber"), (long) position);
+
+		// gets the parameters from the selected message
+		String telnum = (String) o.get("telnumber");
+		String name = (String) o.get("name");
+
+		// activity use to show the message.
+		Intent i = new Intent(InboxActivity.this, MessageActivity.class);
+
+		// creates and initializes the bundle.
+		Bundle bundle = new Bundle();
+
+		// adds the parameters to bundle
+		bundle.putString(MessageActivity.NAME_EXTRA, name);
+		bundle.putString(MessageActivity.PHONENUMBER_EXTRA, telnum);
+		bundle.putBoolean(MessageActivity.NEW_MESSAGE_EXTRA, false);
+
+		// adds this bundle to the intent
+		i.putExtras(bundle);
+		// starts the new activity.
+		startActivity(i);
+	}
+
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 
@@ -217,6 +198,26 @@ public class InboxActivity extends SherlockListActivity implements
 		default:
 			return super.onOptionsItemSelected(item);
 		}
+	}
+
+	@Override
+	public void onStart() {
+		super.onStart();
+
+		// tracks that the activity was opened.
+		ApplicationTracker.getInstance()
+				.logEvent(EventType.ACTIVITY_VIEW, this);
+
+		// Google Analytics tracking.
+		EasyTracker.getInstance().activityStart(this);
+	}
+
+	@Override
+	public void onStop() {
+		super.onStop();
+
+		// Google Analytics tracking.
+		EasyTracker.getInstance().activityStop(this);
 	}
 
 	private List<Conversation> populateList(List<Sms> allSMS) {

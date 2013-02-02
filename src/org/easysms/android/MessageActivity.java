@@ -7,8 +7,8 @@ import org.easysms.android.data.Sms;
 import org.easysms.android.provider.SmsContentProvider;
 import org.easysms.android.ui.KaraokeLayout;
 import org.easysms.android.util.ApplicationTracker;
-import org.easysms.android.util.TextToSpeechManager;
 import org.easysms.android.util.ApplicationTracker.EventType;
+import org.easysms.android.util.TextToSpeechManager;
 import org.easysms.android.view.MessageViewPagerAdapter;
 
 import android.annotation.TargetApi;
@@ -51,9 +51,10 @@ public class MessageActivity extends SherlockActivity {
 
 	/** Handler used to execute actions in another thread. */
 	private Handler handler;
+	/** Name of the contact. */
 	private String mContactName;
+	/** Phone number of the contact. */
 	private String mContactPhoneNumber;
-
 	/** Provider used to manage the underlying SMS data. */
 	private SmsContentProvider mContentProvider;
 	/** Adapter used to handle the content inside the ViewPager. */
