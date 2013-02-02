@@ -5,8 +5,10 @@
     <string name="button_new">New Message</string>
     <string name="activity_inbox_title">Inbox</string>
     <string name="voice_help">To record your message click on the microphone at bottom left.</string>
-    <string name="voice_prompt">Speak now!</string>
     <string name="message_sent">Message Sent</string>
+    <string name="promt_enter_a_message">Please enter a message</string>
+    <string name="promt_voice">Speak now!</string>
+    <string name="promt_no_internet">No Internet connection</string>
 
     <!-- Dates -->
     <string name="date_format">yyyy-MM-dd</string>

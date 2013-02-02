@@ -79,6 +79,11 @@ public class MessageActivity extends SherlockActivity {
 		return mContentProvider;
 	}
 
+	/**
+	 * Detects
+	 * 
+	 * @return
+	 */
 	public boolean isInternetOn() {
 		ConnectivityManager connec = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 		// ARE WE CONNECTED TO THE NET
@@ -226,10 +231,14 @@ public class MessageActivity extends SherlockActivity {
 
 				// plays the audio.
 				TextToSpeechManager.getInstance().say(
-						getResources().getString(R.string.voice_prompt));
+						getResources().getString(R.string.promt_voice));
 
 				// prepares and launches the voice recognition activity.
 				startVoiceRecognitionActivity();
+			} else {
+				// plays the audio.
+				TextToSpeechManager.getInstance().say(
+						getResources().getString(R.string.promt_no_internet));
 			}
 
 			return true;
@@ -293,7 +302,6 @@ public class MessageActivity extends SherlockActivity {
 			values.put("body", message);
 			getContentResolver()
 					.insert(Uri.parse("content://sms/sent"), values);
-
 		}
 
 		else if (mSendLayout.getChildCount() <= 1) {
@@ -303,7 +311,7 @@ public class MessageActivity extends SherlockActivity {
 
 			// plays the audio.
 			TextToSpeechManager.getInstance().say(
-					"Entrez un message s'il vous plait.");
+					getResources().getString(R.string.promt_enter_a_message));
 
 		} else if (mContactPhoneNumber.length() > 0) {
 			Toast.makeText(getBaseContext(),
@@ -312,8 +320,7 @@ public class MessageActivity extends SherlockActivity {
 
 			// plays the audio.
 			TextToSpeechManager.getInstance().say(
-					"Entrez un message s'il vous plait.");
-
+					getResources().getString(R.string.promt_enter_a_message));
 		}
 	}
 
