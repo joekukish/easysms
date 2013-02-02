@@ -53,8 +53,12 @@ public class MessageActivity extends SherlockActivity {
 
 	/** Provider used to manage the underlying SMS data. */
 	private SmsContentProvider mContentProvider;
+	/** Adapter used to handle the content inside the ViewPager. */
+	private MyPagerAdapter mPagerAdapter;
 	/** KaraokeLayout where the message to send is composed. */
 	private KaraokeLayout mSendLayout;
+	/** Pager that allows swiping between the views. */
+	private ViewPager mViewPager;
 
 	/**
 	 * Adds the given text into the send bubble.
@@ -106,6 +110,24 @@ public class MessageActivity extends SherlockActivity {
 	}
 
 	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (requestCode == VOICE_RECOGNITION_REQUEST_CODE
+				&& resultCode == RESULT_OK) {
+
+			// obtains the results from the voice recognizer.
+			List<String> matches = data
+					.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+
+			// gives the content to the adapter.
+			mPagerAdapter.displayVoiceOptions(matches);
+			// changes the current item.
+			mViewPager.setCurrentItem(3);
+
+		}
+		super.onActivityResult(requestCode, resultCode, data);
+	}
+
+	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
@@ -131,10 +153,10 @@ public class MessageActivity extends SherlockActivity {
 					.get(MessageActivity.PHONENUMBER_EXTRA);
 
 			// sets the adapter of the ViewPager.
-			MyPagerAdapter adapter = new MyPagerAdapter(this);
-			ViewPager myPager = (ViewPager) findViewById(R.id.view_message_view_pager);
-			myPager.setAdapter(adapter);
-			myPager.setCurrentItem(0);
+			mPagerAdapter = new MyPagerAdapter(this);
+			mViewPager = (ViewPager) findViewById(R.id.view_message_view_pager);
+			mViewPager.setAdapter(mPagerAdapter);
+			mViewPager.setCurrentItem(0);
 
 			// allows the top bar to be different.
 			ActionBar actionBar = getSupportActionBar();
@@ -346,16 +368,19 @@ public class MessageActivity extends SherlockActivity {
 		intent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, getClass()
 				.getPackage().getName());
 
-		// Display an hint to the user about what he should say.
-		// intent.putExtra(RecognizerIntent.EXTRA_PROMPT,
-		// "Speech recognition demo");
+		// display an hint to the user about what he should say.
+		intent.putExtra(RecognizerIntent.EXTRA_PROMPT, getResources()
+				.getString(R.string.promt_voice));
 
-		// Given an hint to the recognizer about what the user is going to say
+		// given an hint to the recognizer about what the user is going to say
 		intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
 				RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
 
 		// number of results the recognizer should return.
 		intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3);
+
+		// sets the default language.
+		// intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "en-US");
 
 		// starts the activity.
 		startActivityForResult(intent, VOICE_RECOGNITION_REQUEST_CODE);

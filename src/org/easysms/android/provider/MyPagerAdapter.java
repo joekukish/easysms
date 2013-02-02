@@ -40,8 +40,18 @@ public class MyPagerAdapter extends PagerAdapter {
 	 */
 	private MessageActivity mParent;
 
+	private List<String> mVoiceOptions;
+
+	public void displayVoiceOptions(List<String> options) {
+
+		mVoiceOptions = options;
+		// indicates that size must be modified.
+		this.notifyDataSetChanged();
+
+	}
+
 	public int getCount() {
-		return 3;
+		return mVoiceOptions == null ? 3 : 4;
 	}
 
 	public MyPagerAdapter(MessageActivity parent) {
@@ -189,6 +199,95 @@ public class MyPagerAdapter extends PagerAdapter {
 			// adds the help message.
 			instructionsBubble.addText(view.getResources().getString(
 					R.string.voice_help));
+
+			break;
+
+		case 3:
+
+			view = inflater.inflate(R.layout.layout_conversation_list, null);
+			LinearLayout optionsLayout = (LinearLayout) view
+					.findViewById(R.id.msgdetailslayout);
+
+			// iterates the options.
+			for (int i = 0; i < mVoiceOptions.size(); i++) {
+
+				// create a new flow layout for each choice
+				final KaraokeLayout fl = new KaraokeLayout(mParent);
+
+				// add the view number
+				ImageView number = new ImageView(mParent);
+				if (i == 0) {
+					number.setBackgroundResource(R.drawable.one);
+					fl.addView(number);
+
+				} else if (i == 1) {
+					number.setBackgroundResource(R.drawable.two);
+					fl.addView(number);
+
+				} else if (i == 2) {
+					number.setBackgroundResource(R.drawable.three);
+					fl.addView(number);
+				}
+
+				number.setOnLongClickListener(new OnLongClickListener() {
+					@Override
+					public boolean onLongClick(View v) {
+						// String sentenceChoosen = "";
+						for (int i = 1; i < fl.getChildCount(); ++i) {
+							// // get the first word of the results
+							// Button btn = (Button) fl.getChildAt(i);
+							// // create a new word with the same
+							// characteristics
+							// final Button bouton = new Button(mParent
+							// .getBaseContext());
+							// bouton.setText(btn.getText());
+							//
+							// bouton.setLayoutParams(new LayoutParams(
+							// LayoutParams.WRAP_CONTENT,
+							// LayoutParams.WRAP_CONTENT));
+							// bouton.setBackgroundResource(R.drawable.button);
+							// // add the button to the flow layout
+							// flowlayout.addView(bouton, new LayoutParams(
+							// LayoutParams.WRAP_CONTENT,
+							// LayoutParams.WRAP_CONTENT));
+							// sentenceChoosen += btn.getText();
+						}
+						return true;
+					}
+				});
+
+				// adds the sentence to the layout.
+				fl.addText(mVoiceOptions.get(i));
+
+				fl.setOnLongClickListener(new OnLongClickListener() {
+					@Override
+					public boolean onLongClick(View v) {
+						// String sentenceChoosen = "";
+						// for (int i = 1; i < fl.getChildCount(); ++i) {
+						// // get the first word of the results
+						// Button btn = (Button) fl.getChildAt(i);
+						// // create a new word with the same characteristics
+						// final Button bouton = new
+						// Button(mParent.getBaseContext());
+						// bouton.setText(btn.getText());
+						// bouton.setLayoutParams(new LayoutParams(
+						// LayoutParams.WRAP_CONTENT,
+						// LayoutParams.WRAP_CONTENT));
+						// bouton.setBackgroundResource(R.drawable.button);
+						//
+						// // add the button to the flow layout
+						// flowlayout.addView(bouton, new LayoutParams(
+						// LayoutParams.WRAP_CONTENT,
+						// LayoutParams.WRAP_CONTENT));
+						// sentenceChoosen += btn.getText();
+						// }
+						return true;
+					}
+				});
+
+				// adds the option to the view.
+				optionsLayout.addView(fl);
+			}
 
 			break;
 		}
