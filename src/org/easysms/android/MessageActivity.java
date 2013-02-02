@@ -1,10 +1,8 @@
 package org.easysms.android;
 
 import java.util.List;
-import java.util.Locale;
 
 import org.easysms.android.data.Contact;
-import org.easysms.android.data.Conversation;
 import org.easysms.android.data.Sms;
 import org.easysms.android.provider.MyPagerAdapter;
 import org.easysms.android.provider.SmsContentProvider;
@@ -15,6 +13,8 @@ import android.annotation.TargetApi;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -50,12 +50,9 @@ public class MessageActivity extends SherlockActivity {
 	private Handler handler;
 	private String mContactName;
 	private String mContactPhoneNumber;
-	// private Vibrator mVibrationService;
 
 	/** Provider used to manage the underlying SMS data. */
 	private SmsContentProvider mContentProvider;
-	/** Default Locale used through the application. */
-	private Locale mCurrentLocale = Locale.ENGLISH;
 	/** KaraokeLayout where the message to send is composed. */
 	private KaraokeLayout mSendLayout;
 
@@ -82,7 +79,7 @@ public class MessageActivity extends SherlockActivity {
 		return mContentProvider;
 	}
 
-	public final boolean isInternetOn() {
+	public boolean isInternetOn() {
 		ConnectivityManager connec = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 		// ARE WE CONNECTED TO THE NET
 		if ((connec.getNetworkInfo(0) != null && connec.getNetworkInfo(0)
@@ -109,10 +106,6 @@ public class MessageActivity extends SherlockActivity {
 
 		// sets the theme used throughout the application.
 		setTheme(EasySmsApp.THEME);
-
-		// gets the service from the system.
-		// mVibrationService = (Vibrator)
-		// getSystemService(Context.VIBRATOR_SERVICE);
 
 		// objects the provider from the application.
 		mContentProvider = ((EasySmsApp) getApplication()).getContentProvider();
@@ -156,6 +149,9 @@ public class MessageActivity extends SherlockActivity {
 			// enables the icon to serve as back.
 			getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		}
+
+		// initializes the handler for voice recognition.
+		handler = new Handler();
 	}
 
 	@Override
@@ -171,6 +167,91 @@ public class MessageActivity extends SherlockActivity {
 		inflater.inflate(R.menu.menu_view_message, menu);
 
 		return true;
+	}
+
+	public boolean onOptionsItemSelected(MenuItem item) {
+
+		Intent intent;
+		switch (item.getItemId()) {
+		case android.R.id.home:
+
+			// goes back to the home upon the back button click.
+			intent = new Intent();
+			intent.setClass(this, InboxActivity.class);
+			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			startActivity(intent);
+
+			return true;
+
+		case R.id.menu_call:
+
+			// creates the uri.
+			String uri = "tel:" + mContactPhoneNumber;
+
+			// creates a new intent with the call action.
+			intent = new Intent(Intent.ACTION_CALL);
+			intent.setData(Uri.parse(uri));
+			startActivity(intent);
+
+			return true;
+
+		case R.id.menu_delete:
+
+			Runnable runnable = new Runnable() {
+				@Override
+				public void run() {
+					for (int i = 1; i < mSendLayout.getChildCount(); ++i) {
+						final Button btn = (Button) mSendLayout.getChildAt(i);
+
+						try {
+							Thread.sleep(800);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+						handler.post(new Runnable() {
+							@Override
+							public void run() {
+								mSendLayout.removeView(btn);
+							}
+						});
+					}
+				}
+			};
+			new Thread(runnable).start();
+
+			return true;
+		case R.id.menu_voice:
+
+			if (isInternetOn()) {
+
+				// plays the audio.
+				TextToSpeechManager.getInstance().say(
+						getResources().getString(R.string.voice_prompt));
+
+				// prepares and launches the voice recognition activity.
+				startVoiceRecognitionActivity();
+			}
+
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
+	}
+
+	@Override
+	public boolean onPrepareOptionsMenu(Menu menu) {
+
+		// disables recognition button if service is not present.
+		PackageManager pm = getPackageManager();
+		List<ResolveInfo> activities = pm.queryIntentActivities(new Intent(
+				RecognizerIntent.ACTION_RECOGNIZE_SPEECH), 0);
+		if (activities.size() == 0) {
+			MenuItem item = menu.findItem(R.id.menu_voice);
+			item.setEnabled(false);
+			item.setVisible(false);
+		}
+
+		return super.onPrepareOptionsMenu(menu);
 	}
 
 	protected void onSendButtonClick() {
@@ -236,103 +317,6 @@ public class MessageActivity extends SherlockActivity {
 		}
 	}
 
-	public boolean onOptionsItemSelected(MenuItem item) {
-
-		Intent intent;
-		switch (item.getItemId()) {
-		case android.R.id.home:
-
-			// goes back to the home upon the back button click.
-			intent = new Intent();
-			intent.setClass(this, InboxActivity.class);
-			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			startActivity(intent);
-
-			return true;
-
-		case R.id.menu_call:
-			String uri = "tel:" + mContactPhoneNumber;
-
-			// creates a new intent with the call action.
-			intent = new Intent(Intent.ACTION_CALL);
-			intent.setData(Uri.parse(uri));
-			startActivity(intent);
-
-			return true;
-
-		case R.id.menu_delete:
-			// Do something long
-			Runnable runnable = new Runnable() {
-				@Override
-				public void run() {
-					for (int i = 1; i < mSendLayout.getChildCount(); ++i) {
-						final Button btn = (Button) mSendLayout.getChildAt(i);
-
-						try {
-							Thread.sleep(800);
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}
-						handler.post(new Runnable() {
-							@Override
-							public void run() {
-								mSendLayout.removeView(btn);
-							}
-						});
-					}
-				}
-			};
-			new Thread(runnable).start();
-
-			return true;
-		case R.id.menu_voice:
-
-			if (isInternetOn()) {
-				// Do something long
-				Runnable runnable2 = new Runnable() {
-					@Override
-					public void run() {
-
-						// plays the audio.
-						TextToSpeechManager.getInstance().say(
-								"Parlez maintenant.");
-
-						// helpVoiceRecog();
-						try {
-							Thread.sleep(800);
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}
-						handler.post(new Runnable() {
-							@Override
-							public void run() {
-
-								startVoiceRecognitionActivity();
-							}
-						});
-					}
-				};
-				new Thread(runnable2).start();
-			}
-
-			return true;
-		default:
-			return super.onOptionsItemSelected(item);
-		}
-	}
-
-	public Conversation retrieveConvFromThreadId(List<Conversation> allConv,
-			String threadid) {
-		for (Conversation conv : allConv) {
-			String convthreadid = conv.threadid;
-			if (convthreadid.equals(threadid)) {
-				return conv;
-			}
-		}
-
-		return null;
-	}
-
 	public String retrieveThreadIdFromNumberContact(String phoneNumContact) {
 		for (Sms sms : mContentProvider.getMessages()) {
 			String smscontact = sms.contact;
@@ -347,6 +331,8 @@ public class MessageActivity extends SherlockActivity {
 	 * Fire an intent to start the speech recognition activity.
 	 */
 	private void startVoiceRecognitionActivity() {
+
+		// creates an intent that can handle the speech recognition.
 		Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
 
 		// Specify the calling package to identify your application
@@ -361,34 +347,10 @@ public class MessageActivity extends SherlockActivity {
 		intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
 				RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
 
-		// Specify how many results you want to receive. The results will be
-		// sorted
-		// where the first result is the one with higher confidence.
-		// intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 5);
+		// number of results the recognizer should return.
 		intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3);
 
-		// Specify the recognition language. This parameter has to be specified
-		// only if the
-		// recognition has to be done in a specific language and not the default
-		// one (i.e., the
-		// system locale). Most of the applications do not have to set this
-		// parameter.
-		/*
-		 * if
-		 * (!mSupportedLanguageView.getSelectedItem().toString().equals("Default"
-		 * )) { intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE,
-		 * mSupportedLanguageView.getSelectedItem().toString()); }
-		 */
-
-		// intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE,language);
-		// intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE,Locale.FRENCH);
-		if (mCurrentLocale == Locale.FRENCH)
-			intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "fr-FR");
-		else if (mCurrentLocale == Locale.ITALIAN)
-			intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "it-IT");
-		else if (mCurrentLocale == Locale.ENGLISH)
-			intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "en-EN");
-
+		// starts the activity.
 		startActivityForResult(intent, VOICE_RECOGNITION_REQUEST_CODE);
 	}
 
