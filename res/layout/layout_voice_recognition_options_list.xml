@@ -3,11 +3,11 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
-    <org.easysms.android.ui.KaraokeLayout
-        android:id="@+id/layout_speech_recognition_instructions_bubble"
+    <LinearLayout
+        android:id="@+id/voice_recognition_options_list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical" >
-    </org.easysms.android.ui.KaraokeLayout>
+    </LinearLayout>
 
 </ScrollView>

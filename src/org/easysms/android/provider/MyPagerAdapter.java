@@ -204,9 +204,10 @@ public class MyPagerAdapter extends PagerAdapter {
 
 		case 3:
 
-			view = inflater.inflate(R.layout.layout_conversation_list, null);
+			view = inflater.inflate(
+					R.layout.layout_voice_recognition_options_list, null);
 			LinearLayout optionsLayout = (LinearLayout) view
-					.findViewById(R.id.msgdetailslayout);
+					.findViewById(R.id.voice_recognition_options_list);
 
 			// iterates the options.
 			for (int i = 0; i < mVoiceOptions.size(); i++) {
@@ -381,7 +382,6 @@ public class MyPagerAdapter extends PagerAdapter {
 			final KaraokeLayout fl = new KaraokeLayout(mParent);
 			fl.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,
 					LayoutParams.MATCH_PARENT));
-			fl.setBackgroundResource(R.drawable.bubblelast);
 
 			Button dateButton = new Button(mParent);
 			dateButton.setSingleLine(false);

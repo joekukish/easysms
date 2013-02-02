@@ -93,6 +93,9 @@ public class KaraokeLayout extends ViewGroup {
 
 		// handler used in the karaoke.
 		handler = new Handler();
+
+		// sets the default background image.
+		setBackgroundResource(R.drawable.bubblelast);
 	}
 
 	public KaraokeLayout(Context context, AttributeSet attributeSet) {
@@ -104,6 +107,9 @@ public class KaraokeLayout extends ViewGroup {
 
 		// handler used in the karaoke.
 		handler = new Handler();
+
+		// sets the default background image.
+		setBackgroundResource(R.drawable.bubblelast);
 	}
 
 	public KaraokeLayout(Context context, AttributeSet attributeSet,
@@ -116,6 +122,9 @@ public class KaraokeLayout extends ViewGroup {
 
 		// handler used in the karaoke.
 		handler = new Handler();
+
+		// sets the default background image.
+		setBackgroundResource(R.drawable.bubblelast);
 	}
 
 	private void addPlayButton() {
