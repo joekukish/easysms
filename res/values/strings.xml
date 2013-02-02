@@ -50,16 +50,16 @@
         <item>Time?</item>
     </string-array>
     <string-array name="sentenses_array">
-        <item>Ok</item>
-        <item>No</item>
-        <item>"I'm late"</item>
+        <item>Ok.</item>
+        <item>No.</item>
+        <item>"I'm late."</item>
         <item>Call me!</item>
-        <item>"I don't have more battery"</item>
-        <item>"I can't answer, I'm busy"</item>
+        <item>"I don't have more battery."</item>
+        <item>"I can't answer right now, I'm busy."</item>
         <item>Hurry up!</item>
         <item>How are you?</item>
-        <item>"I'm thinking of you"</item>
-        <item>"I'm driving"</item>
+        <item>"I'm thinking of you."</item>
+        <item>"I'm driving."</item>
         <item>When?</item>
         <item>At what time?</item>
     </string-array>

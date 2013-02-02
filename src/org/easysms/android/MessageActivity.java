@@ -63,6 +63,8 @@ public class MessageActivity extends SherlockActivity {
 	private MessageViewPagerAdapter mPagerAdapter;
 	/** KaraokeLayout where the message to send is composed. */
 	private KaraokeLayout mSendLayout;
+	/** Tracker used for Google Analytics. */
+	protected Tracker mTracker;
 	/** Pager that allows swiping between the views. */
 	private ViewPager mViewPager;
 
@@ -90,26 +92,24 @@ public class MessageActivity extends SherlockActivity {
 	}
 
 	/**
-	 * Detects
+	 * Detects if there is an active Internet connection.
 	 * 
-	 * @return
+	 * @return true if there is an active Internet connection, otherwise false.
 	 */
 	public boolean isInternetOn() {
 		ConnectivityManager connec = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-		// ARE WE CONNECTED TO THE NET
+
+		// checks if internet is available.
 		if ((connec.getNetworkInfo(0) != null && connec.getNetworkInfo(0)
 				.getState() == NetworkInfo.State.CONNECTED)
 				|| (connec.getNetworkInfo(1) != null && connec
 						.getNetworkInfo(1).getState() == NetworkInfo.State.CONNECTED)) {
-			// MESSAGE TO SCREEN FOR TESTING (IF REQ)
-			// Toast.makeText(this, connec.getNetworkInfo(0) + "connected",
-			// Toast.LENGTH_LONG).show();
+
 			return true;
 		} else if ((connec.getNetworkInfo(0) != null && connec
 				.getNetworkInfo(0).getState() == NetworkInfo.State.DISCONNECTED)
 				|| (connec.getNetworkInfo(1) != null && connec
 						.getNetworkInfo(1).getState() == NetworkInfo.State.DISCONNECTED)) {
-			// System.out.println(“Not Connected”);
 			return false;
 		}
 		return false;
@@ -132,9 +132,6 @@ public class MessageActivity extends SherlockActivity {
 		}
 		super.onActivityResult(requestCode, resultCode, data);
 	}
-
-	/** Tracker used for Google Analytics. */
-	protected Tracker mTracker;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
