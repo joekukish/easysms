@@ -115,6 +115,7 @@ public class InboxActivity extends SherlockListActivity implements
 				((EasySmsApp) getApplication()).getDeviceId());
 
 		// gets the current tracker.
+		EasyTracker.getInstance().setContext(this);
 		mTracker = EasyTracker.getTracker();
 
 		// loads the available messages.
@@ -255,7 +256,7 @@ public class InboxActivity extends SherlockListActivity implements
 			Contact contact = mContentProvider.getContact(firstsms.contact);
 			// loads the photo bitmap.
 			Bitmap photo = mContentProvider
-					.getFacebookPhoto(contact.phoneNumber);
+					.getContactPhoto(contact.phoneNumber);
 			if (photo != null) {
 				temp2.put("avatar", photo);
 			}

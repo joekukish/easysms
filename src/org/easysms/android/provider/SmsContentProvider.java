@@ -26,7 +26,6 @@ import android.os.Handler;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.PhoneLookup;
 import android.telephony.SmsManager;
-import android.util.Log;
 import android.widget.Toast;
 
 public class SmsContentProvider extends ContentObserver {
@@ -138,7 +137,7 @@ public class SmsContentProvider extends ContentObserver {
 		return tmpContact;
 	}
 
-	public Bitmap getFacebookPhoto(String phoneNumber) {
+	public Bitmap getContactPhoto(String phoneNumber) {
 		Uri phoneUri = Uri.withAppendedPath(PhoneLookup.CONTENT_FILTER_URI,
 				Uri.encode(phoneNumber));
 		Uri photoUri = null;
@@ -166,47 +165,6 @@ public class SmsContentProvider extends ContentObserver {
 		} else {
 			return null;
 		}
-		return null;
-	}
-
-	public Bitmap getContactPhoto(int id, long photo_id) {
-
-		Uri uri = ContentUris.withAppendedId(
-				ContactsContract.Contacts.CONTENT_URI, id);
-		InputStream input = ContactsContract.Contacts
-				.openContactPhotoInputStream(mContext.getContentResolver(), uri);
-		if (input != null) {
-			return BitmapFactory.decodeStream(input);
-		} else {
-			Log.d("PHOTO", "first try failed to load photo");
-
-		}
-
-		byte[] photoBytes = null;
-
-		Uri photoUri = ContentUris.withAppendedId(
-				ContactsContract.Data.CONTENT_URI, photo_id);
-
-		Cursor c = mContext.getContentResolver().query(photoUri,
-				new String[] { ContactsContract.CommonDataKinds.Photo.PHOTO },
-				null, null, null);
-
-		try {
-			if (c.moveToFirst())
-				photoBytes = c.getBlob(0);
-
-		} catch (Exception e) {
-
-		} finally {
-
-			c.close();
-		}
-
-		if (photoBytes != null)
-			return BitmapFactory.decodeByteArray(photoBytes, 0,
-					photoBytes.length);
-		else
-			Log.d("PHOTO", "second try also failed");
 		return null;
 	}
 

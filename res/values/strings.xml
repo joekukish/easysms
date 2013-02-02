@@ -4,7 +4,7 @@
     <string name="app_name">EasySMS</string>
     <string name="button_new">New Message</string>
     <string name="activity_inbox_title">Inbox</string>
-    <string name="voice_help">To record your message click on the microphone at bottom left.</string>
+    <string name="voice_help">To record your message click on the microphone at the top bar.</string>
     <string name="message_sent">Message Sent</string>
     <string name="promt_enter_a_message">Please enter a message</string>
     <string name="promt_voice">Speak now!</string>
