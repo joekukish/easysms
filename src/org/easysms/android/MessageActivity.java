@@ -1,5 +1,6 @@
 package org.easysms.android;
 
+import java.util.Date;
 import java.util.List;
 
 import org.easysms.android.data.Contact;
@@ -36,6 +37,7 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.google.analytics.tracking.android.EasyTracker;
+import com.google.analytics.tracking.android.Tracker;
 
 @TargetApi(8)
 public class MessageActivity extends SherlockActivity {
@@ -131,6 +133,9 @@ public class MessageActivity extends SherlockActivity {
 		super.onActivityResult(requestCode, resultCode, data);
 	}
 
+	/** Tracker used for Google Analytics. */
+	protected Tracker mTracker;
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -143,6 +148,10 @@ public class MessageActivity extends SherlockActivity {
 
 		Bundle bundle = getIntent().getExtras();
 		Boolean newMsg = bundle.getBoolean(NEW_MESSAGE_EXTRA);
+
+		// configures and loads the google analytics tracker.
+		EasyTracker.getInstance().setContext(this);
+		mTracker = EasyTracker.getTracker();
 
 		if (!newMsg) {
 			// shows and existing thread.
@@ -206,6 +215,13 @@ public class MessageActivity extends SherlockActivity {
 		switch (item.getItemId()) {
 		case android.R.id.home:
 
+			// tracks the user activity.
+			ApplicationTracker.getInstance().logEvent(EventType.CLICK, this,
+					"home_button", item.getItemId());
+			// tracks using google analytics.
+			mTracker.sendEvent("ui_action", "button_press", "home_button",
+					(long) item.getItemId());
+
 			// goes back to the home upon the back button click.
 			intent = new Intent();
 			intent.setClass(this, InboxActivity.class);
@@ -215,6 +231,13 @@ public class MessageActivity extends SherlockActivity {
 			return true;
 
 		case R.id.menu_call:
+
+			// tracks the user activity.
+			ApplicationTracker.getInstance().logEvent(EventType.CLICK, this,
+					"call_button", item.getItemId());
+			// tracks using google analytics.
+			mTracker.sendEvent("ui_action", "button_press", "call_button",
+					(long) item.getItemId());
 
 			// creates the uri.
 			String uri = "tel:" + mContactPhoneNumber;
@@ -227,6 +250,13 @@ public class MessageActivity extends SherlockActivity {
 			return true;
 
 		case R.id.menu_delete:
+
+			// tracks the user activity.
+			ApplicationTracker.getInstance().logEvent(EventType.CLICK, this,
+					"delete_button", item.getItemId());
+			// tracks using google analytics.
+			mTracker.sendEvent("ui_action", "button_press", "delete_button",
+					(long) item.getItemId());
 
 			Runnable runnable = new Runnable() {
 				@Override
@@ -253,6 +283,13 @@ public class MessageActivity extends SherlockActivity {
 			return true;
 		case R.id.menu_voice:
 
+			// tracks the user activity.
+			ApplicationTracker.getInstance().logEvent(EventType.CLICK, this,
+					"voice_button", item.getItemId());
+			// tracks using google analytics.
+			mTracker.sendEvent("ui_action", "button_press", "voice_button",
+					(long) item.getItemId());
+
 			if (isInternetOn()) {
 
 				// plays the audio.
@@ -265,6 +302,14 @@ public class MessageActivity extends SherlockActivity {
 				// plays the audio.
 				TextToSpeechManager.getInstance().say(
 						getResources().getString(R.string.promt_no_internet));
+
+				// tracks the error.
+				ApplicationTracker.getInstance().logEvent(EventType.ERROR,
+						this, "speech_recognizer",
+						"internet_connetion_not_available");
+				mTracker.sendEvent("app_error", "speech_recognizer",
+						"internet_connetion_not_available",
+						new Date().getTime());
 			}
 
 			return true;
@@ -281,6 +326,13 @@ public class MessageActivity extends SherlockActivity {
 		List<ResolveInfo> activities = pm.queryIntentActivities(new Intent(
 				RecognizerIntent.ACTION_RECOGNIZE_SPEECH), 0);
 		if (activities.size() == 0) {
+
+			// tracks the error.
+			ApplicationTracker.getInstance().logEvent(EventType.ERROR, this,
+					"speech_recognizer", "speech_recognizer_not_available");
+			mTracker.sendEvent("app_error", "speech_recognizer",
+					"speech_recognizer_not_available", new Date().getTime());
+
 			MenuItem item = menu.findItem(R.id.menu_voice);
 			item.setEnabled(false);
 			item.setVisible(false);
