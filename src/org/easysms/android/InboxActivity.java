@@ -30,6 +30,7 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.google.analytics.tracking.android.EasyTracker;
+import com.google.analytics.tracking.android.Tracker;
 
 @TargetApi(8)
 public class InboxActivity extends SherlockListActivity implements
@@ -43,6 +44,8 @@ public class InboxActivity extends SherlockListActivity implements
 	protected Handler mTaskHandler;
 	/** Class that handles the SMS extraction. */
 	protected SmsContentProvider mContentProvider;
+	/** Tracker used for Google Analytics. */
+	protected Tracker mTracker;
 
 	/**
 	 * Creates a thread that updates the message list every 10 seconds.
@@ -73,8 +76,8 @@ public class InboxActivity extends SherlockListActivity implements
 		super.onStart();
 
 		// tracks that the activity was opened.
-		ApplicationTracker.getInstance().logEvent(EventType.ACTIVITY_VIEW,
-				getLogTag());
+		ApplicationTracker.getInstance()
+				.logEvent(EventType.ACTIVITY_VIEW, this);
 
 		// Google Analytics tracking.
 		EasyTracker.getInstance().activityStart(this);
@@ -91,12 +94,19 @@ public class InboxActivity extends SherlockListActivity implements
 	public void onItemClick(AdapterView<?> parent, View view, int position,
 			long id) {
 
+		// TODO: shouldn't we pass the thread id? this approach will not
+		// work if multiple recipients messages are allowed.
+
 		// Object selectedFromList = (lv.getItemAtPosition(position));
 		HashMap<String, Object> o = (HashMap<String, Object>) mMessageList
 				.get(position);
 
-		// TODO: should we pass the threadid? this approach will not
-		// work if multiple destinatary messages are allowed.
+		// tracks the user activity.
+		ApplicationTracker.getInstance().logEvent(EventType.CLICK, this,
+				"inbox_item", o.get("telnumber"), position);
+		// tracks using google analytics.
+		mTracker.sendEvent("ui_action", "inbox_item_press",
+				(String) o.get("telnumber"), (long) position);
 
 		// gets the parameters from the selected message
 		String telnum = (String) o.get("telnumber");
@@ -104,8 +114,10 @@ public class InboxActivity extends SherlockListActivity implements
 
 		// activity use to show the message.
 		Intent i = new Intent(InboxActivity.this, MessageActivity.class);
+
 		// creates and initializes the bundle.
 		Bundle bundle = new Bundle();
+
 		// adds the parameters to bundle
 		bundle.putString(MessageActivity.NAME_EXTRA, name);
 		bundle.putString(MessageActivity.PHONENUMBER_EXTRA, telnum);
@@ -113,8 +125,8 @@ public class InboxActivity extends SherlockListActivity implements
 
 		// adds this bundle to the intent
 		i.putExtras(bundle);
+		// starts the new activity.
 		startActivity(i);
-
 	}
 
 	private void displayListSMS() {
@@ -131,16 +143,6 @@ public class InboxActivity extends SherlockListActivity implements
 
 		// sets the current content.
 		setListAdapter(new InboxItemAdapter(this, mMessageList));
-	}
-
-	/**
-	 * Gets the tag used to log the actions performed by the user. The tag is
-	 * obtained from the name of the class.
-	 * 
-	 * @return the tag that represents the class.
-	 */
-	protected String getLogTag() {
-		return this.getClass().getSimpleName();
 	}
 
 	@Override
@@ -169,6 +171,9 @@ public class InboxActivity extends SherlockListActivity implements
 		ApplicationTracker.getInstance().setDeviceId(
 				((EasySmsApp) getApplication()).getDeviceId());
 
+		// gets the current tracker.
+		mTracker = EasyTracker.getTracker();
+
 		// loads the available messages.
 		displayListSMS();
 
@@ -191,6 +196,13 @@ public class InboxActivity extends SherlockListActivity implements
 		switch (item.getItemId()) {
 		case R.id.menu_new_message:
 
+			// tracks the user activity.
+			ApplicationTracker.getInstance().logEvent(EventType.CLICK, this,
+					"new_message_button", item.getItemId());
+			// tracks using google analytics.
+			mTracker.sendEvent("ui_action", "button_press",
+					"new_message_button", (long) item.getItemId());
+
 			// creates an intent for the next screen.
 			Intent i = new Intent(InboxActivity.this, MessageActivity.class);
 			// creates and initializes a new bundle.
@@ -200,10 +212,6 @@ public class InboxActivity extends SherlockListActivity implements
 			// adds the bundle to the intent.
 			i.putExtras(bundle);
 			startActivity(i);
-
-			// tracks the user activity.
-			ApplicationTracker.getInstance().logEvent(EventType.CLICK,
-					getLogTag(), R.id.menu_new_message);
 
 			return true;
 		default:

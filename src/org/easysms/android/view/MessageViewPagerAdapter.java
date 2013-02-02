@@ -1,4 +1,4 @@
-package org.easysms.android.provider;
+package org.easysms.android.view;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,7 +32,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.SimpleAdapter;
 
-public class MyPagerAdapter extends PagerAdapter {
+public class MessageViewPagerAdapter extends PagerAdapter {
 
 	/**
 	 * Parent reference used to indicate interaction with the pages of the
@@ -54,7 +54,7 @@ public class MyPagerAdapter extends PagerAdapter {
 		return mVoiceOptions == null ? 3 : 4;
 	}
 
-	public MyPagerAdapter(MessageActivity parent) {
+	public MessageViewPagerAdapter(MessageActivity parent) {
 		mParent = parent;
 	}
 

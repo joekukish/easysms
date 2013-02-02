@@ -4,10 +4,12 @@ import java.util.List;
 
 import org.easysms.android.data.Contact;
 import org.easysms.android.data.Sms;
-import org.easysms.android.provider.MyPagerAdapter;
 import org.easysms.android.provider.SmsContentProvider;
 import org.easysms.android.ui.KaraokeLayout;
+import org.easysms.android.util.ApplicationTracker;
 import org.easysms.android.util.TextToSpeechManager;
+import org.easysms.android.util.ApplicationTracker.EventType;
+import org.easysms.android.view.MessageViewPagerAdapter;
 
 import android.annotation.TargetApi;
 import android.content.ContentValues;
@@ -33,6 +35,7 @@ import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
+import com.google.analytics.tracking.android.EasyTracker;
 
 @TargetApi(8)
 public class MessageActivity extends SherlockActivity {
@@ -54,7 +57,7 @@ public class MessageActivity extends SherlockActivity {
 	/** Provider used to manage the underlying SMS data. */
 	private SmsContentProvider mContentProvider;
 	/** Adapter used to handle the content inside the ViewPager. */
-	private MyPagerAdapter mPagerAdapter;
+	private MessageViewPagerAdapter mPagerAdapter;
 	/** KaraokeLayout where the message to send is composed. */
 	private KaraokeLayout mSendLayout;
 	/** Pager that allows swiping between the views. */
@@ -153,7 +156,7 @@ public class MessageActivity extends SherlockActivity {
 					.get(MessageActivity.PHONENUMBER_EXTRA);
 
 			// sets the adapter of the ViewPager.
-			mPagerAdapter = new MyPagerAdapter(this);
+			mPagerAdapter = new MessageViewPagerAdapter(this);
 			mViewPager = (ViewPager) findViewById(R.id.view_message_view_pager);
 			mViewPager.setAdapter(mPagerAdapter);
 			mViewPager.setCurrentItem(0);
@@ -344,6 +347,26 @@ public class MessageActivity extends SherlockActivity {
 			TextToSpeechManager.getInstance().say(
 					getResources().getString(R.string.promt_enter_a_message));
 		}
+	}
+
+	@Override
+	public void onStart() {
+		super.onStart();
+
+		// tracks that the activity was opened.
+		ApplicationTracker.getInstance()
+				.logEvent(EventType.ACTIVITY_VIEW, this);
+
+		// Google Analytics tracking.
+		EasyTracker.getInstance().activityStart(this);
+	}
+
+	@Override
+	public void onStop() {
+		super.onStop();
+
+		// Google Analytics tracking.
+		EasyTracker.getInstance().activityStop(this);
 	}
 
 	public String retrieveThreadIdFromNumberContact(String phoneNumContact) {

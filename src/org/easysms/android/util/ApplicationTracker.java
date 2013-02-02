@@ -143,6 +143,12 @@ public class ApplicationTracker {
 		return mMaxLogSize;
 	}
 
+	public void logEvent(EventType eventType, Object trackingClass,
+			Object... args) {
+		// uses the name of the class to log the activity.
+		logEvent(eventType, trackingClass.getClass().getSimpleName(), args);
+	}
+
 	/**
 	 * Logs an event that occurred in the application. Each event has a type,
 	 * the name of the source that generated the event and then optionally any
