@@ -10,7 +10,11 @@ import org.easysms.android.R;
 import org.easysms.android.data.Conversation;
 import org.easysms.android.data.Sms;
 import org.easysms.android.ui.KaraokeLayout;
+import org.easysms.android.util.ApplicationTracker;
 import org.easysms.android.util.TextToSpeechManager;
+import org.easysms.android.util.ApplicationTracker.EventType;
+
+import com.google.analytics.tracking.android.EasyTracker;
 
 import android.content.Context;
 import android.support.v4.view.PagerAdapter;
@@ -228,7 +232,7 @@ public class MessageViewPagerAdapter extends PagerAdapter {
 				wholelayout.addView(linlayout);
 				wholelayout.addView(playButton);
 			}
-			listView.addView(wholelayout);
+			// listView.addView(wholelayout);
 		}
 	}
 
@@ -251,43 +255,18 @@ public class MessageViewPagerAdapter extends PagerAdapter {
 	public Object instantiateItem(View collection, int position) {
 
 		LayoutInflater inflater = (LayoutInflater) collection.getContext()
-
-		.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
 		View view = null;
 
+		String itemName = "";
+
 		switch (position) {
 		case 0:
+			itemName = "conversation_list";
 			view = inflater.inflate(R.layout.layout_conversation_list, null);
 			ListView conversationList = (ListView) view
 					.findViewById(R.id.conversation_list_list);
-
-			// gets the contact image.-
-			// String photoid = mParent.getContentProvider()
-			// .getContactPhotoFromNumber(mContactPhonenumber);
-			// // profile = (ImageView) findViewById(R.id.selectcontact);
-			// if (photoid == null) {
-			// // profile.setBackgroundResource(R.drawable.nophotostored);
-			// } else {
-			//
-			// Cursor photo2 = mParent.getContentResolver().query(
-			// // column for the blob
-			// Data.CONTENT_URI, new String[] { Photo.PHOTO },
-			// // select row by id
-			// Data._ID + "=?",
-			// // filter by photoId
-			// new String[] { photoid }, null);
-			// Bitmap photoBitmap = null;
-			// if (photo2.moveToFirst()) {
-			// byte[] photoBlob = photo2.getBlob(photo2
-			// .getColumnIndex(Photo.PHOTO));
-			// photoBitmap = BitmapFactory.decodeByteArray(photoBlob, 0,
-			// photoBlob.length);
-			// // profile.setImageBitmap(photoBitmap);
-			//
-			// }
-			// photo2.close();
-			// }
 
 			// gets all the sms of the conversation, that match the same
 			// phone number.
@@ -297,10 +276,13 @@ public class MessageViewPagerAdapter extends PagerAdapter {
 					.getContactPhonenumber());
 			Conversation conv = retrieveConvFromThreadId(listallconv,
 					threadidconv);
+
+			conversationList.setAdapter(new ConversationAdapter(mParent, conv));
 			createLayoutbubbleconv(conversationList, conv);
 
 			break;
 		case 1:
+			itemName = "quick_action";
 			// creates the page that contains the icons.
 			view = inflater.inflate(R.layout.layout_icon_grid, null);
 
@@ -350,6 +332,15 @@ public class MessageViewPagerAdapter extends PagerAdapter {
 					// gets the clicked item.
 					HashMap<String, String> clickedItem = aList.get(position);
 
+					// tracks the user activity.
+					ApplicationTracker.getInstance().logEvent(EventType.CLICK,
+							this, "quick_item", clickedItem.get("txt"),
+							position);
+					// tracks using google analytics.
+					EasyTracker.getTracker().sendEvent("ui_action",
+							"quick_item_press", clickedItem.get("txt"),
+							(long) position);
+
 					// plays the text associated to the audio.
 					TextToSpeechManager.getInstance().say(
 							clickedItem.get("sentense"));
@@ -363,6 +354,15 @@ public class MessageViewPagerAdapter extends PagerAdapter {
 					// gets the clicked item.
 					HashMap<String, String> clickedItem = aList.get(position);
 
+					// tracks the user activity.
+					ApplicationTracker.getInstance().logEvent(
+							EventType.LONG_CLICK, this, "quick_item",
+							clickedItem.get("txt"), position);
+					// tracks using google analytics.
+					EasyTracker.getTracker().sendEvent("ui_action",
+							"quick_item_long_press", clickedItem.get("txt"),
+							(long) position);
+
 					// adds the text to the message activity.
 					mParent.addTextToMessage(clickedItem.get("sentense"));
 
@@ -373,12 +373,14 @@ public class MessageViewPagerAdapter extends PagerAdapter {
 
 			break;
 		case 2:
+			itemName = "speech_recognition_instructions";
 			// inflates the layout
-			view = inflater.inflate(R.layout.layout_speech_recognition, null);
+			view = inflater.inflate(
+					R.layout.layout_speech_recognition_instructions, null);
 
 			// gets the bubble
 			KaraokeLayout instructionsBubble = (KaraokeLayout) view
-					.findViewById(R.id.speech_recognition_instructions_bubble);
+					.findViewById(R.id.speech_recognition_karaoke_instructions);
 
 			// adds the help message.
 			instructionsBubble.addText(view.getResources().getString(
@@ -386,11 +388,12 @@ public class MessageViewPagerAdapter extends PagerAdapter {
 			break;
 
 		case 3:
+			itemName = "speech_recognition_options";
 			// inflates the layout
-			view = inflater.inflate(R.layout.layout_voice_recognition_options,
+			view = inflater.inflate(R.layout.layout_speech_recognition_options,
 					null);
 			LinearLayout optionsLayout = (LinearLayout) view
-					.findViewById(R.id.voice_recognition_options_list);
+					.findViewById(R.id.speech_recognition_options_list);
 
 			// iterates the options.
 			for (int i = 0; i < mVoiceOptions.size(); i++) {
@@ -416,26 +419,7 @@ public class MessageViewPagerAdapter extends PagerAdapter {
 				number.setOnLongClickListener(new OnLongClickListener() {
 					@Override
 					public boolean onLongClick(View v) {
-						// String sentenceChoosen = "";
-						for (int i = 1; i < fl.getChildCount(); ++i) {
-							// // get the first word of the results
-							// Button btn = (Button) fl.getChildAt(i);
-							// // create a new word with the same
-							// characteristics
-							// final Button bouton = new Button(mParent
-							// .getBaseContext());
-							// bouton.setText(btn.getText());
-							//
-							// bouton.setLayoutParams(new LayoutParams(
-							// LayoutParams.WRAP_CONTENT,
-							// LayoutParams.WRAP_CONTENT));
-							// bouton.setBackgroundResource(R.drawable.button);
-							// // add the button to the flow layout
-							// flowlayout.addView(bouton, new LayoutParams(
-							// LayoutParams.WRAP_CONTENT,
-							// LayoutParams.WRAP_CONTENT));
-							// sentenceChoosen += btn.getText();
-						}
+						mParent.addTextToMessage(fl.getText());
 						return true;
 					}
 				});
@@ -446,25 +430,7 @@ public class MessageViewPagerAdapter extends PagerAdapter {
 				fl.setOnLongClickListener(new OnLongClickListener() {
 					@Override
 					public boolean onLongClick(View v) {
-						// String sentenceChoosen = "";
-						// for (int i = 1; i < fl.getChildCount(); ++i) {
-						// // get the first word of the results
-						// Button btn = (Button) fl.getChildAt(i);
-						// // create a new word with the same characteristics
-						// final Button bouton = new
-						// Button(mParent.getBaseContext());
-						// bouton.setText(btn.getText());
-						// bouton.setLayoutParams(new LayoutParams(
-						// LayoutParams.WRAP_CONTENT,
-						// LayoutParams.WRAP_CONTENT));
-						// bouton.setBackgroundResource(R.drawable.button);
-						//
-						// // add the button to the flow layout
-						// flowlayout.addView(bouton, new LayoutParams(
-						// LayoutParams.WRAP_CONTENT,
-						// LayoutParams.WRAP_CONTENT));
-						// sentenceChoosen += btn.getText();
-						// }
+						mParent.addTextToMessage(fl.getText());
 						return true;
 					}
 				});
@@ -475,6 +441,12 @@ public class MessageViewPagerAdapter extends PagerAdapter {
 
 			break;
 		}
+
+		// tracks the page view.
+		ApplicationTracker.getInstance().logEvent(EventType.ACTIVITY_VIEW,
+				mParent, itemName);
+		EasyTracker.getTracker().sendEvent("ui_view", "view_pager", itemName,
+				(long) position);
 
 		((ViewPager) collection).addView(view, 0);
 		return view;

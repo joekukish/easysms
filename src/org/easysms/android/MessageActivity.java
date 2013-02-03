@@ -155,7 +155,7 @@ public class MessageActivity extends SherlockActivity {
 			setContentView(R.layout.act_view_message);
 
 			// gets the area where the message is composed.
-			mSendLayout = (KaraokeLayout) findViewById(R.id.view_message_compose_bubble);
+			mSendLayout = (KaraokeLayout) findViewById(R.id.view_message_karaoke_compose);
 
 			// obtains the user info from the extras.
 			mContactName = (String) bundle.get(MessageActivity.NAME_EXTRA);

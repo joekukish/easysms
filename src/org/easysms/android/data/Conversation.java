@@ -7,9 +7,10 @@ public class Conversation {
 	public List<Sms> listsms;
 	public String threadid;
 
+	/**
+	 * Creates a new Conversation instance.
+	 */
 	public Conversation() {
-
-		// List<SMS> myList = new ArrayList<SMS>();
 
 	}
 }

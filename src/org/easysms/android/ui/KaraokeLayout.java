@@ -46,18 +46,18 @@ public class KaraokeLayout extends ViewGroup {
 		private void readStyleParameters(Context context,
 				AttributeSet attributeSet) {
 			TypedArray a = context.obtainStyledAttributes(attributeSet,
-					R.styleable.FlowLayout_LayoutParams);
+					R.styleable.KaraokeLayout_LayoutParams);
 			try {
 				horizontalSpacing = a
 						.getDimensionPixelSize(
-								R.styleable.FlowLayout_LayoutParams_layout_horizontalSpacing,
+								R.styleable.KaraokeLayout_LayoutParams_layout_horizontalSpacing,
 								NO_SPACING);
 				verticalSpacing = a
 						.getDimensionPixelSize(
-								R.styleable.FlowLayout_LayoutParams_layout_verticalSpacing,
+								R.styleable.KaraokeLayout_LayoutParams_layout_verticalSpacing,
 								NO_SPACING);
 				newLine = a.getBoolean(
-						R.styleable.FlowLayout_LayoutParams_layout_newLine,
+						R.styleable.KaraokeLayout_LayoutParams_layout_newLine,
 						false);
 			} finally {
 				a.recycle();
@@ -81,8 +81,11 @@ public class KaraokeLayout extends ViewGroup {
 	private Handler handler;
 	private int horizontalSpacing = 0;
 	private ImageView mPlayButton;
+	/** Text that encloses the bubble. */
+	private String mText;
 	private int orientation = 0;
 	private int timesKaraoke = 0;
+
 	private int verticalSpacing = 0;
 
 	public KaraokeLayout(Context context) {
@@ -96,6 +99,8 @@ public class KaraokeLayout extends ViewGroup {
 
 		// sets the default background image.
 		setBackgroundResource(R.drawable.bubblelast);
+
+		// mText = "";
 	}
 
 	public KaraokeLayout(Context context, AttributeSet attributeSet) {
@@ -110,6 +115,8 @@ public class KaraokeLayout extends ViewGroup {
 
 		// sets the default background image.
 		setBackgroundResource(R.drawable.bubblelast);
+
+		// mText = "";
 	}
 
 	public KaraokeLayout(Context context, AttributeSet attributeSet,
@@ -125,6 +132,8 @@ public class KaraokeLayout extends ViewGroup {
 
 		// sets the default background image.
 		setBackgroundResource(R.drawable.bubblelast);
+
+		// mText = "";
 	}
 
 	private void addPlayButton() {
@@ -143,6 +152,10 @@ public class KaraokeLayout extends ViewGroup {
 	}
 
 	public void addText(String text) {
+
+		// adds the text.
+		mText += text;
+
 		// parse the sentence into words and put it into an array of words
 		StringTokenizer st = new StringTokenizer(text);
 
@@ -299,6 +312,10 @@ public class KaraokeLayout extends ViewGroup {
 		return hSpacing;
 	}
 
+	public String getText() {
+		return mText;
+	}
+
 	private int getVerticalSpacing(LayoutParams lp) {
 		int vSpacing;
 		if (lp.verticalSpacingSpecified()) {
@@ -444,6 +461,8 @@ public class KaraokeLayout extends ViewGroup {
 				public void run() {
 
 					for (int i = 1; i < getChildCount(); ++i) {
+						if (!(getChildAt(i) instanceof Button))
+							continue;
 						final Button btn = (Button) getChildAt(i);
 						btn.setFocusableInTouchMode(true);
 						try {
@@ -472,15 +491,18 @@ public class KaraokeLayout extends ViewGroup {
 
 	private void readStyleParameters(Context context, AttributeSet attributeSet) {
 		TypedArray a = context.obtainStyledAttributes(attributeSet,
-				R.styleable.FlowLayout);
+				R.styleable.KaraokeLayout);
 		try {
 			horizontalSpacing = a.getDimensionPixelSize(
-					R.styleable.FlowLayout_horizontalSpacing, 0);
+					R.styleable.KaraokeLayout_horizontalSpacing, 0);
 			verticalSpacing = a.getDimensionPixelSize(
-					R.styleable.FlowLayout_verticalSpacing, 0);
-			orientation = a.getInteger(R.styleable.FlowLayout_orientation,
+					R.styleable.KaraokeLayout_verticalSpacing, 0);
+			orientation = a.getInteger(R.styleable.KaraokeLayout_orientation,
 					HORIZONTAL);
-			debugDraw = a.getBoolean(R.styleable.FlowLayout_debugDraw, false);
+			debugDraw = a.getBoolean(R.styleable.KaraokeLayout_debugDraw, false);
+			
+			
+			addText(a.getString(R.styleable.KaraokeLayout_text));
 		} finally {
 			a.recycle();
 		}
