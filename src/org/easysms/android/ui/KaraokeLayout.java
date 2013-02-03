@@ -106,7 +106,7 @@ public class KaraokeLayout extends ViewGroup {
 		mButtonList.clear();
 
 		// no valid text
-		if (mText == null || mText.trim().equals(""))
+		if (mText == null || mText.equals(""))
 			return;
 
 		// parse the sentence into words and put it into an array of words
@@ -303,8 +303,8 @@ public class KaraokeLayout extends ViewGroup {
 
 	public void setText(String text) {
 
-		if (mText != text) {
-			mText = text;
+		if (text != null && mText != text) {
+			mText = text.trim();
 
 			// adds the text buttons.
 			addTextButtons();
