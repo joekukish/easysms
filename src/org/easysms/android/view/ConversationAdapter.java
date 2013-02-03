@@ -44,7 +44,7 @@ public class ConversationAdapter extends ArrayAdapter<Sms> {
 			wrapper = (ConversationWrapper) row.getTag();
 		}
 
-		wrapper.populateFrom(position, getItem(position));
+		wrapper.populateFrom(position, getItem(position), getContext());
 		return (row);
 	}
 }

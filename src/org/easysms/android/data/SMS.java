@@ -4,6 +4,9 @@ import java.util.Date;
 
 import org.easysms.android.util.DateHelper;
 
+import android.content.Context;
+import android.graphics.Bitmap;
+
 public class Sms {
 	public String body;
 	public String contact;
@@ -11,6 +14,7 @@ public class Sms {
 	public Boolean isRead;
 	public Boolean isSent;
 	public String threadid;
+	public Bitmap image;
 
 	public Sms(String m_threadid, Date m_datesms, String m_contact,
 			String m_body) {
@@ -24,7 +28,7 @@ public class Sms {
 		isRead = false;
 	}
 
-	public String getDate() {
-		return DateHelper.formatDateShort(date);
+	public String getDate(Context context) {
+		return DateHelper.formatDateShort(context, date);
 	}
 }

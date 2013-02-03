@@ -76,7 +76,7 @@ public class MessageActivity extends SherlockActivity {
 	 */
 	public void addTextToMessage(String text) {
 		// adds the text in karaoke mode.
-		mSendLayout.addText(text);
+		mSendLayout.setText(mSendLayout.getText() + " " + text);
 	}
 
 	public String getContactName() {

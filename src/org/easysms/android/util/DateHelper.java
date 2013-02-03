@@ -76,16 +76,19 @@ public class DateHelper {
 	 * 
 	 * @return a string with the date in short.
 	 */
-	public static String formatDateShort(Date date) {
+	public static String formatDateShort(Context context, Date date) {
 
 		long dayDif = calculateDays(date, new Date());
 
 		// returns time of message
-		if (dayDif == 0)
-			return new SimpleDateFormat("kk:mm").format(date);
-		// returns short date
-		else
-			return new SimpleDateFormat("MMM dd").format(date);
+		if (dayDif == 0) {
+			return new SimpleDateFormat(context.getResources().getString(
+					R.string.date_format_time)).format(date);
+			// returns short date
+		} else {
+			return new SimpleDateFormat(context.getResources().getString(
+					R.string.date_format_short)).format(date);
+		}
 	}
 
 	public static String formatWithDay(String date) {
@@ -104,6 +107,13 @@ public class DateHelper {
 		}
 	}
 
+	public static long getBeginningYear() {
+		Calendar calendar = Calendar.getInstance();
+		calendar.set(Calendar.DAY_OF_MONTH, 01);
+		calendar.set(Calendar.MONTH, 00);
+		return calendar.getTimeInMillis();
+	}
+
 	public static String getDateNow() {
 		Calendar currentDate = Calendar.getInstance();
 		SimpleDateFormat formatter = new SimpleDateFormat(DATE_FORMAT);
@@ -117,13 +127,6 @@ public class DateHelper {
 		formatter.setLenient(true);
 		currentDate.add(Calendar.DATE, offsetDays);
 		return formatter.format(currentDate.getTime()) + " 00:00:00";
-	}
-
-	public static long getBeginningYear() {
-		Calendar calendar = Calendar.getInstance();
-		calendar.set(Calendar.DAY_OF_MONTH, 01);
-		calendar.set(Calendar.MONTH, 00);
-		return calendar.getTimeInMillis();
 	}
 
 	public static boolean validDate(int day, int month, int year) {

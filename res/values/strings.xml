@@ -12,6 +12,8 @@
 
     <!-- Dates -->
     <string name="date_format">yyyy-MM-dd</string>
+    <string name="date_format_short">MMM dd</string>
+    <string name="date_format_time">kk:mm</string>
     <string name="date_today">today</string>
     <string name="date_yesterday">yesterday</string>
     <string name="date_last_week">%d days ago</string>

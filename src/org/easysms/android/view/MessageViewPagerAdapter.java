@@ -3,7 +3,6 @@ package org.easysms.android.view;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.StringTokenizer;
 
 import org.easysms.android.MessageActivity;
 import org.easysms.android.R;
@@ -11,30 +10,26 @@ import org.easysms.android.data.Conversation;
 import org.easysms.android.data.Sms;
 import org.easysms.android.ui.KaraokeLayout;
 import org.easysms.android.util.ApplicationTracker;
-import org.easysms.android.util.TextToSpeechManager;
 import org.easysms.android.util.ApplicationTracker.EventType;
-
-import com.google.analytics.tracking.android.EasyTracker;
+import org.easysms.android.util.TextToSpeechManager;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.util.TypedValue;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
-import android.view.ViewGroup.LayoutParams;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.Button;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
+
+import com.google.analytics.tracking.android.EasyTracker;
 
 public class MessageViewPagerAdapter extends PagerAdapter {
 
@@ -65,177 +60,6 @@ public class MessageViewPagerAdapter extends PagerAdapter {
 		mParent = parent;
 	}
 
-	// displays all the SMSs in a conversation.
-	private void createLayoutbubbleconv(ListView listView, Conversation conv) {
-
-		for (final Sms sms : conv.listsms) {
-
-			LinearLayout wholelayout = new LinearLayout(mParent);
-
-			LinearLayout.LayoutParams layoutParamsWhole = new LinearLayout.LayoutParams(
-					(int) TypedValue.applyDimension(
-							TypedValue.COMPLEX_UNIT_DIP, 310, mParent
-									.getResources().getDisplayMetrics()),
-					LinearLayout.LayoutParams.WRAP_CONTENT);
-			layoutParamsWhole.setMargins(0, (int) TypedValue.applyDimension(
-					TypedValue.COMPLEX_UNIT_DIP, 2, mParent.getResources()
-							.getDisplayMetrics()), 0, (int) TypedValue
-					.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 2, mParent
-							.getResources().getDisplayMetrics()));
-			wholelayout.setLayoutParams(layoutParamsWhole);
-			wholelayout.setOrientation(LinearLayout.HORIZONTAL);
-			// LINEAR LAYOUT
-			LinearLayout linlayout = new LinearLayout(mParent);
-			linlayout.setLayoutParams(new LayoutParams((int) TypedValue
-					.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 260, mParent
-							.getResources().getDisplayMetrics()),
-					LayoutParams.WRAP_CONTENT));
-			linlayout.setOrientation(LinearLayout.HORIZONTAL);
-
-			if (sms.isSent) {
-				linlayout.setGravity(Gravity.RIGHT);
-			} else {
-				linlayout.setGravity(Gravity.LEFT);
-			}
-
-			// FLOWLAYOUT
-			final KaraokeLayout fl = new KaraokeLayout(mParent);
-			fl.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,
-					LayoutParams.MATCH_PARENT));
-
-			Button dateButton = new Button(mParent);
-			dateButton.setSingleLine(false);
-			String textButton = sms.getDate();
-			dateButton.setText(textButton);
-			dateButton.setLayoutParams(new LayoutParams(
-					LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
-			dateButton.setBackgroundResource(R.drawable.datebutton);
-			dateButton.setGravity(Gravity.RIGHT);
-
-			// TODO: test how date is represented.
-			final String datesmsplayed = textButton;
-			dateButton.setOnClickListener(new OnClickListener() {
-				@Override
-				public void onClick(View v) {
-
-					// plays the audio.
-					TextToSpeechManager.getInstance().say(datesmsplayed);
-				}
-			});
-			fl.addView(dateButton);
-
-			StringTokenizer st = new StringTokenizer(sms.body);
-			String[] tabWords = new String[100];
-			int nbWords = 0;
-			while (st.hasMoreElements()) {
-				tabWords[nbWords] = (String) st.nextElement();
-				nbWords++;
-			}
-			// create a button for each words and append it to the bubble
-			// composition
-			for (int i = 0; i < nbWords; ++i) {
-				final Button btn = new Button(mParent);
-				btn.setText(tabWords[i]);
-				btn.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,
-						LayoutParams.WRAP_CONTENT));
-				btn.setBackgroundResource(R.drawable.button);
-				// btn.setTextSize(16);
-
-				final String toSay = tabWords[i];
-
-				// play each button
-				btn.setOnClickListener(new OnClickListener() {
-					@Override
-					public void onClick(View v) {
-
-						// plays the audio.
-						TextToSpeechManager.getInstance().say(toSay);
-
-					}
-				});
-
-				// recomposition
-				btn.setOnLongClickListener(new OnLongClickListener() {
-
-					@Override
-					public boolean onLongClick(View v) {
-						final Button bouton = new Button(mParent);
-						bouton.setText(btn.getText());
-						bouton.setLayoutParams(new LayoutParams(
-								LayoutParams.WRAP_CONTENT,
-								LayoutParams.WRAP_CONTENT));
-						bouton.setBackgroundResource(R.drawable.button);
-						// flowlayout.addView(bouton, new LayoutParams(
-						// LayoutParams.WRAP_CONTENT,
-						// LayoutParams.WRAP_CONTENT));
-
-						// play each button
-						bouton.setOnClickListener(new OnClickListener() {
-							@Override
-							public void onClick(View v) {
-
-								// plays the audio.
-								TextToSpeechManager.getInstance().say(toSay);
-							}
-						});
-
-						// on long click, delete the button
-						bouton.setOnLongClickListener(new OnLongClickListener() {
-							@Override
-							public boolean onLongClick(View v) {
-								// flowlayout.removeView(bouton);
-
-								return true;
-							}
-						});
-						return true;
-					}
-
-				});
-
-				LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
-						LinearLayout.LayoutParams.MATCH_PARENT,
-						LinearLayout.LayoutParams.WRAP_CONTENT);
-
-				layoutParams.setMargins((int) TypedValue.applyDimension(
-						TypedValue.COMPLEX_UNIT_SP, 50, mParent.getResources()
-								.getDisplayMetrics()), (int) TypedValue
-						.applyDimension(TypedValue.COMPLEX_UNIT_SP, 80, mParent
-								.getResources().getDisplayMetrics()),
-						(int) TypedValue.applyDimension(
-								TypedValue.COMPLEX_UNIT_SP, 50, mParent
-										.getResources().getDisplayMetrics()),
-						(int) TypedValue.applyDimension(
-								TypedValue.COMPLEX_UNIT_SP, 80, mParent
-										.getResources().getDisplayMetrics()));
-
-				fl.addView(btn, layoutParams);
-
-			}
-
-			// PLAYBUTTON
-			ImageView playButton = new ImageView(mParent);
-			playButton.setBackgroundResource(R.drawable.playsmsclick);
-			playButton.setOnCreateContextMenuListener(mParent);
-			playButton.setOnClickListener(new OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					// playKaraoke(fl);
-				}
-			});
-
-			linlayout.addView(fl);
-			if (sms.isSent) {
-				wholelayout.addView(playButton);
-				wholelayout.addView(linlayout);
-			} else {
-				wholelayout.addView(linlayout);
-				wholelayout.addView(playButton);
-			}
-			// listView.addView(wholelayout);
-		}
-	}
-
 	@Override
 	public void destroyItem(View arg0, int arg1, Object arg2) {
 		((ViewPager) arg0).removeView((View) arg2);
@@ -259,6 +83,7 @@ public class MessageViewPagerAdapter extends PagerAdapter {
 
 		View view = null;
 
+		// name of the view used to in the application tracker.
 		String itemName = "";
 
 		switch (position) {
@@ -268,7 +93,7 @@ public class MessageViewPagerAdapter extends PagerAdapter {
 			ListView conversationList = (ListView) view
 					.findViewById(R.id.conversation_list_list);
 
-			// gets all the sms of the conversation, that match the same
+			// gets all the SMS of the conversation, that match the same
 			// phone number.
 			List<Conversation> listallconv = populateList(mParent
 					.getContentProvider().getMessages());
@@ -277,8 +102,10 @@ public class MessageViewPagerAdapter extends PagerAdapter {
 			Conversation conv = retrieveConvFromThreadId(listallconv,
 					threadidconv);
 
+			prepareConversation(conv);
+
+			// sets the conversation thread.
 			conversationList.setAdapter(new ConversationAdapter(mParent, conv));
-			createLayoutbubbleconv(conversationList, conv);
 
 			break;
 		case 1:
@@ -307,13 +134,12 @@ public class MessageViewPagerAdapter extends PagerAdapter {
 			}
 
 			// Keys used in HashMap
-			String[] from = { "flag", "txt" };
+			final String[] from = { "flag", "txt" };
 
 			// IDs of views in listview_layout
-			int[] to = { R.id.flag, R.id.txt };
+			final int[] to = { R.id.flag, R.id.txt };
 
-			// Instantiating an adapter to store each items
-			// R.layout.listview_layout defines the layout of each item
+			// adapter that can populate the contents of the grid.
 			SimpleAdapter adapter = new SimpleAdapter(view.getContext(), aList,
 					R.layout.tpl_grid_view_item, from, to);
 
@@ -383,7 +209,7 @@ public class MessageViewPagerAdapter extends PagerAdapter {
 					.findViewById(R.id.speech_recognition_karaoke_instructions);
 
 			// adds the help message.
-			instructionsBubble.addText(view.getResources().getString(
+			instructionsBubble.setText(view.getResources().getString(
 					R.string.voice_help));
 			break;
 
@@ -425,7 +251,7 @@ public class MessageViewPagerAdapter extends PagerAdapter {
 				});
 
 				// adds the sentence to the layout.
-				fl.addText(mVoiceOptions.get(i));
+				fl.setText(mVoiceOptions.get(i));
 
 				fl.setOnLongClickListener(new OnLongClickListener() {
 					@Override
@@ -479,6 +305,24 @@ public class MessageViewPagerAdapter extends PagerAdapter {
 			}
 		}
 		return allconversations;
+	}
+
+	/**
+	 * Fills the bitmap objects of the whole conversation.
+	 * 
+	 * @param conv
+	 *            the conversation to process.
+	 */
+	private void prepareConversation(Conversation conv) {
+
+		for (int x = 0; x < conv.listsms.size(); x++) {
+			// loads the photo bitmap.
+			Bitmap photo = mParent.getContentProvider().getContactPhoto(
+					conv.listsms.get(x).contact);
+			if (photo != null) {
+				conv.listsms.get(x).image = photo;
+			}
+		}
 	}
 
 	public Conversation retrieveConvFromThreadId(List<Conversation> allConv,

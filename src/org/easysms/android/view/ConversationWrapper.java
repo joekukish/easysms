@@ -4,6 +4,7 @@ import org.easysms.android.R;
 import org.easysms.android.data.Sms;
 import org.easysms.android.ui.KaraokeLayout;
 
+import android.content.Context;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -60,11 +61,17 @@ public class ConversationWrapper {
 		return (mMessage);
 	}
 
-	public void populateFrom(int position, Sms message) {
+	public void populateFrom(int position, Sms message, Context context) {
 
-		// getContactImageView().setImageBitmap(bm)
-		getMessageTextView().addText(message.body);
-		getDateTextView().setText(message.getDate());
+		// sets the image if available
+		if (message.image != null) {
+			getContactImageView().setImageBitmap(message.image);
+		} else {
+			getContactImageView().setImageResource(R.drawable.nophotostored);
+		}
+
+		getMessageTextView().setText(message.body);
+		getDateTextView().setText(message.getDate(context));
 
 	}
 }
