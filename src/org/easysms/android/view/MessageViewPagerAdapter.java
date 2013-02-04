@@ -315,10 +315,11 @@ public class MessageViewPagerAdapter extends PagerAdapter {
 	 */
 	private void prepareConversation(Conversation conv) {
 
+		Bitmap photo;
 		for (int x = 0; x < conv.listsms.size(); x++) {
 			// loads the photo bitmap.
-			Bitmap photo = mParent.getContentProvider().getContactPhoto(
-					conv.listsms.get(x).contact);
+			photo = mParent.getContentProvider().getContactPhoto(
+					conv.listsms.get(x).address);
 			if (photo != null) {
 				conv.listsms.get(x).image = photo;
 			}
@@ -339,7 +340,7 @@ public class MessageViewPagerAdapter extends PagerAdapter {
 
 	public String retrieveThreadIdFromNumberContact(String phoneNumContact) {
 		for (Sms sms : mParent.getContentProvider().getMessages()) {
-			String smscontact = sms.contact;
+			String smscontact = sms.address;
 			// TODO: could it really be null?
 			if (smscontact != null && smscontact.equals(phoneNumContact))
 				return sms.threadid;

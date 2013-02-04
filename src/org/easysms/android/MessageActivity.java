@@ -421,7 +421,7 @@ public class MessageActivity extends SherlockActivity {
 
 	public String retrieveThreadIdFromNumberContact(String phoneNumContact) {
 		for (Sms sms : mContentProvider.getMessages()) {
-			String smscontact = sms.contact;
+			String smscontact = sms.address;
 			// TODO: could it really be null?
 			if (smscontact != null && smscontact.equals(phoneNumContact))
 				return sms.threadid;

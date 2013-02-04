@@ -35,15 +35,17 @@ public class ConversationAdapter extends ArrayAdapter<Sms> {
 	public View getView(int position, View convertView, ViewGroup parent) {
 		View row = convertView;
 		ConversationWrapper wrapper = null;
+
 		if (row == null) {
 
 			// chooses the layout depending if it is the sender or receiver.
-			if (!getItem(position).isSent) {
-				row = mLayoutInflater.inflate(
-						R.layout.tpl_conversation_left_item, parent, false);
-			} else {
+			if (getItem(position).type == 2) { // sent
 				row = mLayoutInflater.inflate(
 						R.layout.tpl_conversation_right_item, parent, false);
+
+			} else {
+				row = mLayoutInflater.inflate(
+						R.layout.tpl_conversation_left_item, parent, false);
 			}
 			wrapper = new ConversationWrapper(row);
 			row.setTag(wrapper);

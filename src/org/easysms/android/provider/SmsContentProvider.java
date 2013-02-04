@@ -40,69 +40,6 @@ public class SmsContentProvider extends ContentObserver {
 		mContext = context;
 	}
 
-	public void sendSMS(String phoneNumber, String message) {
-
-		String SENT = "SMS_SENT";
-		String DELIVERED = "SMS_DELIVERED";
-
-		PendingIntent sentPI = PendingIntent.getBroadcast(mContext, 0,
-				new Intent(SENT), 0);
-
-		PendingIntent deliveredPI = PendingIntent.getBroadcast(mContext, 0,
-				new Intent(DELIVERED), 0);
-
-		// ---when the SMS has been sent---
-		mContext.registerReceiver(new BroadcastReceiver() {
-			@Override
-			public void onReceive(Context arg0, Intent arg1) {
-				switch (getResultCode()) {
-				case Activity.RESULT_OK: // message sent
-
-					// vocal feedback when message sent
-					String sentence = mContext.getResources().getString(
-							R.string.message_sent);
-
-					// plays the audio.
-					TextToSpeechManager.getInstance().say(sentence);
-
-					break;
-				case SmsManager.RESULT_ERROR_GENERIC_FAILURE:
-					Toast.makeText(mContext, "Erreur d'envoi du message",
-							Toast.LENGTH_SHORT).show();
-					break;
-				case SmsManager.RESULT_ERROR_NO_SERVICE:
-					Toast.makeText(mContext, "Erreur, pas de  service",
-							Toast.LENGTH_SHORT).show();
-					break;
-				case SmsManager.RESULT_ERROR_NULL_PDU:
-					Toast.makeText(mContext, "Null PDU", Toast.LENGTH_SHORT)
-							.show();
-					break;
-				case SmsManager.RESULT_ERROR_RADIO_OFF:
-					Toast.makeText(mContext, "Radio off", Toast.LENGTH_SHORT)
-							.show();
-					break;
-				}
-			}
-		}, new IntentFilter(SENT));
-
-		// ---when the SMS has been delivered---
-		mContext.registerReceiver(new BroadcastReceiver() {
-			@Override
-			public void onReceive(Context arg0, Intent arg1) {
-				switch (getResultCode()) {
-				case Activity.RESULT_OK:
-					break;
-				case Activity.RESULT_CANCELED:
-					break;
-				}
-			}
-		}, new IntentFilter(DELIVERED));
-
-		SmsManager sms = SmsManager.getDefault();
-		sms.sendTextMessage(phoneNumber, null, message, sentPI, deliveredPI);
-	}
-
 	public Contact getContact(String number) {
 
 		// we want to take a contact that has the same phone number.
@@ -181,49 +118,56 @@ public class SmsContentProvider extends ContentObserver {
 			// gets all the available messages.
 			if (curinbox.moveToFirst()) {
 				long datesms = 0;
-				String phoneNumber = null;
+				String address = null;
 				String body = null;
 				String threadid = null;
+				String protocol = null;
+				String person = null;
 				int type = -1;
 				int read = -1;
 
 				// return -1 if the column does not exist.
 				int dateColumn = curinbox.getColumnIndex("date");
-				int numberColumn = curinbox.getColumnIndex("address");
+				int addressColumn = curinbox.getColumnIndex("address");
 				int bodyColumn = curinbox.getColumnIndex("body");
 				int threadColumn = curinbox.getColumnIndex("thread_id");
 				int typeColumn = curinbox.getColumnIndex("type");
 				int typeRead = curinbox.getColumnIndex("read");
+				int protocolColumn = curinbox.getColumnIndex("protocol");
+				int personColumn = curinbox.getColumnIndex("person");
+
 				do {
-					if (dateColumn != -1) {
+					if (dateColumn != -1)
 						datesms = curinbox.getLong(dateColumn);
-					}
 					if (typeRead != -1)
 						read = curinbox.getInt(typeRead);
 					if (typeColumn != -1)
 						type = curinbox.getInt(typeColumn);
 					if (bodyColumn != -1)
 						body = curinbox.getString(bodyColumn);
-					if (numberColumn != -1)
-						phoneNumber = curinbox.getString(numberColumn);
+					if (addressColumn != -1)
+						address = curinbox.getString(addressColumn);
 					if (threadColumn != -1)
 						threadid = curinbox.getString(threadColumn);
+					if (protocolColumn != -1)
+						protocol = curinbox.getString(protocolColumn);
+					if (personColumn != -1)
+						person = curinbox.getString(personColumn);
 
 					Sms sms;
 
-					if (phoneNumber != null) {
-						sms = new Sms(threadid, new Date(datesms), phoneNumber,
+					if (address != null) {
+						sms = new Sms(threadid, new Date(datesms), address,
 								body);
 
-						// to know if it is a message sent or received
-						if (type == 2) { // SENT
-							sms.isSent = true;
-						} else if (type == 1) { // INBOX
-							sms.isSent = false;
-						}
-
+						// sets the person that initiated the message.
+						sms.person = person;
+						// message type.
+						sms.type = type;
 						// indicates whether it was read or not.
 						sms.isRead = read == 1;
+						// send or received message.
+						sms.protocol = protocol;
 
 						// we add this SMS to the list of all the SMS
 						mMessages.add(sms);
@@ -268,16 +212,79 @@ public class SmsContentProvider extends ContentObserver {
 		// determines if sent or received.
 		if (protocol == null) {
 			Toast.makeText(mContext,
-					"Sending to " + add + ".Time:" + time + " - " + body,
+					"Sending to " + add + ". Time:" + time + " - " + body,
 					Toast.LENGTH_SHORT).show();
 		} else {
 			Toast.makeText(mContext,
-					"Receive from " + add + ".Time:" + time + " - " + body,
+					"Receive from " + add + ". Time:" + time + " - " + body,
 					Toast.LENGTH_SHORT).show();
 		}
 
 		cur.close();
 
 		/* logging action HERE... */
+	}
+
+	public void sendSMS(String phoneNumber, String message) {
+
+		String SENT = "SMS_SENT";
+		String DELIVERED = "SMS_DELIVERED";
+
+		PendingIntent sentPI = PendingIntent.getBroadcast(mContext, 0,
+				new Intent(SENT), 0);
+
+		PendingIntent deliveredPI = PendingIntent.getBroadcast(mContext, 0,
+				new Intent(DELIVERED), 0);
+
+		// ---when the SMS has been sent---
+		mContext.registerReceiver(new BroadcastReceiver() {
+			@Override
+			public void onReceive(Context arg0, Intent arg1) {
+				switch (getResultCode()) {
+				case Activity.RESULT_OK: // message sent
+
+					// vocal feedback when message sent
+					String sentence = mContext.getResources().getString(
+							R.string.message_sent);
+
+					// plays the audio.
+					TextToSpeechManager.getInstance().say(sentence);
+
+					break;
+				case SmsManager.RESULT_ERROR_GENERIC_FAILURE:
+					Toast.makeText(mContext, "Erreur d'envoi du message",
+							Toast.LENGTH_SHORT).show();
+					break;
+				case SmsManager.RESULT_ERROR_NO_SERVICE:
+					Toast.makeText(mContext, "Erreur, pas de  service",
+							Toast.LENGTH_SHORT).show();
+					break;
+				case SmsManager.RESULT_ERROR_NULL_PDU:
+					Toast.makeText(mContext, "Null PDU", Toast.LENGTH_SHORT)
+							.show();
+					break;
+				case SmsManager.RESULT_ERROR_RADIO_OFF:
+					Toast.makeText(mContext, "Radio off", Toast.LENGTH_SHORT)
+							.show();
+					break;
+				}
+			}
+		}, new IntentFilter(SENT));
+
+		// ---when the SMS has been delivered---
+		mContext.registerReceiver(new BroadcastReceiver() {
+			@Override
+			public void onReceive(Context arg0, Intent arg1) {
+				switch (getResultCode()) {
+				case Activity.RESULT_OK:
+					break;
+				case Activity.RESULT_CANCELED:
+					break;
+				}
+			}
+		}, new IntentFilter(DELIVERED));
+
+		SmsManager sms = SmsManager.getDefault();
+		sms.sendTextMessage(phoneNumber, null, message, sentPI, deliveredPI);
 	}
 }
