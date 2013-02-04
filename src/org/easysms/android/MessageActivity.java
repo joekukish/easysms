@@ -29,6 +29,7 @@ import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
@@ -43,16 +44,18 @@ import com.google.analytics.tracking.android.Tracker;
 public class MessageActivity extends SherlockActivity {
 
 	/** Identifier of the extra used to pass the name. */
-	public static final String NAME_EXTRA = "Name";
+	public static final String EXTRA_NAME = "Name";
 	/** Identifier of the extra that indicates a new message should be shown. */
-	public static final String NEW_MESSAGE_EXTRA = "NewMsg";
+	public static final String EXTRA_NEW_MESSAGE = "NewMsg";
 	/** Identifier of the extra used to pass the phone number. */
-	public static final String PHONENUMBER_EXTRA = "Tel";
+	public static final String EXTRA_PHONE_NUMBER = "Tel";
 	/** Code used to detect the Voice Recognition Intent. */
 	private static final int VOICE_RECOGNITION_REQUEST_CODE = 1234;
 
 	/** Handler used to execute actions in another thread. */
 	private Handler handler;
+	/** KaraokeLayout where the message to send is composed. */
+	private KaraokeLayout mComposeLayout;
 	/** Name of the contact. */
 	private String mContactName;
 	/** Phone number of the contact. */
@@ -61,8 +64,6 @@ public class MessageActivity extends SherlockActivity {
 	private SmsContentProvider mContentProvider;
 	/** Adapter used to handle the content inside the ViewPager. */
 	private MessageViewPagerAdapter mPagerAdapter;
-	/** KaraokeLayout where the message to send is composed. */
-	private KaraokeLayout mSendLayout;
 	/** Tracker used for Google Analytics. */
 	protected Tracker mTracker;
 	/** Pager that allows swiping between the views. */
@@ -76,7 +77,7 @@ public class MessageActivity extends SherlockActivity {
 	 */
 	public void addTextToMessage(String text) {
 		// adds the text in karaoke mode.
-		mSendLayout.setText(mSendLayout.getText() + " " + text);
+		mComposeLayout.setText(mComposeLayout.getText() + " " + text);
 	}
 
 	public String getContactName() {
@@ -144,7 +145,7 @@ public class MessageActivity extends SherlockActivity {
 		mContentProvider = ((EasySmsApp) getApplication()).getContentProvider();
 
 		Bundle bundle = getIntent().getExtras();
-		Boolean newMsg = bundle.getBoolean(NEW_MESSAGE_EXTRA);
+		Boolean newMsg = bundle.getBoolean(EXTRA_NEW_MESSAGE);
 
 		// configures and loads the google analytics tracker.
 		EasyTracker.getInstance().setContext(this);
@@ -155,12 +156,12 @@ public class MessageActivity extends SherlockActivity {
 			setContentView(R.layout.act_view_message);
 
 			// gets the area where the message is composed.
-			mSendLayout = (KaraokeLayout) findViewById(R.id.view_message_karaoke_compose);
+			mComposeLayout = (KaraokeLayout) findViewById(R.id.view_message_karaoke_compose);
 
 			// obtains the user info from the extras.
-			mContactName = (String) bundle.get(MessageActivity.NAME_EXTRA);
+			mContactName = (String) bundle.get(MessageActivity.EXTRA_NAME);
 			mContactPhoneNumber = (String) bundle
-					.get(MessageActivity.PHONENUMBER_EXTRA);
+					.get(MessageActivity.EXTRA_PHONE_NUMBER);
 
 			// sets the adapter of the ViewPager.
 			mPagerAdapter = new MessageViewPagerAdapter(this);
@@ -185,6 +186,17 @@ public class MessageActivity extends SherlockActivity {
 
 			// enables the icon to serve as back.
 			getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+			// gets the send button and wires the event.
+			ImageButton sendButton = (ImageButton) findViewById(R.id.view_message_button_send);
+			sendButton.setOnClickListener(new View.OnClickListener() {
+
+				@Override
+				public void onClick(View v) {
+					onSendButtonClick();
+				}
+			});
+			// sendButton.setActivated(false);
 		}
 
 		// initializes the handler for voice recognition.
@@ -258,8 +270,9 @@ public class MessageActivity extends SherlockActivity {
 			Runnable runnable = new Runnable() {
 				@Override
 				public void run() {
-					for (int i = 1; i < mSendLayout.getChildCount(); ++i) {
-						final Button btn = (Button) mSendLayout.getChildAt(i);
+					for (int i = 1; i < mComposeLayout.getChildCount(); ++i) {
+						final Button btn = (Button) mComposeLayout
+								.getChildAt(i);
 
 						try {
 							Thread.sleep(800);
@@ -269,7 +282,7 @@ public class MessageActivity extends SherlockActivity {
 						handler.post(new Runnable() {
 							@Override
 							public void run() {
-								mSendLayout.removeView(btn);
+								mComposeLayout.removeView(btn);
 							}
 						});
 					}
@@ -339,19 +352,17 @@ public class MessageActivity extends SherlockActivity {
 	}
 
 	protected void onSendButtonClick() {
-		if (mContactPhoneNumber.length() > 0 && mSendLayout.getChildCount() > 1) {
-			// retrieve SMS body
-			String message = "";
-			for (int i = 1; i < mSendLayout.getChildCount(); ++i) {
-				// message += flowlayout.getChildAt(i).getText();
-				Button btn = (Button) mSendLayout.getChildAt(i);
-				message += btn.getText();
-				message += " ";
-			}
-			// send SMS
-			mContentProvider.sendSMS(mContactPhoneNumber, message);
 
-			// insert SMS sent into DB
+		String promptText;
+
+		if (mContactPhoneNumber.length() > 0
+				&& !mComposeLayout.getText().equals("")) {
+
+			// sends the current message as an SMS.
+			mContentProvider.sendSMS(mContactPhoneNumber,
+					mComposeLayout.getText());
+
+			// inserts the SMS sent into DB
 			String threadid = retrieveThreadIdFromNumberContact(mContactPhoneNumber);
 			// right after the msg is sent, navigate to the message
 			// details page
@@ -360,42 +371,48 @@ public class MessageActivity extends SherlockActivity {
 			// gets the contact data based on the phone number.
 			Contact contact = mContentProvider.getContact(mContactPhoneNumber);
 
+			// creates the bundle
 			Bundle bundle = new Bundle();
 			// Add the parameters to bundle
-			bundle.putString("Name", contact.displayName);
-			bundle.putString("Tel", mContactPhoneNumber);
-			bundle.putBoolean("NewMsg", false);
+			bundle.putString(EXTRA_NAME, contact.displayName);
+			bundle.putString(EXTRA_PHONE_NUMBER, mContactPhoneNumber);
+			bundle.putBoolean(EXTRA_NEW_MESSAGE, false);
 			// Add this bundle to the intent
 			i.putExtras(bundle);
 			startActivity(i);
+
 			// insert SMS in the data base content provider
 			ContentValues values = new ContentValues();
 			values.put("address", mContactPhoneNumber);
-			// values.put("date",dateToday);
 			values.put("read", 1);
 			values.put("thread_id", threadid);
-			values.put("body", message);
+			values.put("body", mComposeLayout.getText());
 			getContentResolver()
 					.insert(Uri.parse("content://sms/sent"), values);
-		}
 
-		else if (mSendLayout.getChildCount() <= 1) {
-			Toast.makeText(getBaseContext(),
-					"Entrez un message s'il vous plait.", Toast.LENGTH_SHORT)
+			// clears the text
+			mComposeLayout.setText("");
+		} else if (mComposeLayout.getText().equals("")) {
+
+			promptText = getResources().getString(
+					R.string.promt_enter_a_message);
+
+			Toast.makeText(getBaseContext(), promptText, Toast.LENGTH_SHORT)
 					.show();
 
 			// plays the audio.
-			TextToSpeechManager.getInstance().say(
-					getResources().getString(R.string.promt_enter_a_message));
+			TextToSpeechManager.getInstance().say(promptText);
 
 		} else if (mContactPhoneNumber.length() > 0) {
-			Toast.makeText(getBaseContext(),
-					"Entrez un numéro s'il vous plait.", Toast.LENGTH_SHORT)
+
+			promptText = getResources().getString(
+					R.string.promt_enter_a_phone_number);
+
+			Toast.makeText(getBaseContext(), promptText, Toast.LENGTH_SHORT)
 					.show();
 
 			// plays the audio.
-			TextToSpeechManager.getInstance().say(
-					getResources().getString(R.string.promt_enter_a_message));
+			TextToSpeechManager.getInstance().say(promptText);
 		}
 	}
 

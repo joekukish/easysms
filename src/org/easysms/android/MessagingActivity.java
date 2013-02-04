@@ -165,7 +165,7 @@ public class MessagingActivity extends SherlockActivity {
 
 		// checks the bundle to handle correctly the two cases.
 		Bundle bundle = getIntent().getExtras();
-		Boolean newMsg = bundle.getBoolean(MessageActivity.NEW_MESSAGE_EXTRA);
+		Boolean newMsg = bundle.getBoolean(MessageActivity.EXTRA_NEW_MESSAGE);
 
 		if (newMsg) { // if new message don't display the message details page
 			setContentView(R.layout.act_new_message);

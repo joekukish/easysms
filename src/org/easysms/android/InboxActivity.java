@@ -162,9 +162,9 @@ public class InboxActivity extends SherlockListActivity implements
 		Bundle bundle = new Bundle();
 
 		// adds the parameters to bundle
-		bundle.putString(MessageActivity.NAME_EXTRA, name);
-		bundle.putString(MessageActivity.PHONENUMBER_EXTRA, telnum);
-		bundle.putBoolean(MessageActivity.NEW_MESSAGE_EXTRA, false);
+		bundle.putString(MessageActivity.EXTRA_NAME, name);
+		bundle.putString(MessageActivity.EXTRA_PHONE_NUMBER, telnum);
+		bundle.putBoolean(MessageActivity.EXTRA_NEW_MESSAGE, false);
 
 		// adds this bundle to the intent
 		i.putExtras(bundle);
@@ -190,7 +190,7 @@ public class InboxActivity extends SherlockListActivity implements
 			// creates and initializes a new bundle.
 			Bundle bundle = new Bundle();
 			// indicates that a new message is being created.
-			bundle.putBoolean(MessageActivity.NEW_MESSAGE_EXTRA, true);
+			bundle.putBoolean(MessageActivity.EXTRA_NEW_MESSAGE, true);
 			// adds the bundle to the intent.
 			i.putExtras(bundle);
 			startActivity(i);
