@@ -13,10 +13,12 @@
     <uses-permission android:name="android.permission.WRITE_SMS" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.CALL_PHONE" />
 
     <uses-sdk
         android:minSdkVersion="8"
-        android:targetSdkVersion="14" />
+        android:targetSdkVersion="15" />
 
     <application
         android:name=".EasySmsApp"
@@ -34,9 +36,8 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".MessagingActivity"
-            android:screenOrientation="portrait"
-            android:uiOptions="splitActionBarWhenNarrow" >
+            android:name=".MessageActivity"
+            android:screenOrientation="portrait" >
         </activity>
 
         <receiver

@@ -3,7 +3,7 @@
 
     <item
         android:id="@+id/menu_new_message"
-        android:icon="@drawable/ic_action_new"
+        android:icon="@android:drawable/ic_menu_edit"
         android:showAsAction="always|withText"
         android:title="@string/menu_new_message"
         android:titleCondensed="@string/menu_new_message"/>

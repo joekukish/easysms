@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="?android:attr/listPreferredItemHeight"
-    android:background="@android:color/white"
+    android:background="#ECECEC"
     android:paddingRight="@dimen/margin" >
 
     <ImageView
@@ -15,44 +15,60 @@
         android:scaleType="centerCrop"
         android:src="@drawable/nophotostored" />
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+    <TextView
+        android:id="@+id/inbox_item_text_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginRight="@dimen/margin"
         android:layout_toRightOf="@+id/inbox_item_image_contact"
-        android:orientation="vertical" >
+        android:singleLine="true"
+        android:text="@string/placeholder_name"
+        android:textColor="@android:color/primary_text_light"
+        android:textSize="@dimen/font_medium" />
 
-        <TextView
-            android:id="@+id/inbox_item_text_name"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="@dimen/margin"
-            android:text="@string/placeholder_name"
-            android:textSize="@dimen/font_medium" />
+    <TextView
+        android:id="@+id/inbox_item_text_counter"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@+id/inbox_item_text_name"
+        android:singleLine="true"
+        android:text="@string/placeholder_counter"
+        android:textColor="@android:color/darker_gray"
+        android:textSize="@dimen/font_medium" />
 
-        <TextView
-            android:id="@+id/inbox_item_text_phonenumber"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:singleLine="true"
-            android:text="@string/placeholder_phonenumber"
-            android:textColor="@android:color/darker_gray"
-            android:textSize="@dimen/font_small" />
+    <TextView
+        android:id="@+id/inbox_item_text_phonenumber"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/inbox_item_text_name"
+        android:layout_toRightOf="@+id/inbox_item_image_contact"
+        android:singleLine="true"
+        android:text="@string/placeholder_phonenumber"
+        android:textColor="@android:color/darker_gray"
+        android:textSize="@dimen/font_small" />
 
-        <TextView
-            android:id="@+id/inbox_item_text_message"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:singleLine="false"
-            android:text="@string/placeholder_text"
-            android:textSize="@dimen/font_medium" />
-    </LinearLayout>
+    <TextView
+        android:id="@+id/inbox_item_text_message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignWithParentIfMissing="true"
+        android:layout_below="@+id/inbox_item_text_phonenumber"
+        android:layout_toRightOf="@+id/inbox_item_image_contact"
+        android:singleLine="true"
+        android:text="@string/placeholder_text"
+        android:textColor="#454545"
+        android:textSize="@dimen/font_small" />
 
     <TextView
         android:id="@+id/inbox_item_text_date"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/inbox_item_text_name"
         android:layout_alignParentRight="true"
         android:text="@string/placeholder_date"
-        android:textSize="@dimen/font_medium" />
+        android:textColor="@android:color/black"
+        android:textSize="@dimen/font_small" />
 
 </RelativeLayout>
