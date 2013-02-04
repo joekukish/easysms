@@ -52,8 +52,6 @@ public class MessageActivity extends SherlockActivity {
 	/** Code used to detect the Voice Recognition Intent. */
 	private static final int VOICE_RECOGNITION_REQUEST_CODE = 1234;
 
-	/** Handler used to execute actions in another thread. */
-	private Handler handler;
 	/** KaraokeLayout where the message to send is composed. */
 	private KaraokeLayout mComposeLayout;
 	/** Name of the contact. */
@@ -62,6 +60,8 @@ public class MessageActivity extends SherlockActivity {
 	private String mContactPhoneNumber;
 	/** Provider used to manage the underlying SMS data. */
 	private SmsContentProvider mContentProvider;
+	/** Handler used to execute actions in another thread. */
+	private Handler mHandler;
 	/** Adapter used to handle the content inside the ViewPager. */
 	private MessageViewPagerAdapter mPagerAdapter;
 	/** Tracker used for Google Analytics. */
@@ -201,7 +201,7 @@ public class MessageActivity extends SherlockActivity {
 		}
 
 		// initializes the handler for voice recognition.
-		handler = new Handler();
+		mHandler = new Handler();
 	}
 
 	@Override
@@ -280,7 +280,7 @@ public class MessageActivity extends SherlockActivity {
 						} catch (InterruptedException e) {
 							e.printStackTrace();
 						}
-						handler.post(new Runnable() {
+						mHandler.post(new Runnable() {
 							@Override
 							public void run() {
 								mComposeLayout.removeView(btn);

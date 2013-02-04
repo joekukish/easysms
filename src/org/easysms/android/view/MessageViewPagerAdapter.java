@@ -67,9 +67,12 @@ public class MessageViewPagerAdapter extends PagerAdapter {
 
 	public void displayVoiceOptions(List<String> options) {
 
-		mVoiceOptions = options;
-		// indicates that size must be modified.
-		this.notifyDataSetChanged();
+		if (mVoiceOptions != options) {
+			mVoiceOptions = options;
+
+			// indicates that size must be modified.
+			this.notifyDataSetChanged();
+		}
 	}
 
 	public int getCount() {

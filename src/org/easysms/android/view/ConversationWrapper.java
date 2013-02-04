@@ -80,6 +80,8 @@ public class ConversationWrapper {
 		// if message is sent.
 		if (message.type == 2) {
 
+			// puts the user image to the right and conversation to the left
+			// date position is change to the right.
 			contactParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, 1);
 			contactParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT, 0);
 			layoutParams.addRule(RelativeLayout.LEFT_OF,
@@ -89,6 +91,8 @@ public class ConversationWrapper {
 
 		} else {
 
+			// puts the user image to the left and conversation to the right.
+			// date position is change to the left.
 			contactParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT, 1);
 			contactParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, 0);
 			layoutParams.addRule(RelativeLayout.LEFT_OF, 0);
