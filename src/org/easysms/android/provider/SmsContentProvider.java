@@ -195,7 +195,7 @@ public class SmsContentProvider extends ContentObserver {
 
 		// resets the message list.
 		mMessages = null;
-		querySMS();
+		// querySMS();
 	}
 
 	protected void querySMS() {

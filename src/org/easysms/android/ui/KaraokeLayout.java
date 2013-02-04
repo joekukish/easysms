@@ -35,14 +35,34 @@ public class KaraokeLayout extends ViewGroup {
 		}
 	}
 
+	interface OnKaraokeLongClickListener {
+
+		public boolean onLockClick(View v);
+
+	}
+
+	/** Thread in charge of the Karaoke. */
 	private Handler handler;
 	/** List of buttons created from the text. */
 	private List<Button> mButtonList;
+	/**
+	 * Control variable used to guarantee that the Karaoke is only playing once.
+	 */
+	private int mKaraokeCount = 0;
+	/**
+	 * Listener used to handle when a button is long clicked. Depending on the
+	 * desired behavior the text could be deleted or it could be added to the
+	 * compose bubble.
+	 */
+	private OnKaraokeLongClickListener mKaraokeLongClickListener;
+	/** Height of each line. */
 	private int mLineHeight;
+
+	/** Button used to play the Karaoke animation. */
 	private ImageView mPlayButton;
+
 	/** Text that encloses the bubble. */
 	private String mText;
-	private int timesKaraoke = 0;
 
 	public KaraokeLayout(Context context) {
 		super(context);
@@ -58,7 +78,6 @@ public class KaraokeLayout extends ViewGroup {
 
 		// adds the play button.
 		addPlayButton();
-
 	}
 
 	public KaraokeLayout(Context context, AttributeSet attrs) {
@@ -132,6 +151,7 @@ public class KaraokeLayout extends ViewGroup {
 			btn.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
+
 					// plays the audio.
 					TextToSpeechManager.getInstance().say(toSay);
 				}
@@ -141,7 +161,10 @@ public class KaraokeLayout extends ViewGroup {
 			btn.setOnLongClickListener(new OnLongClickListener() {
 				@Override
 				public boolean onLongClick(View v) {
-					KaraokeLayout.this.removeView(btn);
+
+					if (mKaraokeLongClickListener != null) {
+						return mKaraokeLongClickListener.onLockClick(v);
+					}
 					return true;
 				}
 			});
@@ -251,9 +274,9 @@ public class KaraokeLayout extends ViewGroup {
 	}
 
 	public void playKaraoke() {
-		timesKaraoke++;
+		mKaraokeCount++;
 
-		if (timesKaraoke <= 1) {
+		if (mKaraokeCount <= 1) {
 
 			Runnable runnable = new Runnable() {
 				@Override
@@ -281,7 +304,7 @@ public class KaraokeLayout extends ViewGroup {
 							}
 						});
 					}
-					timesKaraoke = 0;
+					mKaraokeCount = 0;
 				}
 			};
 			new Thread(runnable).start();
@@ -300,6 +323,11 @@ public class KaraokeLayout extends ViewGroup {
 		} finally {
 			a.recycle();
 		}
+	}
+
+	public void setOnKaraokeLongClickListener(
+			OnKaraokeLongClickListener listener) {
+		mKaraokeLongClickListener = listener;
 	}
 
 	public void setText(String text) {
