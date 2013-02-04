@@ -151,12 +151,10 @@ public class MessagingActivity extends SherlockActivity {
 
 				cur.close();
 				cur = null;
-
 			}
 		}
 
 		super.onActivityResult(requestCode, resultCode, data);
-
 	}
 
 	@Override

@@ -1,23 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res/org.easysms.android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="#ECECEC"
-    android:orientation="horizontal" >
+    android:background="#ECECEC" >
 
     <ImageView
         android:id="@+id/conversation_item_image_contact"
         android:layout_width="?android:attr/listPreferredItemHeight"
         android:layout_height="?android:attr/listPreferredItemHeight"
+        android:layout_alignParentLeft="true"
         android:contentDescription="@string/description_contact_image"
         android:scaleType="centerCrop"
         android:src="@drawable/nophotostored" />
 
     <LinearLayout
+        android:id="@+id/conversation_item_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="0dp"
+        android:layout_toRightOf="@+id/conversation_item_image_contact"
         android:background="@android:color/white"
         android:orientation="vertical"
         android:padding="@dimen/margin" >
@@ -33,9 +35,10 @@
             android:id="@+id/conversation_item_text_date"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="left"
             android:text="@string/placeholder_date"
             android:textColor="@android:color/darker_gray"
             android:textSize="@dimen/font_small" />
     </LinearLayout>
 
-</LinearLayout>
+</RelativeLayout>

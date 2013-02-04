@@ -36,6 +36,7 @@ public class KaraokeLayout extends ViewGroup {
 	}
 
 	private Handler handler;
+	/** List of buttons created from the text. */
 	private List<Button> mButtonList;
 	private int mLineHeight;
 	private ImageView mPlayButton;

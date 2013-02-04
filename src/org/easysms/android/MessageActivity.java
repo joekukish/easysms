@@ -353,6 +353,7 @@ public class MessageActivity extends SherlockActivity {
 
 	protected void onSendButtonClick() {
 
+		// message said using the TTS and a Toast.
 		String promptText;
 
 		if (mContactPhoneNumber.length() > 0
@@ -373,11 +374,11 @@ public class MessageActivity extends SherlockActivity {
 
 			// creates the bundle
 			Bundle bundle = new Bundle();
-			// Add the parameters to bundle
+			// adds the parameters to bundle
 			bundle.putString(EXTRA_NAME, contact.displayName);
 			bundle.putString(EXTRA_PHONE_NUMBER, mContactPhoneNumber);
 			bundle.putBoolean(EXTRA_NEW_MESSAGE, false);
-			// Add this bundle to the intent
+			// adds this bundle to the intent
 			i.putExtras(bundle);
 			startActivity(i);
 
@@ -390,8 +391,10 @@ public class MessageActivity extends SherlockActivity {
 			getContentResolver()
 					.insert(Uri.parse("content://sms/sent"), values);
 
+			// TODO: update UI.
 			// clears the text
 			mComposeLayout.setText("");
+
 		} else if (mComposeLayout.getText().equals("")) {
 
 			promptText = getResources().getString(
