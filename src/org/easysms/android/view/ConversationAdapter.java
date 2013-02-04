@@ -42,7 +42,6 @@ public class ConversationAdapter extends ArrayAdapter<Sms> {
 			if (getItem(position).type == 2) { // sent
 				row = mLayoutInflater.inflate(
 						R.layout.tpl_conversation_right_item, parent, false);
-
 			} else {
 				row = mLayoutInflater.inflate(
 						R.layout.tpl_conversation_left_item, parent, false);
