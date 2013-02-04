@@ -67,9 +67,12 @@ public class MessageViewPagerAdapter extends PagerAdapter {
 
 	public void displayVoiceOptions(List<String> options) {
 
-		mVoiceOptions = options;
-		// indicates that size must be modified.
-		this.notifyDataSetChanged();
+		if (mVoiceOptions != options) {
+			mVoiceOptions = options;
+
+			// indicates that size must be modified.
+			this.notifyDataSetChanged();
+		}
 	}
 
 	public int getCount() {
@@ -83,12 +86,9 @@ public class MessageViewPagerAdapter extends PagerAdapter {
 
 		View view = null;
 
-		// name of the view used to in the application tracker.
-		String itemName = "";
-
 		switch (position) {
 		case 0:
-			itemName = "conversation_list";
+
 			view = inflater.inflate(R.layout.layout_conversation_list, null);
 			ListView conversationList = (ListView) view
 					.findViewById(R.id.conversation_list_list);
@@ -109,7 +109,7 @@ public class MessageViewPagerAdapter extends PagerAdapter {
 
 			break;
 		case 1:
-			itemName = "quick_action";
+
 			// creates the page that contains the icons.
 			view = inflater.inflate(R.layout.layout_icon_grid, null);
 
@@ -199,7 +199,7 @@ public class MessageViewPagerAdapter extends PagerAdapter {
 
 			break;
 		case 2:
-			itemName = "speech_recognition_instructions";
+
 			// inflates the layout
 			view = inflater.inflate(
 					R.layout.layout_speech_recognition_instructions, null);
@@ -214,7 +214,7 @@ public class MessageViewPagerAdapter extends PagerAdapter {
 			break;
 
 		case 3:
-			itemName = "speech_recognition_options";
+
 			// inflates the layout
 			view = inflater.inflate(R.layout.layout_speech_recognition_options,
 					null);
@@ -267,12 +267,6 @@ public class MessageViewPagerAdapter extends PagerAdapter {
 
 			break;
 		}
-
-		// tracks the page view.
-		ApplicationTracker.getInstance().logEvent(EventType.ACTIVITY_VIEW,
-				mParent, itemName);
-		EasyTracker.getTracker().sendEvent("ui_view", "view_pager", itemName,
-				(long) position);
 
 		((ViewPager) collection).addView(view, 0);
 		return view;
