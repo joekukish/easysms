@@ -75,8 +75,12 @@ public class SmsContentProvider extends ContentObserver {
 	}
 
 	public Bitmap getContactPhoto(String phoneNumber) {
+
+		// path where the contact can be found with the given phone number.
 		Uri phoneUri = Uri.withAppendedPath(PhoneLookup.CONTENT_FILTER_URI,
 				Uri.encode(phoneNumber));
+
+		// path where the image can be found.
 		Uri photoUri = null;
 
 		Cursor contact = mContext.getContentResolver().query(phoneUri,
@@ -89,9 +93,11 @@ public class SmsContentProvider extends ContentObserver {
 			photoUri = ContentUris.withAppendedId(
 					ContactsContract.Contacts.CONTENT_URI, userId);
 
-		} else {
-			return null;
 		}
+
+		// closes the current cursor.
+		contact.close();
+
 		if (photoUri != null) {
 			InputStream input = ContactsContract.Contacts
 					.openContactPhotoInputStream(mContext.getContentResolver(),
@@ -284,7 +290,8 @@ public class SmsContentProvider extends ContentObserver {
 			}
 		}, new IntentFilter(DELIVERED));
 
-		SmsManager sms = SmsManager.getDefault();
-		sms.sendTextMessage(phoneNumber, null, message, sentPI, deliveredPI);
+		// sends the message.
+		SmsManager.getDefault().sendTextMessage(phoneNumber, null, message,
+				sentPI, deliveredPI);
 	}
 }

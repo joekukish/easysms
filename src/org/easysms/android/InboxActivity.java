@@ -17,7 +17,6 @@ import org.easysms.android.view.InboxItemAdapter;
 import android.annotation.TargetApi;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
@@ -36,56 +35,39 @@ import com.google.analytics.tracking.android.Tracker;
 public class InboxActivity extends SherlockListActivity implements
 		OnItemClickListener {
 
-	/** List of conversations that are displayed in the inbox. */
-	private static final ArrayList<HashMap<String, Object>> mMessageList = new ArrayList<HashMap<String, Object>>();
 	/** Class that handles the SMS extraction. */
-	protected SmsContentProvider mContentProvider;
-	/** Flag used to determine if the refresh is complete. */
-	protected Boolean mIsComplete = false;
-	/** Handler used to update the list as new messages arrive. */
-	protected Handler mTaskHandler;
+	private SmsContentProvider mContentProvider;
+	/** List of conversations that are displayed in the inbox. */
+	private ArrayList<HashMap<String, Object>> mMessageList;
 	/** Tracker used for Google Analytics. */
-	protected Tracker mTracker;
+	private Tracker mTracker;
+	/** Adapter used to manage the message list. */
+	private InboxItemAdapter mAdapter;
 
 	/**
-	 * Creates a thread that updates the message list every 10 seconds.
+	 * Loads the complete message list.
 	 */
-	private void createUpdateThread() {
+	private void displayMessageList() {
 
-		// TODO: this needs to be removed and rely only on the content observer.
-		// creates the handler used to process the message update.
-		mTaskHandler = new Handler();
-
-		// le timer fait ramer toute l'application!!! trouver un autre moyen
-		// ==> retrieve a signal when a new msg is received.
-		// -------------------timer------------------------
-		final long elapse = 10000;
-		Runnable t = new Runnable() {
-			public void run() {
-				mMessageList.clear();
-				displayListSMS();
-				if (!mIsComplete) {
-					mTaskHandler.postDelayed(this, elapse);
-				}
-			}
-		};
-		mTaskHandler.postDelayed(t, elapse);
-	}
-
-	private void displayListSMS() {
-
-		// empties the current list.
-		mMessageList.clear();
-
-		// gets the messages from the provider and groups them into
-		// conversations.
-		populateList(mContentProvider.getMessages());
-
+		// gets the list and sets the item listener.
 		final ListView lv = getListView();
 		lv.setOnItemClickListener(this);
 
-		// sets the current content.
-		setListAdapter(new InboxItemAdapter(this, mMessageList));
+		// creates and sets the adapter.
+		mAdapter = new InboxItemAdapter(this, mMessageList);
+		lv.setAdapter(mAdapter);
+
+		// handles the content loading in a separate thread
+		new Handler().post(new Runnable() {
+			public void run() {
+				// gets the messages from the provider and groups them into
+				// conversations.
+				populateList(mContentProvider.getMessages());
+
+				// notifies that the UI needs to be updated.
+				mAdapter.notifyDataSetChanged();
+			}
+		});
 	}
 
 	@Override
@@ -101,13 +83,13 @@ public class InboxActivity extends SherlockListActivity implements
 		// objects the provider from the application.
 		mContentProvider = ((EasySmsApp) getApplication()).getContentProvider();
 
-		getContentResolver().registerContentObserver(
-				Uri.parse("content://sms/"), true, mContentProvider);
+		// starts the service in charge of monitoring any SMS change.
+		startService(new Intent(this, SmsService.class));
 
 		// initializes the TextToSpeech
 		TextToSpeechManager.init(getApplicationContext());
-		// sets the default language locale.
-		TextToSpeechManager.getInstance().setLocale(Locale.ENGLISH);
+		// uses the same locale from the system.
+		TextToSpeechManager.getInstance().setLocale(Locale.getDefault());
 
 		// sets the device id which will be used to track the activity of all
 		// phones.
@@ -118,11 +100,11 @@ public class InboxActivity extends SherlockListActivity implements
 		EasyTracker.getInstance().setContext(this);
 		mTracker = EasyTracker.getTracker();
 
-		// loads the available messages.
-		displayListSMS();
+		// initializes the list where the messages will be stored.
+		mMessageList = new ArrayList<HashMap<String, Object>>();
 
-		// starts thread that updates the layout.
-		createUpdateThread();
+		// loads the available messages.
+		displayMessageList();
 	}
 
 	@Override

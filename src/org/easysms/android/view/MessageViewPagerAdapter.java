@@ -42,10 +42,6 @@ public class MessageViewPagerAdapter extends PagerAdapter {
 			R.drawable.howareu, R.drawable.loveu, R.drawable.driving,
 			R.drawable.whatdate, R.drawable.whattime };
 
-	/** Title of each page. */
-	private static final String[] TITLE = { "CONVERSATION", "QUICK ICONS",
-			"VOICE", "OPTIONS" };
-
 	/**
 	 * Parent reference used to indicate interaction with the pages of the
 	 * ViewPager.
@@ -78,11 +74,6 @@ public class MessageViewPagerAdapter extends PagerAdapter {
 
 	public int getCount() {
 		return mVoiceOptions == null ? 3 : 4;
-	}
-
-	@Override
-	public CharSequence getPageTitle(int position) {
-		return TITLE[position];
 	}
 
 	public Object instantiateItem(View collection, int position) {

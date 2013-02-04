@@ -16,7 +16,7 @@ public class EasySmsApp extends Application {
 
 	/** Provider used to handle read and send SMS. */
 	private SmsContentProvider mContentProvider;
-	/** DeviceId of the current phone where the App is running. */
+	/** DeviceId of the current phone where the application is running. */
 	private String mDeviceId;
 
 	/**
@@ -27,11 +27,8 @@ public class EasySmsApp extends Application {
 	public EasySmsApp() {
 		super();
 
+		// initializes the content provider.
 		mContentProvider = new SmsContentProvider(this);
-
-		// // registers the sms observer.
-		// getApplicationContext().getContentResolver().registerContentObserver(
-		// Uri.parse("content://sms/"), true, mContentProvider);
 	}
 
 	public SmsContentProvider getContentProvider() {

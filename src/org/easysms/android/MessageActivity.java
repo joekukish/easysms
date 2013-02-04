@@ -129,8 +129,8 @@ public class MessageActivity extends SherlockActivity {
 			mPagerAdapter.displayVoiceOptions(matches);
 			// changes the current item.
 			mViewPager.setCurrentItem(3);
-
 		}
+
 		super.onActivityResult(requestCode, resultCode, data);
 	}
 
@@ -167,6 +167,7 @@ public class MessageActivity extends SherlockActivity {
 			mPagerAdapter = new MessageViewPagerAdapter(this);
 			mViewPager = (ViewPager) findViewById(R.id.view_message_view_pager);
 			mViewPager.setAdapter(mPagerAdapter);
+			mViewPager.setOffscreenPageLimit(mPagerAdapter.getCount());
 			mViewPager.setCurrentItem(0);
 
 			// allows the top bar to be different.
