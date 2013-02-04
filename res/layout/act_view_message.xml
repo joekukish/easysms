@@ -1,65 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical" >
 
-    <org.easysms.android.ui.FlingAndScrollViewer
-        android:id="@+id/flingScrollViewer"
+    <android.support.v4.view.ViewPager
+        android:id="@+id/view_message_view_pager"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" >
+        android:layout_height="0dp"
+        android:layout_weight="0.80" >
 
-        <ScrollView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" >
-
-            <LinearLayout
-                android:id="@+id/msgdetailslayout"
-                android:layout_width="500dp"
-                android:layout_height="250dp"
-                android:orientation="vertical" >
-            </LinearLayout>
-        </ScrollView>
-
-        <LinearLayout
+        <!--
+             <android.support.v4.view.PagerTitleStrip
+            android:id="@+id/pager_title_strip"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical" >
+            android:layout_gravity="top"
+            android:background="#33b5e5"
+            android:paddingBottom="4dp"
+            android:paddingTop="4dp"
+            android:textColor="#fff" />
+        -->
 
-            <GridView
-                android:id="@+id/gridview"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@android:color/black"
-                android:columnWidth="50dp"
-                android:gravity="top"
-                android:horizontalSpacing="10dip"
-                android:numColumns="4"
-                android:stretchMode="columnWidth"
-                android:verticalSpacing="10dip" />
-        </LinearLayout>
+    </android.support.v4.view.ViewPager>
 
-        <ScrollView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" >
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:background="#ECECEC" />
 
-            <LinearLayout
-                android:id="@+id/elsalayout"
-                android:layout_width="480dp"
-                android:layout_height="wrap_content"
-                android:orientation="vertical" >
-            </LinearLayout>
-        </ScrollView>
-    </org.easysms.android.ui.FlingAndScrollViewer>
-
-    <LinearLayout
-        android:id="@+id/bubblelayout"
+    <org.easysms.android.ui.KaraokeLayout
+        android:id="@+id/view_message_karaoke_compose"
         android:layout_width="match_parent"
-        android:layout_height="100dp"
-        android:layout_alignParentBottom="true"
-        android:layout_below="@+id/flingScrollViewer"
-        android:layout_gravity="bottom"
+        android:layout_height="0dp"
+        android:layout_weight="0.20"
         android:orientation="vertical" >
-    </LinearLayout>
+    </org.easysms.android.ui.KaraokeLayout>
 
-</RelativeLayout>
+</LinearLayout>

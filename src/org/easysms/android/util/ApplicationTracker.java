@@ -3,7 +3,6 @@ package org.easysms.android.util;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedList;
 
@@ -26,11 +25,11 @@ public class ApplicationTracker {
 	 * Format used to stored the data in the log. It corresponds to
 	 * <code>[date] userId EventType activityName label </code>
 	 * */
-	private static final String DATA_ENTRY_FORMAT = "[%s] %s - %s - %s - %s";
+	private static final String DATA_ENTRY_FORMAT = "%s,%s,%s,%s,%s";
 	/** Shorter format used to store data in the log. */
-	private static final String DATA_ENTRY_FORMAT_SMALL = "[%s] %s - %s - %s";
-	/** Format used to store the date information. */
-	public static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
+	private static final String DATA_ENTRY_FORMAT_SMALL = "%s,%s,%s,%s";
+	// /** Format used to store the date information. */
+	// public static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
 	/** Default value for the maximum size of the log that will force a flush. */
 	public static final int DEFAULT_MAX_LOG_SIZE = 5;
 	/** Name of the file where the log is stored. */
@@ -57,8 +56,8 @@ public class ApplicationTracker {
 
 	/** Data structure used to store locally the log. */
 	private LinkedList<String> mActivityLog;
-	/** Date format used in each log. */
-	private SimpleDateFormat mDateFormat;
+	// /** Date format used in each log. */
+	// private SimpleDateFormat mDateFormat;
 	/** DeviceId used to name the log file. */
 	private String mDeviceId;
 	/** Path where the log is stored in the SD card. */
@@ -69,9 +68,12 @@ public class ApplicationTracker {
 	 */
 	public int mMaxLogSize;
 
+	/**
+	 * Private constructor. <code>getInstance()</code> should be used instead.
+	 */
 	private ApplicationTracker() {
 		// creates the date formatter.
-		mDateFormat = new SimpleDateFormat(DATE_FORMAT);
+		// mDateFormat = new SimpleDateFormat(DATE_FORMAT);
 		// initializes the list where the data will be stored.
 		mActivityLog = new LinkedList<String>();
 		// initializes the value with the default
@@ -143,6 +145,12 @@ public class ApplicationTracker {
 		return mMaxLogSize;
 	}
 
+	public void logEvent(EventType eventType, Object trackingClass,
+			Object... args) {
+		// uses the name of the class to log the activity.
+		logEvent(eventType, trackingClass.getClass().getSimpleName(), args);
+	}
+
 	/**
 	 * Logs an event that occurred in the application. Each event has a type,
 	 * the name of the source that generated the event and then optionally any
@@ -160,14 +168,17 @@ public class ApplicationTracker {
 	public void logEvent(EventType eventType, String activityName,
 			Object... args) {
 
+		String entry;
 		if (args.length == 0) {
 
 			// synchronized access to the log since concurrent access could
 			// be enabled.
 			synchronized (mActivityLog) {
-				mActivityLog.add(String.format(DATA_ENTRY_FORMAT_SMALL,
-						mDateFormat.format(new Date()), mDeviceId, eventType,
-						activityName));
+				entry = String.format(DATA_ENTRY_FORMAT_SMALL,
+						new Date().getTime(), mDeviceId, eventType,
+						activityName);
+				Log.i(LOG_TAG, entry);
+				mActivityLog.add(entry);
 			}
 
 		} else {
@@ -179,15 +190,16 @@ public class ApplicationTracker {
 				sb.append(args[i].toString());
 				// appends a comma and a space.
 				if (i + 1 < args.length) {
-					sb.append(", ");
+					sb.append(",");
 				}
 			}
 			// synchronized access to the log since concurrent access could be
 			// enabled.
 			synchronized (mActivityLog) {
-				mActivityLog.add(String.format(DATA_ENTRY_FORMAT,
-						mDateFormat.format(new Date()), mDeviceId, eventType,
-						activityName, sb.toString()));
+				entry = String.format(DATA_ENTRY_FORMAT, new Date().getTime(),
+						mDeviceId, eventType, activityName, sb.toString());
+				Log.i(LOG_TAG, entry);
+				mActivityLog.add(entry);
 			}
 		}
 
