@@ -29,6 +29,7 @@ public class InboxItemAdapter extends ArrayAdapter<HashMap<String, Object>> {
 
 	public View getView(int position, View convertView, ViewGroup parent) {
 		View row = convertView;
+		// view holder pattern user for performance.
 		InboxItemWrapper wrapper = null;
 		if (row == null) {
 

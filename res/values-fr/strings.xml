@@ -2,23 +2,17 @@
 <resources>
 
     <string name="app_name">EasySMS</string>
-    <string name="button_new">Neue SMS verfassen</string>
-    <string name="activity_inbox_title">Eingangsfach</string>
+    <string name="activity_inbox_title">Boîte de réception</string>
 
     <!-- Dates -->
-    <string name="date_format">yyyy-MM-dd</string>
     <string name="date_format_short">dd MMM</string>
     <string name="date_format_time">kk:mm</string>
-    <string name="date_today">Heute</string>
-    <string name="date_yesterday">Gestern</string>
-    <string name="date_last_week">vor %d Tagen</string>
-    <string name="date_more_than_a_week">vor %d Wochen</string>
 
     <!-- Menu -->
-    <string name="menu_new_message">New Message</string>
-    <string name="menu_voice">Spracheingabe</string>
-    <string name="menu_delete">Konversation löschen</string>
-    <string name="menu_send">schicken</string>
-    <string name="menu_call">anrufen</string>
+    <string name="menu_new_message">Nouveau message</string>
+    <string name="menu_voice">Entrée vocale</string>
+    <string name="menu_delete">Supprimer le fil</string>
+    <string name="menu_send">Envoyer</string>
+    <string name="menu_call">Appeler</string>
 
 </resources>
