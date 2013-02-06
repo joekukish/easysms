@@ -99,6 +99,12 @@ public class MessageViewPagerAdapter extends PagerAdapter {
 					.getContentProvider().getMessages());
 			String threadidconv = retrieveThreadIdFromNumberContact(mParent
 					.getContactPhonenumber());
+
+			// only continues if valid conversation is loaded.
+			if (threadidconv.equals("error")) {
+				break;
+			}
+
 			Conversation conv = retrieveConvFromThreadId(listallconv,
 					threadidconv);
 

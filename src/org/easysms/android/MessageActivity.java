@@ -170,6 +170,7 @@ public class MessageActivity extends SherlockActivity {
 							null,
 							ContactsContract.CommonDataKinds.Phone.CONTACT_ID
 									+ " = ?", new String[] { id }, null);
+
 					// this second loop will retrieve all the contact
 					// numbers for a particular contact id
 					String mobilePhone = "Inconnu";
@@ -181,12 +182,7 @@ public class MessageActivity extends SherlockActivity {
 						while (pCur.moveToNext()) {
 							// takes only the MOBILE number
 							if (pCur.getInt(pCur.getColumnIndex(Phone.TYPE)) == Phone.TYPE_MOBILE) {
-								/*
-								 * int phNumber = pCur.getColumnIndexOrThrow(
-								 * ContactsContract
-								 * .CommonDataKinds.Phone.NUMBER); no =
-								 * pCur.getString(phNumber);
-								 */
+
 								switch (pCur.getInt(pCur
 										.getColumnIndex(Phone.TYPE))) {
 								case Phone.TYPE_MOBILE:
@@ -215,6 +211,9 @@ public class MessageActivity extends SherlockActivity {
 
 					pCur.close();
 				}
+
+				// TODO: pass the photo id instead of phone number to retrieve
+				// the picture.
 
 				ImageView profile = (ImageView) findViewById(R.id.new_message_image_contact);
 				Bitmap profileImage = mContentProvider.getContactPhoto(no);
@@ -287,16 +286,6 @@ public class MessageActivity extends SherlockActivity {
 			// shows and existing thread.
 			setContentView(R.layout.act_view_message);
 
-			// sets the adapter of the ViewPager.
-			mPagerAdapter = new MessageViewPagerAdapter(this);
-
-			// configures the pager that allows to swap between different views
-			// by swiping.
-			mViewPager = (ViewPager) findViewById(R.id.view_message_view_pager);
-			mViewPager.setAdapter(mPagerAdapter);
-			mViewPager.setOffscreenPageLimit(mPagerAdapter.getCount());
-			mViewPager.setCurrentItem(0);
-
 			// obtains the user info from the extras.
 			mContactName = (String) bundle.get(MessageActivity.EXTRA_NAME);
 			mContactPhoneNumber = (String) bundle
@@ -316,8 +305,17 @@ public class MessageActivity extends SherlockActivity {
 				actionBar.setTitle(mContactName);
 				actionBar.setSubtitle(mContactPhoneNumber);
 			}
-
 		}
+
+		// sets the adapter of the ViewPager.
+		mPagerAdapter = new MessageViewPagerAdapter(this);
+
+		// configures the pager that allows to swap between different views
+		// by swiping.
+		mViewPager = (ViewPager) findViewById(R.id.view_message_view_pager);
+		mViewPager.setAdapter(mPagerAdapter);
+		mViewPager.setOffscreenPageLimit(mPagerAdapter.getCount());
+		mViewPager.setCurrentItem(0);
 
 		// gets the area where the message is composed.
 		mComposeLayout = (KaraokeLayout) findViewById(R.id.view_message_karaoke_compose);
