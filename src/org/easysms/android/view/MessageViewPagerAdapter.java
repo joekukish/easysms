@@ -23,6 +23,7 @@ import android.view.View.OnLongClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.Button;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -211,8 +212,50 @@ public class MessageViewPagerAdapter extends PagerAdapter {
 			// adds the help message.
 			instructionsBubble.setText(view.getResources().getString(
 					R.string.voice_help));
-			break;
 
+			instructionsBubble
+					.setOnKaraokeClickListener(new KaraokeLayout.OnKaraokeClickListener() {
+
+						@Override
+						public void onClick(Button button) {
+
+							// tracks the user activity.
+							ApplicationTracker.getInstance().logEvent(
+									EventType.CLICK, mParent,
+									"voice_instructions_bubble",
+									button.getText());
+							// tracks using google analytics.
+							EasyTracker.getTracker().sendEvent("ui_action",
+									"button_press",
+									"voice_instructions_bubble", null);
+						}
+					});
+
+			instructionsBubble
+					.setOnKaraokeLongClickListener(new KaraokeLayout.OnKaraokeLongClickListener() {
+
+						@Override
+						public boolean onLongClick(Button button) {
+							// tracks the user activity.
+							ApplicationTracker.getInstance().logEvent(
+									EventType.LONG_CLICK, mParent,
+									"voice_instructions_bubble",
+									button.getText());
+							// tracks using google analytics.
+							EasyTracker.getTracker().sendEvent("ui_action",
+									"button_long_press",
+									"voice_instructions_bubble", null);
+
+							// adds the text inside the button to the compose
+							// bubble.
+							mParent.addTextToMessage(button.getText()
+									.toString());
+
+							return true;
+						}
+					});
+
+			break;
 		case 3:
 
 			// inflates the layout

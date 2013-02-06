@@ -36,11 +36,11 @@ public class KaraokeLayout extends ViewGroup {
 	}
 
 	public interface OnKaraokeClickListener {
-		public void onClick(Button v);
+		public void onClick(Button button);
 	}
 
 	public interface OnKaraokeLongClickListener {
-		public boolean onLongClick(Button v);
+		public boolean onLongClick(Button button);
 	}
 
 	/** Thread in charge of the Karaoke. */
