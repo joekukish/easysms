@@ -13,16 +13,20 @@ import org.easysms.android.util.TextToSpeechManager;
 import org.easysms.android.view.MessageViewPagerAdapter;
 
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.ContactsContract;
+import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.speech.RecognizerIntent;
 import android.support.v4.view.ViewPager;
 import android.view.ContextMenu;
@@ -30,6 +34,8 @@ import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
@@ -49,6 +55,9 @@ public class MessageActivity extends SherlockActivity {
 	public static final String EXTRA_NEW_MESSAGE = "NewMsg";
 	/** Identifier of the extra used to pass the phone number. */
 	public static final String EXTRA_PHONE_NUMBER = "Tel";
+
+	/** Code used to detect to the Pick Contact Intent. */
+	private static final int PICK_CONTACT = 4321;
 	/** Code used to detect the Voice Recognition Intent. */
 	private static final int VOICE_RECOGNITION_REQUEST_CODE = 1234;
 
@@ -62,10 +71,13 @@ public class MessageActivity extends SherlockActivity {
 	private SmsContentProvider mContentProvider;
 	/** Handler used to execute actions in another thread. */
 	private Handler mHandler;
+	/** Indicates whether we are displaying a new message or an exiting thread. */
+	private boolean mIsNewMessage;
 	/** Adapter used to handle the content inside the ViewPager. */
 	private MessageViewPagerAdapter mPagerAdapter;
 	/** Tracker used for Google Analytics. */
 	protected Tracker mTracker;
+
 	/** Pager that allows swiping between the views. */
 	private ViewPager mViewPager;
 
@@ -129,13 +141,101 @@ public class MessageActivity extends SherlockActivity {
 			mPagerAdapter.displayVoiceOptions(matches);
 			// changes the current item.
 			mViewPager.setCurrentItem(3);
+		} else if (requestCode == PICK_CONTACT
+				&& resultCode == Activity.RESULT_OK) {
+
+			Uri contactData = data.getData();
+			Cursor cur = getContentResolver().query(contactData, null, null,
+					null, null);
+			String nameContact = "Nom inconnu";
+			String photoId = null;
+			if (cur.moveToFirst()) {
+				String id = cur.getString(cur.getColumnIndexOrThrow(Phone._ID));
+				// contact name
+				nameContact = cur
+						.getString(cur
+								.getColumnIndexOrThrow(ContactsContract.Contacts.DISPLAY_NAME));
+				// photoID
+				long photo = cur
+						.getLong(cur
+								.getColumnIndexOrThrow(ContactsContract.Contacts.PHOTO_ID));
+				String no = "NumŽro inconnu";
+				// if the contact has a phone number
+				if (Integer
+						.parseInt(cur.getString(cur
+								.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER))) > 0) {
+					Cursor pCur = getContentResolver().query(
+							ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+							null,
+							ContactsContract.CommonDataKinds.Phone.CONTACT_ID
+									+ " = ?", new String[] { id }, null);
+					// this second loop will retrieve all the contact
+					// numbers for a particular contact id
+					String mobilePhone = "Inconnu";
+					String homePhone = "Inconnu";
+					String workPhone = "Inconnu";
+					String otherPhone = "Inconnu";
+
+					if (pCur != null) {
+						while (pCur.moveToNext()) {
+							// takes only the MOBILE number
+							if (pCur.getInt(pCur.getColumnIndex(Phone.TYPE)) == Phone.TYPE_MOBILE) {
+								/*
+								 * int phNumber = pCur.getColumnIndexOrThrow(
+								 * ContactsContract
+								 * .CommonDataKinds.Phone.NUMBER); no =
+								 * pCur.getString(phNumber);
+								 */
+								switch (pCur.getInt(pCur
+										.getColumnIndex(Phone.TYPE))) {
+								case Phone.TYPE_MOBILE:
+									mobilePhone = pCur.getString(pCur
+											.getColumnIndex(Phone.NUMBER));
+									break;
+								case Phone.TYPE_HOME:
+									homePhone = pCur.getString(pCur
+											.getColumnIndex(Phone.NUMBER));
+									break;
+								case Phone.TYPE_WORK:
+									workPhone = pCur.getString(pCur
+											.getColumnIndex(Phone.NUMBER));
+									break;
+								case Phone.TYPE_OTHER:
+									otherPhone = pCur.getString(pCur
+											.getColumnIndex(Phone.NUMBER));
+									break;
+								}
+							}
+						}
+						if (mobilePhone != "Inconnu") {
+							no = mobilePhone;
+						}
+					}
+
+					pCur.close();
+				}
+
+				TextView recipientName = (TextView) findViewById(R.id.new_message_text_name);
+				TextView recipientNumber = (TextView) findViewById(R.id.new_message_text_phone_number);
+
+				// append new name selected
+				recipientName.setText(nameContact);
+				recipientNumber.setText(no);
+
+				// sets the recipients number.
+				mContactPhoneNumber = no;
+
+				id = null;
+				nameContact = null;
+				no = null;
+
+				cur.close();
+				cur = null;
+			}
 		}
 
 		super.onActivityResult(requestCode, resultCode, data);
 	}
-
-	/** Indicates whether we are displaying a new message or an exiting thread. */
-	private boolean mIsNewMessage;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -158,6 +258,18 @@ public class MessageActivity extends SherlockActivity {
 		if (mIsNewMessage) {
 			// shows and existing thread.
 			setContentView(R.layout.act_new_message);
+
+			// adds the contact listener used to select the target contact.
+			ImageView contactImage = (ImageView) findViewById(R.id.new_message_image_contact);
+			contactImage.setOnClickListener(new View.OnClickListener() {
+
+				@Override
+				public void onClick(View v) {
+					Intent intent = new Intent(Intent.ACTION_PICK,
+							ContactsContract.Contacts.CONTENT_URI);
+					startActivityForResult(intent, PICK_CONTACT);
+				}
+			});
 
 		} else {
 
@@ -439,6 +551,36 @@ public class MessageActivity extends SherlockActivity {
 		return super.onPrepareOptionsMenu(menu);
 	}
 
+	@Override
+	public void onStart() {
+		super.onStart();
+
+		// tracks that the activity was opened.
+		ApplicationTracker.getInstance()
+				.logEvent(EventType.ACTIVITY_VIEW, this);
+
+		// Google Analytics tracking.
+		EasyTracker.getInstance().activityStart(this);
+	}
+
+	@Override
+	public void onStop() {
+		super.onStop();
+
+		// Google Analytics tracking.
+		EasyTracker.getInstance().activityStop(this);
+	}
+
+	public String retrieveThreadIdFromNumberContact(String phoneNumContact) {
+		for (Sms sms : mContentProvider.getMessages()) {
+			String smscontact = sms.address;
+			// TODO: could it really be null?
+			if (smscontact != null && smscontact.equals(phoneNumContact))
+				return sms.threadid;
+		}
+		return "error";
+	}
+
 	protected void sendMessage() {
 
 		// message said using the TTS and a Toast.
@@ -453,7 +595,7 @@ public class MessageActivity extends SherlockActivity {
 
 			// inserts the SMS sent into DB
 			String threadid = retrieveThreadIdFromNumberContact(mContactPhoneNumber);
-			// right after the msg is sent, navigate to the message
+			// right after the message is sent, navigates to the message
 			// details page
 			Intent i = new Intent(MessageActivity.this, MessageActivity.class);
 
@@ -505,36 +647,6 @@ public class MessageActivity extends SherlockActivity {
 			// plays the audio.
 			TextToSpeechManager.getInstance().say(promptText);
 		}
-	}
-
-	@Override
-	public void onStart() {
-		super.onStart();
-
-		// tracks that the activity was opened.
-		ApplicationTracker.getInstance()
-				.logEvent(EventType.ACTIVITY_VIEW, this);
-
-		// Google Analytics tracking.
-		EasyTracker.getInstance().activityStart(this);
-	}
-
-	@Override
-	public void onStop() {
-		super.onStop();
-
-		// Google Analytics tracking.
-		EasyTracker.getInstance().activityStop(this);
-	}
-
-	public String retrieveThreadIdFromNumberContact(String phoneNumContact) {
-		for (Sms sms : mContentProvider.getMessages()) {
-			String smscontact = sms.address;
-			// TODO: could it really be null?
-			if (smscontact != null && smscontact.equals(phoneNumContact))
-				return sms.threadid;
-		}
-		return "error";
 	}
 
 	/**

@@ -5,19 +5,18 @@
     android:orientation="vertical" >
 
     <LinearLayout
-        android:id="@+id/layout_contact"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
         android:orientation="horizontal"
         android:padding="@dimen/margin" >
 
         <ImageView
-            android:id="@+id/selectcontact"
+            android:id="@+id/new_message_image_contact"
             android:layout_width="?android:attr/listPreferredItemHeight"
             android:layout_height="?android:attr/listPreferredItemHeight"
             android:layout_marginRight="@dimen/margin"
             android:adjustViewBounds="true"
+            android:contentDescription="@string/description_contact_image"
             android:scaleType="centerCrop"
             android:src="@drawable/contactpickerclick" />
 
@@ -27,18 +26,18 @@
             android:orientation="vertical" >
 
             <TextView
-                android:id="@+id/contactnumber"
+                android:id="@+id/new_message_text_name"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:text="Numéro inconnu"
+                android:text="Nom inconnu"
                 android:textColor="@android:color/black"
                 android:textSize="@dimen/font_large" />
 
             <TextView
-                android:id="@+id/contactname"
+                android:id="@+id/new_message_text_phone_number"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Nom inconnu"
+                android:text="Numéro inconnu"
                 android:textColor="@android:color/black"
                 android:textSize="@dimen/font_medium" />
         </LinearLayout>
