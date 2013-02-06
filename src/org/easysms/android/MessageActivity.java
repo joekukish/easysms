@@ -134,6 +134,9 @@ public class MessageActivity extends SherlockActivity {
 		super.onActivityResult(requestCode, resultCode, data);
 	}
 
+	/** Indicates whether we are displaying a new message or an exiting thread. */
+	private boolean mIsNewMessage;
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -144,87 +147,37 @@ public class MessageActivity extends SherlockActivity {
 		// objects the provider from the application.
 		mContentProvider = ((EasySmsApp) getApplication()).getContentProvider();
 
+		// checks if it is a new message from the bundle.
 		Bundle bundle = getIntent().getExtras();
-		Boolean newMsg = bundle.getBoolean(EXTRA_NEW_MESSAGE);
+		mIsNewMessage = bundle.getBoolean(EXTRA_NEW_MESSAGE, false);
 
 		// configures and loads the google analytics tracker.
 		EasyTracker.getInstance().setContext(this);
 		mTracker = EasyTracker.getTracker();
 
-		if (!newMsg) {
+		if (mIsNewMessage) {
+			// shows and existing thread.
+			setContentView(R.layout.act_new_message);
+
+		} else {
+
 			// shows and existing thread.
 			setContentView(R.layout.act_view_message);
 
-			// gets the area where the message is composed.
-			mComposeLayout = (KaraokeLayout) findViewById(R.id.view_message_karaoke_compose);
+			// sets the adapter of the ViewPager.
+			mPagerAdapter = new MessageViewPagerAdapter(this);
 
-			mComposeLayout
-					.setOnKaraokeClickListener(new KaraokeLayout.OnKaraokeClickListener() {
-
-						@Override
-						public void onClick(Button button) {
-
-							// tracks the user activity.
-							ApplicationTracker.getInstance().logEvent(
-									EventType.CLICK, MessageActivity.this,
-									"compose_bubble_word", button.getText());
-							// tracks using google analytics.
-							mTracker.sendEvent("ui_action", "button_press",
-									"compose_bubble_word", null);
-
-						}
-					});
-
-			mComposeLayout
-					.setOnKaraokeLongClickListener(new KaraokeLayout.OnKaraokeLongClickListener() {
-
-						@Override
-						public boolean onLongClick(Button button) {
-
-							// tracks the user activity.
-							ApplicationTracker.getInstance().logEvent(
-									EventType.LONG_CLICK, MessageActivity.this,
-									"compose_bubble_word", button.getText());
-							// tracks using google analytics.
-							mTracker.sendEvent("ui_action",
-									"button_long_press", "compose_bubble_word",
-									null);
-
-							// removes the test from the bubble.
-							mComposeLayout.removeWordButton(button);
-
-							return true;
-						}
-					});
-
-			mComposeLayout
-					.setOnKaraokePlayButtonClickListener(new KaraokeLayout.OnKaraokePlayButtonClickListener() {
-
-						@Override
-						public boolean onPlayClick() {
-							// tracks the user activity.
-							ApplicationTracker.getInstance().logEvent(
-									EventType.CLICK, MessageActivity.this,
-									"compose_bubble_play");
-							// tracks using google analytics.
-							EasyTracker.getTracker()
-									.sendEvent("ui_action", "button_press",
-											"compose_bubble_play", null);
-							return true;
-						}
-					});
+			// configures the pager that allows to swap between different views
+			// by swiping.
+			mViewPager = (ViewPager) findViewById(R.id.view_message_view_pager);
+			mViewPager.setAdapter(mPagerAdapter);
+			mViewPager.setOffscreenPageLimit(mPagerAdapter.getCount());
+			mViewPager.setCurrentItem(0);
 
 			// obtains the user info from the extras.
 			mContactName = (String) bundle.get(MessageActivity.EXTRA_NAME);
 			mContactPhoneNumber = (String) bundle
 					.get(MessageActivity.EXTRA_PHONE_NUMBER);
-
-			// sets the adapter of the ViewPager.
-			mPagerAdapter = new MessageViewPagerAdapter(this);
-			mViewPager = (ViewPager) findViewById(R.id.view_message_view_pager);
-			mViewPager.setAdapter(mPagerAdapter);
-			mViewPager.setOffscreenPageLimit(mPagerAdapter.getCount());
-			mViewPager.setCurrentItem(0);
 
 			// allows the top bar to be different.
 			ActionBar actionBar = getSupportActionBar();
@@ -241,20 +194,85 @@ public class MessageActivity extends SherlockActivity {
 				actionBar.setSubtitle(mContactPhoneNumber);
 			}
 
-			// enables the icon to serve as back.
-			getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-			// gets the send button and wires the event.
-			ImageButton sendButton = (ImageButton) findViewById(R.id.view_message_button_send);
-			sendButton.setOnClickListener(new View.OnClickListener() {
-
-				@Override
-				public void onClick(View v) {
-					onSendButtonClick();
-				}
-			});
-			// sendButton.setActivated(false);
 		}
+
+		// gets the area where the message is composed.
+		mComposeLayout = (KaraokeLayout) findViewById(R.id.view_message_karaoke_compose);
+		mComposeLayout
+				.setOnKaraokeClickListener(new KaraokeLayout.OnKaraokeClickListener() {
+
+					@Override
+					public void onClick(Button button) {
+
+						// tracks the user activity.
+						ApplicationTracker.getInstance().logEvent(
+								EventType.CLICK, MessageActivity.this,
+								"compose_bubble_word", button.getText());
+						// tracks using google analytics.
+						mTracker.sendEvent("ui_action", "button_press",
+								"compose_bubble_word", null);
+
+					}
+				});
+
+		mComposeLayout
+				.setOnKaraokeLongClickListener(new KaraokeLayout.OnKaraokeLongClickListener() {
+
+					@Override
+					public boolean onLongClick(Button button) {
+
+						// tracks the user activity.
+						ApplicationTracker.getInstance().logEvent(
+								EventType.LONG_CLICK, MessageActivity.this,
+								"compose_bubble_word", button.getText());
+						// tracks using google analytics.
+						mTracker.sendEvent("ui_action", "button_long_press",
+								"compose_bubble_word", null);
+
+						// removes the test from the bubble.
+						mComposeLayout.removeWordButton(button);
+
+						return true;
+					}
+				});
+
+		mComposeLayout
+				.setOnKaraokePlayButtonClickListener(new KaraokeLayout.OnKaraokePlayButtonClickListener() {
+
+					@Override
+					public boolean onPlayClick() {
+						// tracks the user activity.
+						ApplicationTracker.getInstance().logEvent(
+								EventType.CLICK, MessageActivity.this,
+								"compose_bubble_play");
+						// tracks using google analytics.
+						EasyTracker.getTracker().sendEvent("ui_action",
+								"button_press", "compose_bubble_play", null);
+						return true;
+					}
+				});
+
+		// enables the icon to serve as back.
+		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+		// gets the send button and wires the event.
+		ImageButton sendButton = (ImageButton) findViewById(R.id.view_message_button_send);
+		sendButton.setOnClickListener(new View.OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+
+				// tracks the user activity.
+				ApplicationTracker.getInstance().logEvent(EventType.CLICK,
+						MessageActivity.this, "send_button");
+				// tracks using google analytics.
+				EasyTracker.getTracker().sendEvent("ui_action", "button_press",
+						"send_button", null);
+
+				// sends the current message in the compose bubble.
+				sendMessage();
+			}
+		});
 
 		// initializes the handler for voice recognition.
 		mHandler = new Handler();
@@ -270,7 +288,7 @@ public class MessageActivity extends SherlockActivity {
 	public boolean onCreateOptionsMenu(Menu menu) {
 
 		MenuInflater inflater = getSupportMenuInflater();
-		inflater.inflate(R.menu.menu_view_message, menu);
+		inflater.inflate(R.menu.menu_message, menu);
 
 		return true;
 	}
@@ -392,6 +410,8 @@ public class MessageActivity extends SherlockActivity {
 		PackageManager pm = getPackageManager();
 		List<ResolveInfo> activities = pm.queryIntentActivities(new Intent(
 				RecognizerIntent.ACTION_RECOGNIZE_SPEECH), 0);
+
+		MenuItem item;
 		if (activities.size() == 0) {
 
 			// tracks the error.
@@ -400,20 +420,31 @@ public class MessageActivity extends SherlockActivity {
 			mTracker.sendEvent("app_error", "speech_recognizer",
 					"speech_recognizer_not_available", new Date().getTime());
 
-			MenuItem item = menu.findItem(R.id.menu_voice);
+			item = menu.findItem(R.id.menu_voice);
 			item.setEnabled(false);
 			item.setVisible(false);
+		}
+
+		// hides call and delete while composing a new message.
+		if (mIsNewMessage) {
+
+			item = menu.findItem(R.id.menu_call);
+			item.setVisible(false);
+
+			item = menu.findItem(R.id.menu_delete);
+			item.setVisible(false);
+
 		}
 
 		return super.onPrepareOptionsMenu(menu);
 	}
 
-	protected void onSendButtonClick() {
+	protected void sendMessage() {
 
 		// message said using the TTS and a Toast.
 		String promptText;
 
-		if (mContactPhoneNumber.length() > 0
+		if (mContactPhoneNumber != null && mContactPhoneNumber.length() > 0
 				&& !mComposeLayout.getText().equals("")) {
 
 			// sends the current message as an SMS.

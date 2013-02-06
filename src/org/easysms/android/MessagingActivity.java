@@ -4,18 +4,10 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
-import android.provider.ContactsContract.CommonDataKinds.Photo;
-import android.provider.ContactsContract.Contacts;
-import android.provider.ContactsContract.Data;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockActivity;
@@ -26,7 +18,6 @@ public class MessagingActivity extends SherlockActivity {
 	private static final int PICK_CONTACT = 4321;
 
 	private String phoneNo = "";
-	private ImageView profile;
 	private TextView recipient;
 	private TextView recipientnum;
 
@@ -109,34 +100,6 @@ public class MessagingActivity extends SherlockActivity {
 					pCur.close();
 				}
 
-				photoId = cur.getString(cur.getColumnIndex(Contacts.PHOTO_ID));
-				if (photo != 0) {
-					Cursor photo2 = getContentResolver().query(
-							// column for the blob
-							Data.CONTENT_URI, new String[] { Photo.PHOTO },
-							Data._ID + "=?", // select row by id
-							new String[] { photoId }, // filter by photoId
-							null);
-
-					if (photo2.moveToFirst()) {
-						byte[] photoBlob = photo2.getBlob(photo2
-								.getColumnIndex(Photo.PHOTO));
-						Bitmap photoBitmap = BitmapFactory.decodeByteArray(
-								photoBlob, 0, photoBlob.length);
-						profile.setImageBitmap(photoBitmap);
-					}
-					photo2.close();
-				} else {
-					profile.setImageResource(R.drawable.nophotostored);
-				}
-
-				/*
-				 * if (photo != 0) { Uri uri =
-				 * ContentUris.withAppendedId(People.CONTENT_URI, photo); Bitmap
-				 * bitmap = People.loadContactPhoto(getBaseContext(), uri,
-				 * R.drawable.icon, null); profile.setImageBitmap(bitmap); }
-				 */
-
 				// reinitialise le textview
 				recipient.setText("");
 				recipientnum.setText("");
@@ -168,17 +131,10 @@ public class MessagingActivity extends SherlockActivity {
 		if (newMsg) { // if new message don't display the message details page
 			setContentView(R.layout.act_new_message);
 
-			profile = (ImageView) findViewById(R.id.selectcontact);
-			profile.setOnClickListener(new OnClickListener() {
+			// Intent intent = new Intent(Intent.ACTION_PICK,
+			// ContactsContract.Contacts.CONTENT_URI);
+			// startActivityForResult(intent, PICK_CONTACT);
 
-				@Override
-				public void onClick(View v) {
-					Intent intent = new Intent(Intent.ACTION_PICK,
-							ContactsContract.Contacts.CONTENT_URI);
-					startActivityForResult(intent, PICK_CONTACT);
-				}
-
-			});
 			recipient = (TextView) findViewById(R.id.contactname);
 			recipientnum = (TextView) findViewById(R.id.contactnumber);
 
