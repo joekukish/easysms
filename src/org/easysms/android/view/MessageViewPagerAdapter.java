@@ -19,7 +19,6 @@ import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnLongClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
@@ -105,8 +104,72 @@ public class MessageViewPagerAdapter extends PagerAdapter {
 
 			prepareConversation(conv);
 
+			// creates the new conversation adapter and prepares all the
+			// corresponding listeners.
+			ConversationAdapter convAdapter = new ConversationAdapter(mParent,
+					conv);
+
+			convAdapter
+					.setOnKaraokeClickListener(new KaraokeLayout.OnKaraokeClickListener() {
+
+						@Override
+						public void onClick(Button button) {
+
+							// tracks the user activity.
+							ApplicationTracker.getInstance().logEvent(
+									EventType.CLICK, mParent,
+									"conversation_bubble_word",
+									button.getText());
+							// tracks using google analytics.
+							EasyTracker.getTracker().sendEvent("ui_action",
+									"button_press", "conversation_bubble_word",
+									null);
+						}
+					});
+
+			convAdapter
+					.setOnKaraokeLongClickListener(new KaraokeLayout.OnKaraokeLongClickListener() {
+
+						@Override
+						public boolean onLongClick(Button button) {
+							// tracks the user activity.
+							ApplicationTracker.getInstance().logEvent(
+									EventType.LONG_CLICK, mParent,
+									"conversation_bubble_word",
+									button.getText());
+							// tracks using google analytics.
+							EasyTracker.getTracker().sendEvent("ui_action",
+									"button_long_press",
+									"conversation_bubble_word", null);
+
+							// adds the text inside the button to the compose
+							// bubble.
+							mParent.addTextToMessage(button.getText()
+									.toString());
+
+							return true;
+						}
+					});
+
+			convAdapter
+					.setOnKaraokePlayButtonListener(new KaraokeLayout.OnKaraokePlayButtonClickListener() {
+
+						@Override
+						public boolean onPlayClick() {
+							// tracks the user activity.
+							ApplicationTracker.getInstance().logEvent(
+									EventType.CLICK, mParent,
+									"conversation_bubble_play");
+							// tracks using google analytics.
+							EasyTracker.getTracker().sendEvent("ui_action",
+									"button_press", "conversation_bubble_play",
+									null);
+							return true;
+						}
+					});
+
 			// sets the conversation thread.
-			conversationList.setAdapter(new ConversationAdapter(mParent, conv));
+			conversationList.setAdapter(convAdapter);
 
 			break;
 		case 1:
@@ -222,12 +285,12 @@ public class MessageViewPagerAdapter extends PagerAdapter {
 							// tracks the user activity.
 							ApplicationTracker.getInstance().logEvent(
 									EventType.CLICK, mParent,
-									"voice_instructions_bubble",
+									"voice_instructions_bubble_word",
 									button.getText());
 							// tracks using google analytics.
 							EasyTracker.getTracker().sendEvent("ui_action",
 									"button_press",
-									"voice_instructions_bubble", null);
+									"voice_instructions_bubble_word", null);
 						}
 					});
 
@@ -239,18 +302,35 @@ public class MessageViewPagerAdapter extends PagerAdapter {
 							// tracks the user activity.
 							ApplicationTracker.getInstance().logEvent(
 									EventType.LONG_CLICK, mParent,
-									"voice_instructions_bubble",
+									"voice_instructions_bubble_word",
 									button.getText());
 							// tracks using google analytics.
 							EasyTracker.getTracker().sendEvent("ui_action",
 									"button_long_press",
-									"voice_instructions_bubble", null);
+									"voice_instructions_bubble_word", null);
 
 							// adds the text inside the button to the compose
 							// bubble.
 							mParent.addTextToMessage(button.getText()
 									.toString());
 
+							return true;
+						}
+					});
+
+			instructionsBubble
+					.setOnKaraokePlayButtonClickListener(new KaraokeLayout.OnKaraokePlayButtonClickListener() {
+
+						@Override
+						public boolean onPlayClick() {
+							// tracks the user activity.
+							ApplicationTracker.getInstance().logEvent(
+									EventType.CLICK, mParent,
+									"voice_instructions_bubble_play");
+							// tracks using google analytics.
+							EasyTracker.getTracker().sendEvent("ui_action",
+									"button_press",
+									"voice_instructions_bubble_play", null);
 							return true;
 						}
 					});
@@ -268,44 +348,133 @@ public class MessageViewPagerAdapter extends PagerAdapter {
 			for (int i = 0; i < mVoiceOptions.size(); i++) {
 
 				// create a new flow layout for each choice
-				final KaraokeLayout fl = new KaraokeLayout(mParent);
+				final KaraokeLayout kl = new KaraokeLayout(mParent);
 
 				// add the view number
 				ImageView number = new ImageView(mParent);
 				if (i == 0) {
 					number.setBackgroundResource(R.drawable.one);
-					fl.addView(number);
-
+					number.setContentDescription("one");
 				} else if (i == 1) {
 					number.setBackgroundResource(R.drawable.two);
-					fl.addView(number);
-
+					number.setContentDescription("two");
 				} else if (i == 2) {
 					number.setBackgroundResource(R.drawable.three);
-					fl.addView(number);
+					number.setContentDescription("three");
 				}
 
-				number.setOnLongClickListener(new OnLongClickListener() {
+				// adds the view to the layout.
+				kl.addView(number);
+
+				number.setOnClickListener(new View.OnClickListener() {
+
+					@Override
+					public void onClick(View v) {
+						// tracks the user activity.
+						ApplicationTracker.getInstance().logEvent(
+								EventType.CLICK, mParent,
+								"voice_option_number",
+								v.getContentDescription(), kl.getText());
+						// tracks using google analytics.
+						EasyTracker.getTracker().sendEvent("ui_action",
+								"button_press", "voice_option_number", null);
+
+					}
+				});
+				number.setOnLongClickListener(new View.OnLongClickListener() {
 					@Override
 					public boolean onLongClick(View v) {
-						mParent.addTextToMessage(fl.getText());
+						// tracks the user activity.
+						ApplicationTracker.getInstance().logEvent(
+								EventType.LONG_CLICK, mParent,
+								"voice_option_number",
+								v.getContentDescription(), kl.getText());
+						// tracks using google analytics.
+						EasyTracker.getTracker().sendEvent("ui_action",
+								"button_long_press", "voice_option_number",
+								null);
+
+						// adds the text to the compose layout.
+						mParent.addTextToMessage(kl.getText());
 						return true;
 					}
 				});
 
 				// adds the sentence to the layout.
-				fl.setText(mVoiceOptions.get(i));
+				kl.setText(mVoiceOptions.get(i));
 
-				fl.setOnLongClickListener(new OnLongClickListener() {
+				kl.setOnLongClickListener(new View.OnLongClickListener() {
 					@Override
 					public boolean onLongClick(View v) {
-						mParent.addTextToMessage(fl.getText());
+						// tracks the user activity.
+						ApplicationTracker.getInstance().logEvent(
+								EventType.LONG_CLICK, mParent,
+								"voice_option_bubble", kl.getText());
+						// tracks using google analytics.
+						EasyTracker.getTracker().sendEvent("ui_action",
+								"button_long_press", "voice_option_bubble",
+								null);
+
+						// adds the text to the compose layout.
+						mParent.addTextToMessage(kl.getText());
+						return true;
+					}
+				});
+
+				kl.setOnKaraokeClickListener(new KaraokeLayout.OnKaraokeClickListener() {
+
+					@Override
+					public void onClick(Button button) {
+						// tracks the user activity.
+						ApplicationTracker.getInstance().logEvent(
+								EventType.CLICK, mParent,
+								"voice_option_bubble_word", button.getText());
+						// tracks using google analytics.
+						EasyTracker.getTracker().sendEvent("ui_action",
+								"button_press", "voice_option_bubble_word",
+								null);
+					}
+				});
+
+				kl.setOnKaraokeLongClickListener(new KaraokeLayout.OnKaraokeLongClickListener() {
+
+					@Override
+					public boolean onLongClick(Button button) {
+
+						// tracks the user activity.
+						ApplicationTracker.getInstance().logEvent(
+								EventType.LONG_CLICK, mParent,
+								"voice_option_bubble_word", button.getText());
+						// tracks using google analytics.
+						EasyTracker.getTracker().sendEvent("ui_action",
+								"button_long_press",
+								"voice_option_bubble_word", null);
+
+						// adds the text to the compose layout.
+						mParent.addTextToMessage(button.getText().toString());
+
+						return true;
+					}
+				});
+
+				kl.setOnKaraokePlayButtonClickListener(new KaraokeLayout.OnKaraokePlayButtonClickListener() {
+
+					@Override
+					public boolean onPlayClick() {
+						// tracks the user activity.
+						ApplicationTracker.getInstance().logEvent(
+								EventType.CLICK, mParent,
+								"voice_option_bubble_play");
+						// tracks using google analytics.
+						EasyTracker.getTracker().sendEvent("ui_action",
+								"button_press", "voice_option_bubble_play",
+								null);
 						return true;
 					}
 				});
 
 				// adds the option to the view.
-				optionsLayout.addView(fl);
+				optionsLayout.addView(kl);
 			}
 
 			break;

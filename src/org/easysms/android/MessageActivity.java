@@ -7,8 +7,6 @@ import org.easysms.android.data.Contact;
 import org.easysms.android.data.Sms;
 import org.easysms.android.provider.SmsContentProvider;
 import org.easysms.android.ui.KaraokeLayout;
-import org.easysms.android.ui.KaraokeLayout.OnKaraokeClickListener;
-import org.easysms.android.ui.KaraokeLayout.OnKaraokeLongClickListener;
 import org.easysms.android.util.ApplicationTracker;
 import org.easysms.android.util.ApplicationTracker.EventType;
 import org.easysms.android.util.TextToSpeechManager;
@@ -161,7 +159,7 @@ public class MessageActivity extends SherlockActivity {
 			mComposeLayout = (KaraokeLayout) findViewById(R.id.view_message_karaoke_compose);
 
 			mComposeLayout
-					.setOnKaraokeClickListener(new OnKaraokeClickListener() {
+					.setOnKaraokeClickListener(new KaraokeLayout.OnKaraokeClickListener() {
 
 						@Override
 						public void onClick(Button button) {
@@ -169,16 +167,16 @@ public class MessageActivity extends SherlockActivity {
 							// tracks the user activity.
 							ApplicationTracker.getInstance().logEvent(
 									EventType.CLICK, MessageActivity.this,
-									"compose_bubble", button.getText());
+									"compose_bubble_word", button.getText());
 							// tracks using google analytics.
 							mTracker.sendEvent("ui_action", "button_press",
-									"compose_bubble", null);
+									"compose_bubble_word", null);
 
 						}
 					});
 
 			mComposeLayout
-					.setOnKaraokeLongClickListener(new OnKaraokeLongClickListener() {
+					.setOnKaraokeLongClickListener(new KaraokeLayout.OnKaraokeLongClickListener() {
 
 						@Override
 						public boolean onLongClick(Button button) {
@@ -186,14 +184,32 @@ public class MessageActivity extends SherlockActivity {
 							// tracks the user activity.
 							ApplicationTracker.getInstance().logEvent(
 									EventType.LONG_CLICK, MessageActivity.this,
-									"compose_bubble", button.getText());
+									"compose_bubble_word", button.getText());
 							// tracks using google analytics.
 							mTracker.sendEvent("ui_action",
-									"button_long_press", "compose_bubble", null);
+									"button_long_press", "compose_bubble_word",
+									null);
 
 							// removes the test from the bubble.
 							mComposeLayout.removeWordButton(button);
 
+							return true;
+						}
+					});
+
+			mComposeLayout
+					.setOnKaraokePlayButtonClickListener(new KaraokeLayout.OnKaraokePlayButtonClickListener() {
+
+						@Override
+						public boolean onPlayClick() {
+							// tracks the user activity.
+							ApplicationTracker.getInstance().logEvent(
+									EventType.CLICK, MessageActivity.this,
+									"compose_bubble_play");
+							// tracks using google analytics.
+							EasyTracker.getTracker()
+									.sendEvent("ui_action", "button_press",
+											"compose_bubble_play", null);
 							return true;
 						}
 					});
