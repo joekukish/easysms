@@ -7,6 +7,8 @@ import org.easysms.android.data.Contact;
 import org.easysms.android.data.Sms;
 import org.easysms.android.provider.SmsContentProvider;
 import org.easysms.android.ui.KaraokeLayout;
+import org.easysms.android.ui.KaraokeLayout.OnKaraokeClickListener;
+import org.easysms.android.ui.KaraokeLayout.OnKaraokeLongClickListener;
 import org.easysms.android.util.ApplicationTracker;
 import org.easysms.android.util.ApplicationTracker.EventType;
 import org.easysms.android.util.TextToSpeechManager;
@@ -100,7 +102,7 @@ public class MessageActivity extends SherlockActivity {
 	public boolean isInternetOn() {
 		ConnectivityManager connec = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 
-		// checks if internet is available.
+		// checks if Internet is available.
 		if ((connec.getNetworkInfo(0) != null && connec.getNetworkInfo(0)
 				.getState() == NetworkInfo.State.CONNECTED)
 				|| (connec.getNetworkInfo(1) != null && connec
@@ -157,6 +159,44 @@ public class MessageActivity extends SherlockActivity {
 
 			// gets the area where the message is composed.
 			mComposeLayout = (KaraokeLayout) findViewById(R.id.view_message_karaoke_compose);
+
+			mComposeLayout
+					.setOnKaraokeClickListener(new OnKaraokeClickListener() {
+
+						@Override
+						public void onClick(Button button) {
+
+							// tracks the user activity.
+							ApplicationTracker.getInstance().logEvent(
+									EventType.CLICK, MessageActivity.this,
+									"compose_bubble", button.getText());
+							// tracks using google analytics.
+							mTracker.sendEvent("ui_action", "button_press",
+									"compose_bubble", null);
+
+						}
+					});
+
+			mComposeLayout
+					.setOnKaraokeLongClickListener(new OnKaraokeLongClickListener() {
+
+						@Override
+						public boolean onLongClick(Button button) {
+
+							// tracks the user activity.
+							ApplicationTracker.getInstance().logEvent(
+									EventType.LONG_CLICK, MessageActivity.this,
+									"compose_bubble", button.getText());
+							// tracks using google analytics.
+							mTracker.sendEvent("ui_action",
+									"button_long_press", "compose_bubble", null);
+
+							// removes the test from the bubble.
+							mComposeLayout.removeWordButton(button);
+
+							return true;
+						}
+					});
 
 			// obtains the user info from the extras.
 			mContactName = (String) bundle.get(MessageActivity.EXTRA_NAME);
