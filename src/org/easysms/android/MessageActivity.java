@@ -20,6 +20,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -215,6 +216,16 @@ public class MessageActivity extends SherlockActivity {
 					pCur.close();
 				}
 
+				ImageView profile = (ImageView) findViewById(R.id.new_message_image_contact);
+				Bitmap profileImage = mContentProvider.getContactPhoto(no);
+
+				if (profileImage != null) {
+					profile.setImageBitmap(profileImage);
+				} else {
+					profile.setImageResource(R.drawable.nophotostored);
+				}
+
+				// updates the name and number.
 				TextView recipientName = (TextView) findViewById(R.id.new_message_text_name);
 				TextView recipientNumber = (TextView) findViewById(R.id.new_message_text_phone_number);
 
