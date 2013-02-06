@@ -3,6 +3,9 @@ package org.easysms.android.view;
 import org.easysms.android.R;
 import org.easysms.android.data.Conversation;
 import org.easysms.android.data.Sms;
+import org.easysms.android.ui.KaraokeLayout.OnKaraokeClickListener;
+import org.easysms.android.ui.KaraokeLayout.OnKaraokeLongClickListener;
+import org.easysms.android.ui.KaraokeLayout.OnKaraokePlayButtonClickListener;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -16,6 +19,24 @@ public class ConversationAdapter extends ArrayAdapter<Sms> {
 	// private Conversation mConversation;
 	/** Inflater used to create the layout based on the XML. */
 	private LayoutInflater mLayoutInflater;
+
+	private OnKaraokePlayButtonClickListener mPlayButtonListener;
+	private OnKaraokeClickListener mClickListener;
+	private OnKaraokeLongClickListener mLongClickListener;
+
+	public void setOnKaraokePlayButtonListener(
+			OnKaraokePlayButtonClickListener listener) {
+		mPlayButtonListener = listener;
+	}
+
+	public void setOnKaraokeClickListener(OnKaraokeClickListener listener) {
+		mClickListener = listener;
+	}
+
+	public void setOnKaraokeLongClickListener(
+			OnKaraokeLongClickListener listener) {
+		mLongClickListener = listener;
+	}
 
 	/**
 	 * Creates a new PlotItemAdapter instance.
@@ -51,6 +72,14 @@ public class ConversationAdapter extends ArrayAdapter<Sms> {
 		}
 
 		wrapper.populateFrom(position, getItem(position), getContext());
+
+		// adds the event listeners.
+		wrapper.getMessageTextView().setOnKaraokeClickListener(mClickListener);
+		wrapper.getMessageTextView().setOnKaraokeLongClickListener(
+				mLongClickListener);
+		wrapper.getMessageTextView().setOnKaraokePlayButtonClickListener(
+				mPlayButtonListener);
+
 		return (row);
 	}
 }

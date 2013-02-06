@@ -35,16 +35,24 @@ public class KaraokeLayout extends ViewGroup {
 		}
 	}
 
-	interface OnKaraokeLongClickListener {
+	public interface OnKaraokeClickListener {
+		public void onClick(Button button);
+	}
 
-		public boolean onLockClick(View v);
+	public interface OnKaraokeLongClickListener {
+		public boolean onLongClick(Button button);
+	}
 
+	public interface OnKaraokePlayButtonClickListener {
+		public boolean onPlayClick();
 	}
 
 	/** Thread in charge of the Karaoke. */
 	private Handler handler;
 	/** List of buttons created from the text. */
 	private List<Button> mButtonList;
+	/** Listener used to notify when a text button has been clicked. */
+	private OnKaraokeClickListener mKaraokeClickListener;
 	/**
 	 * Control variable used to guarantee that the Karaoke is only playing once.
 	 */
@@ -55,12 +63,12 @@ public class KaraokeLayout extends ViewGroup {
 	 * compose bubble.
 	 */
 	private OnKaraokeLongClickListener mKaraokeLongClickListener;
+	/** Listener used to indicate that the play button has been pressed. */
+	private OnKaraokePlayButtonClickListener mKaraokePlayButtonClickListener;
 	/** Height of each line. */
 	private int mLineHeight;
-
 	/** Button used to play the Karaoke animation. */
 	private ImageView mPlayButton;
-
 	/** Text that encloses the bubble. */
 	private String mText;
 
@@ -106,6 +114,12 @@ public class KaraokeLayout extends ViewGroup {
 		mPlayButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
+
+				if (mKaraokePlayButtonClickListener != null) {
+					mKaraokePlayButtonClickListener.onPlayClick();
+				}
+
+				// plays the karaoke.
 				playKaraoke();
 			}
 		});
@@ -126,8 +140,9 @@ public class KaraokeLayout extends ViewGroup {
 		mButtonList.clear();
 
 		// no valid text
-		if (mText == null || mText.equals(""))
+		if (mText == null || mText.equals("")) {
 			return;
+		}
 
 		// parse the sentence into words and put it into an array of words
 		String[] words = mText.split("\\s+");
@@ -152,6 +167,10 @@ public class KaraokeLayout extends ViewGroup {
 				@Override
 				public void onClick(View v) {
 
+					if (mKaraokeClickListener != null) {
+						mKaraokeClickListener.onClick((Button) v);
+					}
+
 					// plays the audio.
 					TextToSpeechManager.getInstance().say(toSay);
 				}
@@ -163,8 +182,10 @@ public class KaraokeLayout extends ViewGroup {
 				public boolean onLongClick(View v) {
 
 					if (mKaraokeLongClickListener != null) {
-						return mKaraokeLongClickListener.onLockClick(v);
+						return mKaraokeLongClickListener
+								.onLongClick((Button) v);
 					}
+
 					return true;
 				}
 			});
@@ -325,9 +346,46 @@ public class KaraokeLayout extends ViewGroup {
 		}
 	}
 
+	public void removeWordButton(Button button) {
+
+		String tmpText = "";
+
+		// removes the button from the list. If valid,
+		// the message is reconstructed.`
+		if (mButtonList.remove(button)) {
+
+			// reconstructs the new text.
+			for (int x = 0; x < mButtonList.size(); x++) {
+				// adds the contents of the button.
+				tmpText += mButtonList.get(x).getText();
+
+				// adds a space between the words.
+				if (x + 1 < mButtonList.size()) {
+					tmpText += " ";
+				}
+			}
+
+			// substitutes the current text with the newly reconstructed one.
+			mText = tmpText;
+
+			// removes it normally.
+			removeView(button);
+		}
+
+	}
+
+	public void setOnKaraokeClickListener(OnKaraokeClickListener listener) {
+		mKaraokeClickListener = listener;
+	}
+
 	public void setOnKaraokeLongClickListener(
 			OnKaraokeLongClickListener listener) {
 		mKaraokeLongClickListener = listener;
+	}
+
+	public void setOnKaraokePlayButtonClickListener(
+			OnKaraokePlayButtonClickListener listener) {
+		mKaraokePlayButtonClickListener = listener;
 	}
 
 	public void setText(String text) {

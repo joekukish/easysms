@@ -113,77 +113,76 @@ public class SmsContentProvider extends ContentObserver {
 
 	public synchronized List<Sms> getMessages() {
 
-		if (mMessages == null) {
+		// if (mMessages == null) {
 
-			// we put all the SMS sent and received in a list
-			mMessages = new ArrayList<Sms>();
+		// we put all the SMS sent and received in a list
+		mMessages = new ArrayList<Sms>();
 
-			Cursor curinbox = mContext.getContentResolver().query(
-					Uri.parse("content://sms/"), null, null, null, null);
+		Cursor curinbox = mContext.getContentResolver().query(
+				Uri.parse("content://sms/"), null, null, null, null);
 
-			// gets all the available messages.
-			if (curinbox.moveToFirst()) {
-				long datesms = 0;
-				String address = null;
-				String body = null;
-				String threadid = null;
-				String protocol = null;
-				String person = null;
-				int type = -1;
-				int read = -1;
+		// gets all the available messages.
+		if (curinbox.moveToFirst()) {
+			long datesms = 0;
+			String address = null;
+			String body = null;
+			String threadid = null;
+			String protocol = null;
+			String person = null;
+			int type = -1;
+			int read = -1;
 
-				// return -1 if the column does not exist.
-				int dateColumn = curinbox.getColumnIndex("date");
-				int addressColumn = curinbox.getColumnIndex("address");
-				int bodyColumn = curinbox.getColumnIndex("body");
-				int threadColumn = curinbox.getColumnIndex("thread_id");
-				int typeColumn = curinbox.getColumnIndex("type");
-				int typeRead = curinbox.getColumnIndex("read");
-				int protocolColumn = curinbox.getColumnIndex("protocol");
-				int personColumn = curinbox.getColumnIndex("person");
+			// return -1 if the column does not exist.
+			int dateColumn = curinbox.getColumnIndex("date");
+			int addressColumn = curinbox.getColumnIndex("address");
+			int bodyColumn = curinbox.getColumnIndex("body");
+			int threadColumn = curinbox.getColumnIndex("thread_id");
+			int typeColumn = curinbox.getColumnIndex("type");
+			int typeRead = curinbox.getColumnIndex("read");
+			int protocolColumn = curinbox.getColumnIndex("protocol");
+			int personColumn = curinbox.getColumnIndex("person");
 
-				do {
-					if (dateColumn != -1)
-						datesms = curinbox.getLong(dateColumn);
-					if (typeRead != -1)
-						read = curinbox.getInt(typeRead);
-					if (typeColumn != -1)
-						type = curinbox.getInt(typeColumn);
-					if (bodyColumn != -1)
-						body = curinbox.getString(bodyColumn);
-					if (addressColumn != -1)
-						address = curinbox.getString(addressColumn);
-					if (threadColumn != -1)
-						threadid = curinbox.getString(threadColumn);
-					if (protocolColumn != -1)
-						protocol = curinbox.getString(protocolColumn);
-					if (personColumn != -1)
-						person = curinbox.getString(personColumn);
+			do {
+				if (dateColumn != -1)
+					datesms = curinbox.getLong(dateColumn);
+				if (typeRead != -1)
+					read = curinbox.getInt(typeRead);
+				if (typeColumn != -1)
+					type = curinbox.getInt(typeColumn);
+				if (bodyColumn != -1)
+					body = curinbox.getString(bodyColumn);
+				if (addressColumn != -1)
+					address = curinbox.getString(addressColumn);
+				if (threadColumn != -1)
+					threadid = curinbox.getString(threadColumn);
+				if (protocolColumn != -1)
+					protocol = curinbox.getString(protocolColumn);
+				if (personColumn != -1)
+					person = curinbox.getString(personColumn);
 
-					Sms sms;
+				Sms sms;
 
-					if (address != null) {
-						sms = new Sms(threadid, new Date(datesms), address,
-								body);
+				if (address != null) {
+					sms = new Sms(threadid, new Date(datesms), address, body);
 
-						// sets the person that initiated the message.
-						sms.person = person;
-						// message type.
-						sms.type = type;
-						// indicates whether it was read or not.
-						sms.isRead = read == 1;
-						// send or received message.
-						sms.protocol = protocol;
+					// sets the person that initiated the message.
+					sms.person = person;
+					// message type.
+					sms.type = type;
+					// indicates whether it was read or not.
+					sms.isRead = read == 1;
+					// send or received message.
+					sms.protocol = protocol;
 
-						// we add this SMS to the list of all the SMS
-						mMessages.add(sms);
-					}
+					// we add this SMS to the list of all the SMS
+					mMessages.add(sms);
+				}
 
-				} while (curinbox.moveToNext());
-			}
-
-			curinbox.close();
+			} while (curinbox.moveToNext());
 		}
+
+		curinbox.close();
+		// }
 
 		return mMessages;
 	}
