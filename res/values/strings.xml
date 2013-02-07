@@ -2,13 +2,13 @@
 <resources>
 
     <string name="app_name">EasySMS</string>
-    <string name="activity_inbox_title">Inbox</string>
-    <string name="voice_help">To record your message click on the microphone at the top bar.</string>
-    <string name="message_sent">Message Sent</string>
-    <string name="promt_enter_a_message">Please enter a message</string>
-    <string name="promt_enter_a_phone_number">Please enter a phone number</string>
-    <string name="promt_voice">Speak now!</string>
-    <string name="promt_no_internet">No Internet connection</string>
+    <string name="activity_inbox_title">Eingangsfach</string>
+    <string name="voice_help">Zum aufnehmen von Wörtern auf das Mikrofon oben klicken.</string>
+    <string name="message_sent">SMS gesendet</string>
+    <string name="promt_enter_a_message">Verfassen sie die SMS</string>
+    <string name="promt_enter_a_phone_number">Geben sie bitte eine Telefonnummer ein.</string>
+    <string name="promt_voice">Sprechen sie jetzt!</string>
+    <string name="promt_no_internet">Keine Internetverbindung</string>
 
     <!-- Dates -->
     <string name="date_format">yyyy-MM-dd</string>
@@ -38,32 +38,32 @@
 
     <!-- Arrays -->
     <string-array name="icons_array">
-        <item>Ok</item>
-        <item>No</item>
-        <item>Late</item>
-        <item>Call</item>
-        <item>Empty</item>
-        <item>Busy</item>
-        <item>Hurry!</item>
-        <item>How are you?</item>
-        <item>Love</item>
-        <item>Car</item>
-        <item>Date?</item>
-        <item>Time?</item>
+        <item>ok</item>
+        <item>nein</item>
+        <item>spät</item>
+        <item>Anruf</item>
+        <item>leer</item>
+        <item>beschäftigt</item>
+        <item>Beeilung!</item>
+        <item>Wie geht's?</item>
+        <item>Liebe</item>
+        <item>Auto</item>
+        <item>Datum?</item>
+        <item>Zeit?</item>
     </string-array>
     <string-array name="sentenses_array">
         <item>Ok.</item>
-        <item>No.</item>
-        <item>"I'm late."</item>
-        <item>Call me!</item>
-        <item>"I don't have more battery."</item>
-        <item>"I can't answer right now, I'm busy."</item>
-        <item>Hurry up!</item>
-        <item>How are you?</item>
-        <item>"I'm thinking of you."</item>
-        <item>"I'm driving."</item>
-        <item>When?</item>
-        <item>At what time?</item>
+        <item>Nein.</item>
+        <item>"Ich verspäte mich."</item>
+        <item>Ruf mich an!</item>
+        <item>"Mein Akku ist alle."</item>
+        <item>"Ich kann gerade nicht antworten. Ich habe zu tun."</item>
+        <item>Beeil Dich!</item>
+        <item>Wie gehts?</item>
+        <item>"Ich denke and Dich."</item>
+        <item>"Ich fahre gerade Auto."</item>
+        <item>An welchem Tag?</item>
+        <item>Zu welcher Zeit?</item>
     </string-array>
 
 </resources>

@@ -53,7 +53,7 @@ public class MessageActivity extends SherlockActivity {
 	/** Identifier of the extra used to pass the name. */
 	public static final String EXTRA_NAME = "Name";
 	/** Identifier of the extra that indicates a new message should be shown. */
-	public static final String EXTRA_NEW_MESSAGE = "NewMsg";
+	public static final String EXTRA_NEW_MESSAGE = "Neue SMS";
 	/** Identifier of the extra used to pass the phone number. */
 	public static final String EXTRA_PHONE_NUMBER = "Tel";
 
@@ -148,7 +148,7 @@ public class MessageActivity extends SherlockActivity {
 			Uri contactData = data.getData();
 			Cursor cur = getContentResolver().query(contactData, null, null,
 					null, null);
-			String nameContact = "Nom inconnu";
+			String nameContact = "Name unbekannt";
 			String photoId = null;
 			if (cur.moveToFirst()) {
 				String id = cur.getString(cur.getColumnIndexOrThrow(Phone._ID));
@@ -160,7 +160,7 @@ public class MessageActivity extends SherlockActivity {
 				long photo = cur
 						.getLong(cur
 								.getColumnIndexOrThrow(ContactsContract.Contacts.PHOTO_ID));
-				String no = "Numéro inconnu";
+				String no = "Nummer unbekannt";
 				// if the contact has a phone number
 				if (Integer
 						.parseInt(cur.getString(cur
@@ -173,10 +173,10 @@ public class MessageActivity extends SherlockActivity {
 
 					// this second loop will retrieve all the contact
 					// numbers for a particular contact id
-					String mobilePhone = "Inconnu";
-					String homePhone = "Inconnu";
-					String workPhone = "Inconnu";
-					String otherPhone = "Inconnu";
+					String mobilePhone = "unbekannt";
+					String homePhone = "unbekannt";
+					String workPhone = "unbekannt";
+					String otherPhone = "unbekannt";
 
 					if (pCur != null) {
 						while (pCur.moveToNext()) {
@@ -204,7 +204,7 @@ public class MessageActivity extends SherlockActivity {
 								}
 							}
 						}
-						if (mobilePhone != "Inconnu") {
+						if (mobilePhone != "unbekannt") {
 							no = mobilePhone;
 						}
 					}
