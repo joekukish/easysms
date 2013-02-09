@@ -149,7 +149,7 @@ public class SmsContentProvider extends ContentObserver {
 		}
 	}
 
-	public synchronized List<Sms> getConversations() {
+	protected synchronized List<Sms> getConversations() {
 
 		// we put all the SMS sent and received in a list
 		mMessages = new ArrayList<Sms>();

@@ -7,6 +7,7 @@ import java.util.List;
 import org.easysms.android.MessageActivity;
 import org.easysms.android.R;
 import org.easysms.android.data.Conversation;
+import org.easysms.android.data.Sms;
 import org.easysms.android.ui.KaraokeLayout;
 import org.easysms.android.util.ApplicationTracker;
 import org.easysms.android.util.ApplicationTracker.EventType;
@@ -14,6 +15,7 @@ import org.easysms.android.util.TextToSpeechManager;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.os.Handler;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
@@ -93,23 +95,21 @@ public class MessageViewPagerAdapter extends PagerAdapter {
 					.findViewById(R.id.conversation_list_list);
 
 			// thread id from the active conversation.
-			long convThreadId = mParent.getThreadId();
+			final long convThreadId = mParent.getThreadId();
 
 			// only continues if valid conversation is loaded.
 			if (convThreadId == -1) {
 				break;
 			}
 
-			// gets all the messages of the same thread.
-			Conversation conv = mParent.getContentProvider()
-					.getConversationByThreadId(convThreadId);
-
-			prepareConversation(conv);
+			final Conversation conv = new Conversation();
+			conv.listsms = new ArrayList<Sms>();
+			conv.threadid = convThreadId;
 
 			// creates the new conversation adapter and prepares all the
 			// corresponding listeners.
-			ConversationAdapter convAdapter = new ConversationAdapter(mParent,
-					conv);
+			final ConversationAdapter convAdapter = new ConversationAdapter(
+					mParent, conv);
 
 			convAdapter
 					.setOnKaraokeClickListener(new KaraokeLayout.OnKaraokeClickListener() {
@@ -172,6 +172,21 @@ public class MessageViewPagerAdapter extends PagerAdapter {
 
 			// sets the conversation thread.
 			conversationList.setAdapter(convAdapter);
+
+			// handles the content loading in a separate thread
+			new Handler().post(new Runnable() {
+				public void run() {
+
+					// gets all the messages of the same thread.
+					conv.listsms.addAll(mParent.getContentProvider()
+							.getConversationByThreadId(convThreadId).listsms);
+
+					prepareConversation(conv);
+
+					// notifies that the UI needs to be updated.
+					convAdapter.notifyDataSetChanged();
+				}
+			});
 
 			break;
 		case 1:
