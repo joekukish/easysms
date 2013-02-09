@@ -5,8 +5,6 @@
     <string name="activity_inbox_title">Eingangsfach</string>
     <string name="voice_help">Zum aufnehmen von Wörtern auf das Mikrofon oben klicken.</string>
     <string name="message_sent">SMS gesendet</string>
-    <string name="unknown_contact">Name unbekannt</string>
-    <string name="unknown_number">Nummer unbekannt</string>
 
     <!-- Voice prompts -->
     <string name="promt_enter_a_message">Verfassen sie die SMS</string>

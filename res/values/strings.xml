@@ -5,8 +5,7 @@
     <string name="activity_inbox_title">Inbox</string>
     <string name="voice_help">To record your message click on the microphone at the top bar.</string>
     <string name="message_sent">Message Sent</string>
-    <string name="unknown_contact">Unknown name</string>
-    <string name="unknown_number">Unknown number</string>
+    <string name="choose_contact">Choose a contact</string>
 
     <!-- Voice prompts -->
     <string name="promt_enter_a_message">Please enter a message</string>

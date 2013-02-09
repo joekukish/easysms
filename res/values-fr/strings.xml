@@ -3,8 +3,6 @@
 
     <string name="app_name">EasySMS</string>
     <string name="activity_inbox_title">Boîte de réception</string>
-    <string name="unknown_contact">Non inconnu</string>
-    <string name="unknown_number">Número inconnu</string>
 
     <!-- Dates -->
     <string name="date_format_short">dd MMM</string>
