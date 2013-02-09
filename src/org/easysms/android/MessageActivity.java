@@ -176,49 +176,37 @@ public class MessageActivity extends SherlockActivity {
 					// this second loop will retrieve all the contact
 					// numbers for a particular contact id
 					String mobilePhone = null;
-					String homePhone = null;
-					String workPhone = null;
 					String otherPhone = null;
 
 					if (pCur != null) {
 
 						// extracts all the available numbers.
 						while (pCur.moveToNext()) {
-							if (pCur.getInt(pCur.getColumnIndex(Phone.TYPE)) == Phone.TYPE_MOBILE) {
 
-								switch (pCur.getInt(pCur
-										.getColumnIndex(Phone.TYPE))) {
-								case Phone.TYPE_MOBILE:
-									mobilePhone = pCur.getString(pCur
-											.getColumnIndex(Phone.NUMBER));
-									break;
-								case Phone.TYPE_HOME:
-									homePhone = pCur.getString(pCur
-											.getColumnIndex(Phone.NUMBER));
-									break;
-								case Phone.TYPE_WORK:
-									workPhone = pCur.getString(pCur
-											.getColumnIndex(Phone.NUMBER));
-									break;
-								case Phone.TYPE_OTHER:
-									otherPhone = pCur.getString(pCur
-											.getColumnIndex(Phone.NUMBER));
-									break;
-								}
+							// extracts the phone depending on the type.
+							switch (pCur
+									.getInt(pCur.getColumnIndex(Phone.TYPE))) {
+							case Phone.TYPE_MOBILE:
+								mobilePhone = pCur.getString(pCur
+										.getColumnIndex(Phone.NUMBER));
+								break;
+							default:
+								otherPhone = pCur.getString(pCur
+										.getColumnIndex(Phone.NUMBER));
+								break;
 							}
 						}
-						// uses the first available number.
+
+						// gives priority to mobile, otherwise any other found
+						// number
 						if (mobilePhone != null) {
 							contactNumber = mobilePhone;
-						} else if (homePhone != null) {
-							contactNumber = homePhone;
-						} else if (workPhone != null) {
-							contactNumber = workPhone;
 						} else if (otherPhone != null) {
-							otherPhone = contactNumber;
+							contactNumber = otherPhone;
 						}
 					}
 
+					// closes the cursor in charge of the phone numbers.
 					pCur.close();
 				}
 
