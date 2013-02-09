@@ -227,6 +227,8 @@ public class InboxActivity extends SherlockListActivity implements
 		}
 
 		for (Conversation conv : allconversations) {
+
+			// object used to store the properties of the conversation.
 			HashMap<String, Object> temp2 = new HashMap<String, Object>();
 
 			// we use the first message of the list.
@@ -247,6 +249,7 @@ public class InboxActivity extends SherlockListActivity implements
 			temp2.put("name", contact.displayName);
 			temp2.put("message", firstsms.body);
 			temp2.put("thread_id", conv.threadid);
+			temp2.put("read", firstsms.isRead);
 
 			mMessageList.add(temp2);
 		}
