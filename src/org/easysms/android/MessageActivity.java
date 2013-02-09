@@ -34,7 +34,6 @@ import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -311,7 +310,7 @@ public class MessageActivity extends SherlockActivity {
 		mViewPager.setCurrentItem(0);
 
 		// gets the area where the message is composed.
-		mComposeLayout = (KaraokeLayout) findViewById(R.id.view_message_karaoke_compose);
+		mComposeLayout = (KaraokeLayout) findViewById(R.id.bottom_compose_karaoke_compose);
 		mComposeLayout
 				.setOnKaraokeClickListener(new KaraokeLayout.OnKaraokeClickListener() {
 
@@ -370,7 +369,7 @@ public class MessageActivity extends SherlockActivity {
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
 		// gets the send button and wires the event.
-		ImageButton sendButton = (ImageButton) findViewById(R.id.view_message_button_send);
+		Button sendButton = (Button) findViewById(R.id.bottom_compose_button_send);
 		sendButton.setOnClickListener(new View.OnClickListener() {
 
 			@Override
