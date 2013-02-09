@@ -323,7 +323,6 @@ public class KaraokeLayout extends ViewGroup {
 										(String) btn.getText());
 							}
 						});
-
 					}
 
 					try {

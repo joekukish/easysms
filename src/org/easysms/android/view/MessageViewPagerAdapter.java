@@ -51,6 +51,9 @@ public class MessageViewPagerAdapter extends PagerAdapter {
 	/** Text options as a result of the Voice Recognition. */
 	private List<String> mVoiceOptions;
 
+	/** LinearLayout where the Voice options are contained. */
+	private LinearLayout mVoiceOptionsLayout;
+
 	/**
 	 * Creates a new MessageViewPagerAdapter instance.
 	 * 
@@ -70,6 +73,9 @@ public class MessageViewPagerAdapter extends PagerAdapter {
 
 		if (mVoiceOptions != options) {
 			mVoiceOptions = options;
+
+			// updates the layout.
+			loadVoiceOptions();
 
 			// indicates that size must be modified.
 			this.notifyDataSetChanged();
@@ -358,141 +364,10 @@ public class MessageViewPagerAdapter extends PagerAdapter {
 			// inflates the layout
 			view = inflater.inflate(R.layout.layout_speech_recognition_options,
 					null);
-			LinearLayout optionsLayout = (LinearLayout) view
+			mVoiceOptionsLayout = (LinearLayout) view
 					.findViewById(R.id.speech_recognition_options_list);
 
-			// iterates the options.
-			for (int i = 0; i < mVoiceOptions.size(); i++) {
-
-				// create a new flow layout for each choice
-				final KaraokeLayout kl = new KaraokeLayout(mParent);
-
-				// add the view number
-				ImageView number = new ImageView(mParent);
-				if (i == 0) {
-					number.setBackgroundResource(R.drawable.one);
-					number.setContentDescription("one");
-				} else if (i == 1) {
-					number.setBackgroundResource(R.drawable.two);
-					number.setContentDescription("two");
-				} else if (i == 2) {
-					number.setBackgroundResource(R.drawable.three);
-					number.setContentDescription("three");
-				}
-
-				// adds the view to the layout.
-				kl.addView(number);
-
-				number.setOnClickListener(new View.OnClickListener() {
-
-					@Override
-					public void onClick(View v) {
-						// tracks the user activity.
-						ApplicationTracker.getInstance().logEvent(
-								EventType.CLICK, mParent,
-								"voice_option_number",
-								v.getContentDescription(), kl.getText());
-						// tracks using google analytics.
-						EasyTracker.getTracker().sendEvent("ui_action",
-								"button_press", "voice_option_number", null);
-
-					}
-				});
-				number.setOnLongClickListener(new View.OnLongClickListener() {
-					@Override
-					public boolean onLongClick(View v) {
-						// tracks the user activity.
-						ApplicationTracker.getInstance().logEvent(
-								EventType.LONG_CLICK, mParent,
-								"voice_option_number",
-								v.getContentDescription(), kl.getText());
-						// tracks using google analytics.
-						EasyTracker.getTracker().sendEvent("ui_action",
-								"button_long_press", "voice_option_number",
-								null);
-
-						// adds the text to the compose layout.
-						mParent.addTextToMessage(kl.getText());
-						return true;
-					}
-				});
-
-				// adds the sentence to the layout.
-				kl.setText(mVoiceOptions.get(i));
-
-				kl.setOnLongClickListener(new View.OnLongClickListener() {
-					@Override
-					public boolean onLongClick(View v) {
-						// tracks the user activity.
-						ApplicationTracker.getInstance().logEvent(
-								EventType.LONG_CLICK, mParent,
-								"voice_option_bubble", kl.getText());
-						// tracks using google analytics.
-						EasyTracker.getTracker().sendEvent("ui_action",
-								"button_long_press", "voice_option_bubble",
-								null);
-
-						// adds the text to the compose layout.
-						mParent.addTextToMessage(kl.getText());
-						return true;
-					}
-				});
-
-				kl.setOnKaraokeClickListener(new KaraokeLayout.OnKaraokeClickListener() {
-
-					@Override
-					public void onClick(Button button) {
-						// tracks the user activity.
-						ApplicationTracker.getInstance().logEvent(
-								EventType.CLICK, mParent,
-								"voice_option_bubble_word", button.getText());
-						// tracks using google analytics.
-						EasyTracker.getTracker().sendEvent("ui_action",
-								"button_press", "voice_option_bubble_word",
-								null);
-					}
-				});
-
-				kl.setOnKaraokeLongClickListener(new KaraokeLayout.OnKaraokeLongClickListener() {
-
-					@Override
-					public boolean onLongClick(Button button) {
-
-						// tracks the user activity.
-						ApplicationTracker.getInstance().logEvent(
-								EventType.LONG_CLICK, mParent,
-								"voice_option_bubble_word", button.getText());
-						// tracks using google analytics.
-						EasyTracker.getTracker().sendEvent("ui_action",
-								"button_long_press",
-								"voice_option_bubble_word", null);
-
-						// adds the text to the compose layout.
-						mParent.addTextToMessage(button.getText().toString());
-
-						return true;
-					}
-				});
-
-				kl.setOnKaraokePlayButtonClickListener(new KaraokeLayout.OnKaraokePlayButtonClickListener() {
-
-					@Override
-					public boolean onPlayClick() {
-						// tracks the user activity.
-						ApplicationTracker.getInstance().logEvent(
-								EventType.CLICK, mParent,
-								"voice_option_bubble_play");
-						// tracks using google analytics.
-						EasyTracker.getTracker().sendEvent("ui_action",
-								"button_press", "voice_option_bubble_play",
-								null);
-						return true;
-					}
-				});
-
-				// adds the option to the view.
-				optionsLayout.addView(kl);
-			}
+			loadVoiceOptions();
 
 			break;
 		}
@@ -504,6 +379,142 @@ public class MessageViewPagerAdapter extends PagerAdapter {
 	@Override
 	public boolean isViewFromObject(View arg0, Object arg1) {
 		return arg0 == ((View) arg1);
+	}
+
+	private void loadVoiceOptions() {
+
+		if (mVoiceOptionsLayout == null)
+			return;
+
+		// removes all previous contents.
+		mVoiceOptionsLayout.removeAllViews();
+
+		// iterates the options.
+		for (int i = 0; i < mVoiceOptions.size(); i++) {
+
+			// create a new flow layout for each choice
+			final KaraokeLayout kl = new KaraokeLayout(mParent);
+
+			// add the view number
+			ImageView number = new ImageView(mParent);
+			if (i == 0) {
+				number.setBackgroundResource(R.drawable.one);
+				number.setContentDescription("one");
+			} else if (i == 1) {
+				number.setBackgroundResource(R.drawable.two);
+				number.setContentDescription("two");
+			} else if (i == 2) {
+				number.setBackgroundResource(R.drawable.three);
+				number.setContentDescription("three");
+			}
+
+			// adds the view to the layout.
+			kl.addView(number);
+
+			number.setOnClickListener(new View.OnClickListener() {
+
+				@Override
+				public void onClick(View v) {
+					// tracks the user activity.
+					ApplicationTracker.getInstance().logEvent(EventType.CLICK,
+							mParent, "voice_option_number",
+							v.getContentDescription(), kl.getText());
+					// tracks using google analytics.
+					EasyTracker.getTracker().sendEvent("ui_action",
+							"button_press", "voice_option_number", null);
+
+				}
+			});
+			number.setOnLongClickListener(new View.OnLongClickListener() {
+				@Override
+				public boolean onLongClick(View v) {
+					// tracks the user activity.
+					ApplicationTracker.getInstance().logEvent(
+							EventType.LONG_CLICK, mParent,
+							"voice_option_number", v.getContentDescription(),
+							kl.getText());
+					// tracks using google analytics.
+					EasyTracker.getTracker().sendEvent("ui_action",
+							"button_long_press", "voice_option_number", null);
+
+					// adds the text to the compose layout.
+					mParent.addTextToMessage(kl.getText());
+					return true;
+				}
+			});
+
+			// adds the sentence to the layout.
+			kl.setText(mVoiceOptions.get(i));
+
+			kl.setOnLongClickListener(new View.OnLongClickListener() {
+				@Override
+				public boolean onLongClick(View v) {
+					// tracks the user activity.
+					ApplicationTracker.getInstance().logEvent(
+							EventType.LONG_CLICK, mParent,
+							"voice_option_bubble", kl.getText());
+					// tracks using google analytics.
+					EasyTracker.getTracker().sendEvent("ui_action",
+							"button_long_press", "voice_option_bubble", null);
+
+					// adds the text to the compose layout.
+					mParent.addTextToMessage(kl.getText());
+					return true;
+				}
+			});
+
+			kl.setOnKaraokeClickListener(new KaraokeLayout.OnKaraokeClickListener() {
+
+				@Override
+				public void onClick(Button button) {
+					// tracks the user activity.
+					ApplicationTracker.getInstance().logEvent(EventType.CLICK,
+							mParent, "voice_option_bubble_word",
+							button.getText());
+					// tracks using google analytics.
+					EasyTracker.getTracker().sendEvent("ui_action",
+							"button_press", "voice_option_bubble_word", null);
+				}
+			});
+
+			kl.setOnKaraokeLongClickListener(new KaraokeLayout.OnKaraokeLongClickListener() {
+
+				@Override
+				public boolean onLongClick(Button button) {
+
+					// tracks the user activity.
+					ApplicationTracker.getInstance().logEvent(
+							EventType.LONG_CLICK, mParent,
+							"voice_option_bubble_word", button.getText());
+					// tracks using google analytics.
+					EasyTracker.getTracker().sendEvent("ui_action",
+							"button_long_press", "voice_option_bubble_word",
+							null);
+
+					// adds the text to the compose layout.
+					mParent.addTextToMessage(button.getText().toString());
+
+					return true;
+				}
+			});
+
+			kl.setOnKaraokePlayButtonClickListener(new KaraokeLayout.OnKaraokePlayButtonClickListener() {
+
+				@Override
+				public boolean onPlayClick() {
+					// tracks the user activity.
+					ApplicationTracker.getInstance().logEvent(EventType.CLICK,
+							mParent, "voice_option_bubble_play");
+					// tracks using google analytics.
+					EasyTracker.getTracker().sendEvent("ui_action",
+							"button_press", "voice_option_bubble_play", null);
+					return true;
+				}
+			});
+
+			// adds the option to the view.
+			mVoiceOptionsLayout.addView(kl);
+		}
 	}
 
 	/**
