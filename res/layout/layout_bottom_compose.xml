@@ -6,12 +6,17 @@
     android:background="@android:color/white"
     android:paddingBottom="@dimen/margin_small" >
 
-    <org.easysms.android.ui.KaraokeLayout
-        android:id="@+id/bottom_compose_karaoke_compose"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_toLeftOf="@+id/bottom_compose_button_send" >
-    </org.easysms.android.ui.KaraokeLayout>
+
+        <org.easysms.android.ui.KaraokeLayout
+            android:id="@+id/bottom_compose_karaoke_compose"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+        </org.easysms.android.ui.KaraokeLayout>
+    </ScrollView>
 
     <Button
         android:id="@+id/bottom_compose_button_send"

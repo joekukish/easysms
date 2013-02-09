@@ -428,7 +428,7 @@ public class SmsContentProvider extends ContentObserver {
 		/* logging action HERE... */
 	}
 
-	public void sendSMS(String phoneNumber, String message) {
+	public void sendSms(String phoneNumber, String message) {
 
 		String SENT = "SMS_SENT";
 		String DELIVERED = "SMS_DELIVERED";
@@ -443,23 +443,29 @@ public class SmsContentProvider extends ContentObserver {
 		mContext.registerReceiver(new BroadcastReceiver() {
 			@Override
 			public void onReceive(Context arg0, Intent arg1) {
+
 				switch (getResultCode()) {
 				case Activity.RESULT_OK: // message sent
 
-					// vocal feedback when message sent
-					String sentence = mContext.getResources().getString(
-							R.string.message_sent);
-
 					// plays the audio.
-					TextToSpeechManager.getInstance().say(sentence);
+					TextToSpeechManager.getInstance().say(
+							mContext.getResources().getString(
+									R.string.message_sent));
 
 					break;
 				case SmsManager.RESULT_ERROR_GENERIC_FAILURE:
-					Toast.makeText(mContext, "Erreur d'envoi du message",
+
+					Toast.makeText(
+							mContext,
+							mContext.getResources().getString(
+									R.string.message_sent_error),
 							Toast.LENGTH_SHORT).show();
 					break;
 				case SmsManager.RESULT_ERROR_NO_SERVICE:
-					Toast.makeText(mContext, "Erreur, pas de  service",
+					Toast.makeText(
+							mContext,
+							mContext.getResources().getString(
+									R.string.error_no_service),
 							Toast.LENGTH_SHORT).show();
 					break;
 				case SmsManager.RESULT_ERROR_NULL_PDU:

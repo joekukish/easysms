@@ -286,10 +286,10 @@ public class MessageActivity extends SherlockActivity {
 			setContentView(R.layout.act_view_message);
 
 			// obtains the user info from the extras.
+			mThreadId = (Long) bundle.get(MessageActivity.EXTRA_THREAD_ID);
 			mContactName = (String) bundle.get(MessageActivity.EXTRA_NAME);
 			mContactPhoneNumber = (String) bundle
 					.get(MessageActivity.EXTRA_PHONE_NUMBER);
-			mThreadId = (Long) bundle.get(MessageActivity.EXTRA_THREAD_ID);
 
 			// allows the top bar to be different.
 			ActionBar actionBar = getSupportActionBar();
@@ -591,7 +591,7 @@ public class MessageActivity extends SherlockActivity {
 				&& !mComposeLayout.getText().equals("")) {
 
 			// sends the current message as an SMS.
-			mContentProvider.sendSMS(mContactPhoneNumber,
+			mContentProvider.sendSms(mContactPhoneNumber,
 					mComposeLayout.getText());
 
 			// right after the message is sent, navigates to the message
@@ -604,6 +604,7 @@ public class MessageActivity extends SherlockActivity {
 			// creates the bundle
 			Bundle bundle = new Bundle();
 			// adds the parameters to bundle
+			bundle.putLong(EXTRA_THREAD_ID, mThreadId);
 			bundle.putString(EXTRA_NAME, contact.displayName);
 			bundle.putString(EXTRA_PHONE_NUMBER, mContactPhoneNumber);
 			bundle.putBoolean(EXTRA_NEW_MESSAGE, false);
