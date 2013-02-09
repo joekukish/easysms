@@ -7,7 +7,6 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
-import android.widget.Toast;
 
 public class SmsService extends Service {
 
@@ -24,9 +23,9 @@ public class SmsService extends Service {
 
 		@Override
 		public void onChange(boolean selfChange) {
-			Toast.makeText(getBaseContext(),
-					"Didn't call onChange()( " + selfChange + ")",
-					Toast.LENGTH_SHORT).show();
+			// Toast.makeText(getBaseContext(),
+			// "Didn't call onChange()( " + selfChange + ")",
+			// Toast.LENGTH_SHORT).show();
 
 			super.onChange(selfChange);
 		}

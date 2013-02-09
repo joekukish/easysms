@@ -8,17 +8,17 @@ import android.content.Context;
 import android.graphics.Bitmap;
 
 public class Sms {
-	public String body;
 	public String address;
+	public String body;
 	public Date date;
-	public String person;
-	public Boolean isRead;
-	public int type;
-	public String threadid;
 	public Bitmap image;
+	public Boolean isRead;
+	public String person;
 	public String protocol;
+	public long threadid;
+	public int type;
 
-	public Sms(String m_threadid, Date m_date, String m_address, String m_body) {
+	public Sms(long m_threadid, Date m_date, String m_address, String m_body) {
 		threadid = m_threadid;
 		date = m_date;
 		address = m_address;

@@ -2,9 +2,9 @@ package org.easysms.android;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import org.easysms.android.data.Contact;
-import org.easysms.android.data.Sms;
 import org.easysms.android.provider.SmsContentProvider;
 import org.easysms.android.ui.KaraokeLayout;
 import org.easysms.android.util.ApplicationTracker;
@@ -44,7 +44,6 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.google.analytics.tracking.android.EasyTracker;
-import com.google.analytics.tracking.android.Tracker;
 
 @TargetApi(8)
 public class MessageActivity extends SherlockActivity {
@@ -55,6 +54,8 @@ public class MessageActivity extends SherlockActivity {
 	public static final String EXTRA_NEW_MESSAGE = "NewMsg";
 	/** Identifier of the extra used to pass the phone number. */
 	public static final String EXTRA_PHONE_NUMBER = "Tel";
+	/** Identifier of the extra used to pass the thread id. */
+	public static final String EXTRA_THREAD_ID = "ThreadId";
 
 	/** Code used to detect to the Pick Contact Intent. */
 	private static final int PICK_CONTACT = 4321;
@@ -75,9 +76,8 @@ public class MessageActivity extends SherlockActivity {
 	private boolean mIsNewMessage;
 	/** Adapter used to handle the content inside the ViewPager. */
 	private MessageViewPagerAdapter mPagerAdapter;
-	/** Tracker used for Google Analytics. */
-	protected Tracker mTracker;
-
+	/** Thread id of the displayed conversation. */
+	private long mThreadId;
 	/** Pager that allows swiping between the views. */
 	private ViewPager mViewPager;
 
@@ -96,7 +96,7 @@ public class MessageActivity extends SherlockActivity {
 		return mContactName;
 	}
 
-	public String getContactPhonenumber() {
+	public String getContactPhoneNumber() {
 		return mContactPhoneNumber;
 	}
 
@@ -104,12 +104,16 @@ public class MessageActivity extends SherlockActivity {
 		return mContentProvider;
 	}
 
+	public long getThreadId() {
+		return mThreadId;
+	}
+
 	/**
 	 * Detects if there is an active Internet connection.
 	 * 
 	 * @return true if there is an active Internet connection, otherwise false.
 	 */
-	public boolean isInternetOn() {
+	protected boolean isInternetOn() {
 		ConnectivityManager connec = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 
 		// checks if Internet is available.
@@ -229,7 +233,8 @@ public class MessageActivity extends SherlockActivity {
 				recipientName.setText(contactName);
 				recipientNumber.setText(contactNumber);
 
-				// sets the recipients number.
+				// sets the recipient data.
+				mContactName = contactName;
 				mContactPhoneNumber = contactNumber;
 
 				cur.close();
@@ -255,7 +260,6 @@ public class MessageActivity extends SherlockActivity {
 
 		// configures and loads the google analytics tracker.
 		EasyTracker.getInstance().setContext(this);
-		mTracker = EasyTracker.getTracker();
 
 		if (mIsNewMessage) {
 			// shows and existing thread.
@@ -273,6 +277,9 @@ public class MessageActivity extends SherlockActivity {
 				}
 			});
 
+			// new thread.
+			mThreadId = -1;
+
 		} else {
 
 			// shows and existing thread.
@@ -282,6 +289,7 @@ public class MessageActivity extends SherlockActivity {
 			mContactName = (String) bundle.get(MessageActivity.EXTRA_NAME);
 			mContactPhoneNumber = (String) bundle
 					.get(MessageActivity.EXTRA_PHONE_NUMBER);
+			mThreadId = (Long) bundle.get(MessageActivity.EXTRA_THREAD_ID);
 
 			// allows the top bar to be different.
 			ActionBar actionBar = getSupportActionBar();
@@ -289,8 +297,7 @@ public class MessageActivity extends SherlockActivity {
 			// modifies layout depending if name is available or not.
 			if (mContactName == null || mContactName.trim().equals("")) {
 				// sets the phone number instead of the name since it is not
-				// available.
-				// the action bar handles the layout change.
+				// available. the action bar handles the layout change.
 				actionBar.setTitle(mContactPhoneNumber);
 
 			} else {
@@ -322,8 +329,8 @@ public class MessageActivity extends SherlockActivity {
 								EventType.CLICK, MessageActivity.this,
 								"compose_bubble_word", button.getText());
 						// tracks using google analytics.
-						mTracker.sendEvent("ui_action", "button_press",
-								"compose_bubble_word", null);
+						EasyTracker.getTracker().sendEvent("ui_action",
+								"button_press", "compose_bubble_word", null);
 
 					}
 				});
@@ -339,8 +346,9 @@ public class MessageActivity extends SherlockActivity {
 								EventType.LONG_CLICK, MessageActivity.this,
 								"compose_bubble_word", button.getText());
 						// tracks using google analytics.
-						mTracker.sendEvent("ui_action", "button_long_press",
-								"compose_bubble_word", null);
+						EasyTracker.getTracker().sendEvent("ui_action",
+								"button_long_press", "compose_bubble_word",
+								null);
 
 						// removes the test from the bubble.
 						mComposeLayout.removeWordButton(button);
@@ -416,8 +424,8 @@ public class MessageActivity extends SherlockActivity {
 			ApplicationTracker.getInstance().logEvent(EventType.CLICK, this,
 					"home_button", item.getItemId());
 			// tracks using google analytics.
-			mTracker.sendEvent("ui_action", "button_press", "home_button",
-					(long) item.getItemId());
+			EasyTracker.getTracker().sendEvent("ui_action", "button_press",
+					"home_button", (long) item.getItemId());
 
 			// goes back to the home upon the back button click.
 			intent = new Intent();
@@ -433,8 +441,8 @@ public class MessageActivity extends SherlockActivity {
 			ApplicationTracker.getInstance().logEvent(EventType.CLICK, this,
 					"call_button", item.getItemId());
 			// tracks using google analytics.
-			mTracker.sendEvent("ui_action", "button_press", "call_button",
-					(long) item.getItemId());
+			EasyTracker.getTracker().sendEvent("ui_action", "button_press",
+					"call_button", (long) item.getItemId());
 
 			// creates the uri.
 			String uri = "tel:" + mContactPhoneNumber;
@@ -452,8 +460,8 @@ public class MessageActivity extends SherlockActivity {
 			ApplicationTracker.getInstance().logEvent(EventType.CLICK, this,
 					"delete_button", item.getItemId());
 			// tracks using google analytics.
-			mTracker.sendEvent("ui_action", "button_press", "delete_button",
-					(long) item.getItemId());
+			EasyTracker.getTracker().sendEvent("ui_action", "button_press",
+					"delete_button", (long) item.getItemId());
 
 			Runnable runnable = new Runnable() {
 				@Override
@@ -485,8 +493,8 @@ public class MessageActivity extends SherlockActivity {
 			ApplicationTracker.getInstance().logEvent(EventType.CLICK, this,
 					"voice_button", item.getItemId());
 			// tracks using google analytics.
-			mTracker.sendEvent("ui_action", "button_press", "voice_button",
-					(long) item.getItemId());
+			EasyTracker.getTracker().sendEvent("ui_action", "button_press",
+					"voice_button", (long) item.getItemId());
 
 			if (isInternetOn()) {
 
@@ -505,7 +513,8 @@ public class MessageActivity extends SherlockActivity {
 				ApplicationTracker.getInstance().logEvent(EventType.ERROR,
 						this, "speech_recognizer",
 						"internet_connetion_not_available");
-				mTracker.sendEvent("app_error", "speech_recognizer",
+				EasyTracker.getTracker().sendEvent("app_error",
+						"speech_recognizer",
 						"internet_connetion_not_available",
 						new Date().getTime());
 			}
@@ -530,8 +539,9 @@ public class MessageActivity extends SherlockActivity {
 			// tracks the error.
 			ApplicationTracker.getInstance().logEvent(EventType.ERROR, this,
 					"speech_recognizer", "speech_recognizer_not_available");
-			mTracker.sendEvent("app_error", "speech_recognizer",
-					"speech_recognizer_not_available", new Date().getTime());
+			EasyTracker.getTracker().sendEvent("app_error",
+					"speech_recognizer", "speech_recognizer_not_available",
+					new Date().getTime());
 
 			item = menu.findItem(R.id.menu_voice);
 			item.setEnabled(false);
@@ -572,16 +582,6 @@ public class MessageActivity extends SherlockActivity {
 		EasyTracker.getInstance().activityStop(this);
 	}
 
-	public String retrieveThreadIdFromNumberContact(String phoneNumContact) {
-		for (Sms sms : mContentProvider.getMessages()) {
-			String smscontact = sms.address;
-			// TODO: could it really be null?
-			if (smscontact != null && smscontact.equals(phoneNumContact))
-				return sms.threadid;
-		}
-		return "error";
-	}
-
 	protected void sendMessage() {
 
 		// message said using the TTS and a Toast.
@@ -594,8 +594,6 @@ public class MessageActivity extends SherlockActivity {
 			mContentProvider.sendSMS(mContactPhoneNumber,
 					mComposeLayout.getText());
 
-			// inserts the SMS sent into DB
-			String threadid = retrieveThreadIdFromNumberContact(mContactPhoneNumber);
 			// right after the message is sent, navigates to the message
 			// details page
 			Intent i = new Intent(MessageActivity.this, MessageActivity.class);
@@ -613,11 +611,12 @@ public class MessageActivity extends SherlockActivity {
 			i.putExtras(bundle);
 			startActivity(i);
 
+			// TODO: remove strings.
 			// insert SMS in the data base content provider
 			ContentValues values = new ContentValues();
 			values.put("address", mContactPhoneNumber);
 			values.put("read", 1);
-			values.put("thread_id", threadid);
+			values.put("thread_id", mThreadId);
 			values.put("body", mComposeLayout.getText());
 			getContentResolver()
 					.insert(Uri.parse("content://sms/sent"), values);
@@ -637,7 +636,8 @@ public class MessageActivity extends SherlockActivity {
 			// plays the audio.
 			TextToSpeechManager.getInstance().say(promptText);
 
-		} else if (mContactPhoneNumber.length() > 0) {
+		} else if (mContactPhoneNumber == null
+				|| mContactPhoneNumber.trim().length() == 0) {
 
 			promptText = getResources().getString(
 					R.string.promt_enter_a_phone_number);
@@ -673,8 +673,8 @@ public class MessageActivity extends SherlockActivity {
 		// number of results the recognizer should return.
 		intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3);
 
-		// sets the default language.
-		// intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "en-US");
+		// sets the language the same as the locale
+		intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
 
 		// starts the activity.
 		startActivityForResult(intent, VOICE_RECOGNITION_REQUEST_CODE);

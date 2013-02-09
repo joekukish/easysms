@@ -15,28 +15,14 @@ import android.widget.ArrayAdapter;
 
 public class ConversationAdapter extends ArrayAdapter<Sms> {
 
+	private OnKaraokeClickListener mClickListener;
+
 	// /** Conversation that encloses the adapter. */
 	// private Conversation mConversation;
 	/** Inflater used to create the layout based on the XML. */
 	private LayoutInflater mLayoutInflater;
-
-	private OnKaraokePlayButtonClickListener mPlayButtonListener;
-	private OnKaraokeClickListener mClickListener;
 	private OnKaraokeLongClickListener mLongClickListener;
-
-	public void setOnKaraokePlayButtonListener(
-			OnKaraokePlayButtonClickListener listener) {
-		mPlayButtonListener = listener;
-	}
-
-	public void setOnKaraokeClickListener(OnKaraokeClickListener listener) {
-		mClickListener = listener;
-	}
-
-	public void setOnKaraokeLongClickListener(
-			OnKaraokeLongClickListener listener) {
-		mLongClickListener = listener;
-	}
+	private OnKaraokePlayButtonClickListener mPlayButtonListener;
 
 	/**
 	 * Creates a new PlotItemAdapter instance.
@@ -81,5 +67,19 @@ public class ConversationAdapter extends ArrayAdapter<Sms> {
 				mPlayButtonListener);
 
 		return (row);
+	}
+
+	public void setOnKaraokeClickListener(OnKaraokeClickListener listener) {
+		mClickListener = listener;
+	}
+
+	public void setOnKaraokeLongClickListener(
+			OnKaraokeLongClickListener listener) {
+		mLongClickListener = listener;
+	}
+
+	public void setOnKaraokePlayButtonListener(
+			OnKaraokePlayButtonClickListener listener) {
+		mPlayButtonListener = listener;
 	}
 }

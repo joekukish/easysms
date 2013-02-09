@@ -29,20 +29,17 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.google.analytics.tracking.android.EasyTracker;
-import com.google.analytics.tracking.android.Tracker;
 
 @TargetApi(8)
 public class InboxActivity extends SherlockListActivity implements
 		OnItemClickListener {
 
+	/** Adapter used to manage the message list. */
+	private InboxItemAdapter mAdapter;
 	/** Class that handles the SMS extraction. */
 	private SmsContentProvider mContentProvider;
 	/** List of conversations that are displayed in the inbox. */
 	private ArrayList<HashMap<String, Object>> mMessageList;
-	/** Tracker used for Google Analytics. */
-	private Tracker mTracker;
-	/** Adapter used to manage the message list. */
-	private InboxItemAdapter mAdapter;
 
 	/**
 	 * Loads the complete message list.
@@ -60,6 +57,7 @@ public class InboxActivity extends SherlockListActivity implements
 		// handles the content loading in a separate thread
 		new Handler().post(new Runnable() {
 			public void run() {
+
 				// gets the messages from the provider and groups them into
 				// conversations.
 				populateList(mContentProvider.getMessages());
@@ -98,7 +96,6 @@ public class InboxActivity extends SherlockListActivity implements
 
 		// gets the current tracker.
 		EasyTracker.getInstance().setContext(this);
-		mTracker = EasyTracker.getTracker();
 
 		// initializes the list where the messages will be stored.
 		mMessageList = new ArrayList<HashMap<String, Object>>();
@@ -128,12 +125,13 @@ public class InboxActivity extends SherlockListActivity implements
 
 		// tracks the user activity.
 		ApplicationTracker.getInstance().logEvent(EventType.CLICK, this,
-				"inbox_item", o.get("telnumber"), position);
+				"inbox_item", o.get("telnumber"));
 		// tracks using google analytics.
-		mTracker.sendEvent("ui_action", "inbox_item_press",
-				(String) o.get("telnumber"), (long) position);
+		EasyTracker.getTracker().sendEvent("ui_action", "inbox_item_press",
+				(String) o.get("telnumber"), null);
 
 		// gets the parameters from the selected message
+		long threadid = (Long) o.get("thread_id");
 		String telnum = (String) o.get("telnumber");
 		String name = (String) o.get("name");
 
@@ -142,12 +140,11 @@ public class InboxActivity extends SherlockListActivity implements
 
 		// creates and initializes the bundle.
 		Bundle bundle = new Bundle();
-
 		// adds the parameters to bundle
+		bundle.putLong(MessageActivity.EXTRA_THREAD_ID, threadid);
 		bundle.putString(MessageActivity.EXTRA_NAME, name);
 		bundle.putString(MessageActivity.EXTRA_PHONE_NUMBER, telnum);
 		bundle.putBoolean(MessageActivity.EXTRA_NEW_MESSAGE, false);
-
 		// adds this bundle to the intent
 		i.putExtras(bundle);
 		// starts the new activity.
@@ -164,7 +161,7 @@ public class InboxActivity extends SherlockListActivity implements
 			ApplicationTracker.getInstance().logEvent(EventType.CLICK, this,
 					"new_message_button", item.getItemId());
 			// tracks using google analytics.
-			mTracker.sendEvent("ui_action", "button_press",
+			EasyTracker.getTracker().sendEvent("ui_action", "button_press",
 					"new_message_button", (long) item.getItemId());
 
 			// creates an intent for the next screen.
@@ -212,7 +209,7 @@ public class InboxActivity extends SherlockListActivity implements
 			// case where the SMS is a draft, otherwise the pp bugs.
 			if (smsnew.address != null) {
 				for (Conversation conv : allconversations) {
-					if (conv.threadid.equals(smsnew.threadid)) {
+					if (conv.threadid == smsnew.threadid) {
 						conv.listsms.add(smsnew);
 						add = true;
 					}
@@ -249,6 +246,7 @@ public class InboxActivity extends SherlockListActivity implements
 			temp2.put("date", firstsms.getDate(this));
 			temp2.put("name", contact.displayName);
 			temp2.put("message", firstsms.body);
+			temp2.put("thread_id", conv.threadid);
 
 			mMessageList.add(temp2);
 		}

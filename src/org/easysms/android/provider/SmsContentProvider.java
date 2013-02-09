@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.easysms.android.R;
 import org.easysms.android.data.Contact;
+import org.easysms.android.data.Conversation;
 import org.easysms.android.data.Sms;
 import org.easysms.android.util.TextToSpeechManager;
 
@@ -19,6 +20,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.ContentObserver;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -35,11 +37,25 @@ public class SmsContentProvider extends ContentObserver {
 	/** List of cached messages. */
 	private ArrayList<Sms> mMessages;
 
+	/**
+	 * Creates a new SmsContectProvider instance.
+	 * 
+	 * @param context
+	 *            application context.
+	 */
 	public SmsContentProvider(Context context) {
 		super(new Handler());
 		mContext = context;
 	}
 
+	/**
+	 * Obtains the contact information given a phone number.
+	 * 
+	 * @param number
+	 *            phone number to check.
+	 * 
+	 * @return a Contact object with all registered data.
+	 */
 	public Contact getContact(String number) {
 
 		// we want to take a contact that has the same phone number.
@@ -72,28 +88,6 @@ public class SmsContentProvider extends ContentObserver {
 			c.close();
 		}
 		return tmpContact;
-	}
-
-	public Bitmap getContactPhotoWithPhotoId(long photoId) {
-		Cursor c = mContext.getContentResolver().query(
-				ContactsContract.Data.CONTENT_URI,
-				new String[] { ContactsContract.CommonDataKinds.Photo.PHOTO },
-				ContactsContract.Data._ID + "=?",
-				new String[] { Long.toString(photoId) }, null);
-		byte[] imageBytes = null;
-		if (c != null) {
-			if (c.moveToFirst()) {
-				imageBytes = c.getBlob(0);
-			}
-			c.close();
-		}
-
-		if (imageBytes != null) {
-			return BitmapFactory.decodeByteArray(imageBytes, 0,
-					imageBytes.length);
-		} else {
-			return null;
-		}
 	}
 
 	public Bitmap getContactPhoto(String phoneNumber) {
@@ -133,54 +127,81 @@ public class SmsContentProvider extends ContentObserver {
 		return null;
 	}
 
-	public synchronized List<Sms> getMessages() {
+	public Bitmap getContactPhotoWithPhotoId(long photoId) {
+		Cursor c = mContext.getContentResolver().query(
+				ContactsContract.Data.CONTENT_URI,
+				new String[] { ContactsContract.CommonDataKinds.Photo.PHOTO },
+				ContactsContract.Data._ID + "=?",
+				new String[] { Long.toString(photoId) }, null);
+		byte[] imageBytes = null;
+		if (c != null) {
+			if (c.moveToFirst()) {
+				imageBytes = c.getBlob(0);
+			}
+			c.close();
+		}
 
-		// if (mMessages == null) {
+		if (imageBytes != null) {
+			return BitmapFactory.decodeByteArray(imageBytes, 0,
+					imageBytes.length);
+		} else {
+			return null;
+		}
+	}
+
+	public synchronized List<Sms> getConversations() {
 
 		// we put all the SMS sent and received in a list
 		mMessages = new ArrayList<Sms>();
 
-		Cursor curinbox = mContext.getContentResolver().query(
-				Uri.parse("content://sms/"), null, null, null, null);
+		// final String[] projection = new String[] { "*" };
+
+		Cursor c = mContext.getContentResolver().query(
+				Uri.parse("content://sms/conversations?simple=true"), null,
+				null, null, "date DESC");
 
 		// gets all the available messages.
-		if (curinbox.moveToFirst()) {
+		if (c.moveToFirst()) {
+
+			// prints the contents.
+			DatabaseUtils.dumpCurrentRow(c);
+
 			long datesms = 0;
 			String address = null;
 			String body = null;
-			String threadid = null;
+			long threadid = -1;
 			String protocol = null;
 			String person = null;
 			int type = -1;
 			int read = -1;
 
 			// return -1 if the column does not exist.
-			int dateColumn = curinbox.getColumnIndex("date");
-			int addressColumn = curinbox.getColumnIndex("address");
-			int bodyColumn = curinbox.getColumnIndex("body");
-			int threadColumn = curinbox.getColumnIndex("thread_id");
-			int typeColumn = curinbox.getColumnIndex("type");
-			int typeRead = curinbox.getColumnIndex("read");
-			int protocolColumn = curinbox.getColumnIndex("protocol");
-			int personColumn = curinbox.getColumnIndex("person");
+			int dateColumn = c.getColumnIndex("date");
+			int addressColumn = c.getColumnIndex("address");
+			int bodyColumn = c.getColumnIndex("body");
+			int threadColumn = c.getColumnIndex("thread_id");
+			int typeColumn = c.getColumnIndex("type");
+			int typeRead = c.getColumnIndex("read");
+			int protocolColumn = c.getColumnIndex("protocol");
+			int personColumn = c.getColumnIndex("person");
 
 			do {
 				if (dateColumn != -1)
-					datesms = curinbox.getLong(dateColumn);
+					datesms = c.getLong(dateColumn);
 				if (typeRead != -1)
-					read = curinbox.getInt(typeRead);
+					read = c.getInt(typeRead);
 				if (typeColumn != -1)
-					type = curinbox.getInt(typeColumn);
+					type = c.getInt(typeColumn);
 				if (bodyColumn != -1)
-					body = curinbox.getString(bodyColumn);
+					body = c.getString(bodyColumn);
 				if (addressColumn != -1)
-					address = curinbox.getString(addressColumn);
+					address = c.getString(addressColumn);
 				if (threadColumn != -1)
-					threadid = curinbox.getString(threadColumn);
+					threadid = c.getLong(threadColumn);
 				if (protocolColumn != -1)
-					protocol = curinbox.getString(protocolColumn);
+					protocol = c.getString(protocolColumn);
 				if (personColumn != -1)
-					person = curinbox.getString(personColumn);
+					person = c.getString(personColumn);
 
 				Sms sms;
 
@@ -200,10 +221,165 @@ public class SmsContentProvider extends ContentObserver {
 					mMessages.add(sms);
 				}
 
-			} while (curinbox.moveToNext());
+			} while (c.moveToNext());
 		}
 
-		curinbox.close();
+		c.close();
+
+		return mMessages;
+	}
+
+	public synchronized Conversation getConversationByThreadId(long threadId) {
+
+		// TODO: cache conversations and return the correct.
+
+		// creates temporary object that will be filled with data.
+		Conversation tmpConversation = new Conversation();
+		tmpConversation.listsms = new ArrayList<Sms>();
+		tmpConversation.threadid = threadId;
+
+		// queries the ContentResolver for the data.
+		Cursor c = mContext.getContentResolver().query(
+				Uri.parse("content://sms/"), null, "thread_id=" + threadId,
+				null, "date ASC");
+
+		// gets all the available messages.
+		if (c != null && c.moveToFirst()) {
+			long datesms = 0;
+			String address = null;
+			String body = null;
+			long threadid = -1;
+			String protocol = null;
+			String person = null;
+			int type = -1;
+			int read = -1;
+
+			// return -1 if the column does not exist.
+			int dateColumn = c.getColumnIndex("date");
+			int addressColumn = c.getColumnIndex("address");
+			int bodyColumn = c.getColumnIndex("body");
+			int threadColumn = c.getColumnIndex("thread_id");
+			int typeColumn = c.getColumnIndex("type");
+			int typeRead = c.getColumnIndex("read");
+			int protocolColumn = c.getColumnIndex("protocol");
+			int personColumn = c.getColumnIndex("person");
+
+			do {
+				if (dateColumn != -1)
+					datesms = c.getLong(dateColumn);
+				if (typeRead != -1)
+					read = c.getInt(typeRead);
+				if (typeColumn != -1)
+					type = c.getInt(typeColumn);
+				if (bodyColumn != -1)
+					body = c.getString(bodyColumn);
+				if (addressColumn != -1)
+					address = c.getString(addressColumn);
+				if (threadColumn != -1)
+					threadid = c.getLong(threadColumn);
+				if (protocolColumn != -1)
+					protocol = c.getString(protocolColumn);
+				if (personColumn != -1)
+					person = c.getString(personColumn);
+
+				Sms sms;
+
+				if (address != null) {
+					sms = new Sms(threadid, new Date(datesms), address, body);
+
+					// sets the person that initiated the message.
+					sms.person = person;
+					// message type.
+					sms.type = type;
+					// indicates whether it was read or not.
+					sms.isRead = read == 1;
+					// send or received message.
+					sms.protocol = protocol;
+
+					// we add this SMS to the list of all the SMS
+					tmpConversation.listsms.add(sms);
+				}
+
+			} while (c.moveToNext());
+
+			// closes the cursor.
+			c.close();
+		}
+
+		return tmpConversation;
+	}
+
+	public synchronized List<Sms> getMessages() {
+
+		// if (mMessages == null) {
+
+		// we put all the SMS sent and received in a list
+		mMessages = new ArrayList<Sms>();
+
+		Cursor c = mContext.getContentResolver().query(
+				Uri.parse("content://sms/"), null, null, null, null);
+
+		// gets all the available messages.
+		if (c.moveToFirst()) {
+			long datesms = 0;
+			String address = null;
+			String body = null;
+			long threadid = -1;
+			String protocol = null;
+			String person = null;
+			int type = -1;
+			int read = -1;
+
+			// return -1 if the column does not exist.
+			int dateColumn = c.getColumnIndex("date");
+			int addressColumn = c.getColumnIndex("address");
+			int bodyColumn = c.getColumnIndex("body");
+			int threadColumn = c.getColumnIndex("thread_id");
+			int typeColumn = c.getColumnIndex("type");
+			int typeRead = c.getColumnIndex("read");
+			int protocolColumn = c.getColumnIndex("protocol");
+			int personColumn = c.getColumnIndex("person");
+
+			do {
+				if (dateColumn != -1)
+					datesms = c.getLong(dateColumn);
+				if (typeRead != -1)
+					read = c.getInt(typeRead);
+				if (typeColumn != -1)
+					type = c.getInt(typeColumn);
+				if (bodyColumn != -1)
+					body = c.getString(bodyColumn);
+				if (addressColumn != -1)
+					address = c.getString(addressColumn);
+				if (threadColumn != -1)
+					threadid = c.getLong(threadColumn);
+				if (protocolColumn != -1)
+					protocol = c.getString(protocolColumn);
+				if (personColumn != -1)
+					person = c.getString(personColumn);
+
+				Sms sms;
+
+				if (address != null) {
+					sms = new Sms(threadid, new Date(datesms), address, body);
+
+					// sets the person that initiated the message.
+					sms.person = person;
+					// message type.
+					sms.type = type;
+					// indicates whether it was read or not.
+					sms.isRead = read == 1;
+					// send or received message.
+					sms.protocol = protocol;
+
+					// we add this SMS to the list of all the SMS
+					mMessages.add(sms);
+				}
+
+			} while (c.moveToNext());
+		}
+
+		c.close();
 		// }
 
 		return mMessages;

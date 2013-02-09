@@ -7,7 +7,6 @@ import java.util.List;
 import org.easysms.android.MessageActivity;
 import org.easysms.android.R;
 import org.easysms.android.data.Conversation;
-import org.easysms.android.data.Sms;
 import org.easysms.android.ui.KaraokeLayout;
 import org.easysms.android.util.ApplicationTracker;
 import org.easysms.android.util.ApplicationTracker.EventType;
@@ -93,20 +92,17 @@ public class MessageViewPagerAdapter extends PagerAdapter {
 			ListView conversationList = (ListView) view
 					.findViewById(R.id.conversation_list_list);
 
-			// gets all the SMS of the conversation, that match the same
-			// phone number.
-			List<Conversation> listallconv = populateList(mParent
-					.getContentProvider().getMessages());
-			String threadidconv = retrieveThreadIdFromNumberContact(mParent
-					.getContactPhonenumber());
+			// thread id from the active conversation.
+			long convThreadId = mParent.getThreadId();
 
 			// only continues if valid conversation is loaded.
-			if (threadidconv.equals("error")) {
+			if (convThreadId == -1) {
 				break;
 			}
 
-			Conversation conv = retrieveConvFromThreadId(listallconv,
-					threadidconv);
+			// gets all the messages of the same thread.
+			Conversation conv = mParent.getContentProvider()
+					.getConversationByThreadId(convThreadId);
 
 			prepareConversation(conv);
 
@@ -495,30 +491,6 @@ public class MessageViewPagerAdapter extends PagerAdapter {
 		return arg0 == ((View) arg1);
 	}
 
-	private List<Conversation> populateList(List<Sms> allSMS) {
-
-		// list with all the conversations
-		List<Conversation> allconversations = new ArrayList<Conversation>();
-		for (Sms smsnew : allSMS) {
-			boolean add = false;
-			for (Conversation conv : allconversations) {
-				if (conv.threadid.equals(smsnew.threadid)) {
-					conv.listsms.add(smsnew);
-					add = true;
-				}
-			}
-			if (add == false) { // we create a new conversation
-				Conversation newconv = new Conversation();
-				List<Sms> newlist = new ArrayList<Sms>();
-				newlist.add(smsnew);
-				newconv.listsms = newlist;
-				newconv.threadid = smsnew.threadid;
-				allconversations.add(newconv);
-			}
-		}
-		return allconversations;
-	}
-
 	/**
 	 * Fills the bitmap objects of the whole conversation.
 	 * 
@@ -536,27 +508,5 @@ public class MessageViewPagerAdapter extends PagerAdapter {
 				conv.listsms.get(x).image = photo;
 			}
 		}
-	}
-
-	public Conversation retrieveConvFromThreadId(List<Conversation> allConv,
-			String threadid) {
-		for (Conversation conv : allConv) {
-			String convthreadid = conv.threadid;
-			if (convthreadid.equals(threadid)) {
-				return conv;
-			}
-		}
-
-		return null;
-	}
-
-	public String retrieveThreadIdFromNumberContact(String phoneNumContact) {
-		for (Sms sms : mParent.getContentProvider().getMessages()) {
-			String smscontact = sms.address;
-			// TODO: could it really be null?
-			if (smscontact != null && smscontact.equals(phoneNumContact))
-				return sms.threadid;
-		}
-		return "error";
 	}
 }
