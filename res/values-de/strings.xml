@@ -5,17 +5,17 @@
     <string name="activity_inbox_title">Eingangsfach</string>
 
     <!-- Dates -->
-    <string name="date_format">yyyy-MM-dd</string>
+    <string name="date_format">dd-MM-yyyy</string>
     <string name="date_today">Heute</string>
     <string name="date_yesterday">Gestern</string>
     <string name="date_last_week">vor %d Tagen</string>
     <string name="date_more_than_a_week">vor %d Wochen</string>
 
     <!-- Menu -->
-    <string name="menu_new_message">New Message</string>
+    <string name="menu_new_message">Neue SMS</string>
     <string name="menu_voice">Spracheingabe</string>
     <string name="menu_delete">Konversation löschen</string>
-    <string name="menu_send">schicken</string>
+    <string name="menu_send">abschicken</string>
     <string name="menu_call">anrufen</string>
 
     <!-- Placeholders -->
@@ -32,31 +32,31 @@ der wir testen, was passiert wenn die Länge eines Textfeldes
     <!-- Arrays -->
     <string-array name="icons_array">
         <item>Ok</item>
-        <item>No</item>
-        <item>Late</item>
-        <item>Call</item>
-        <item>Empty</item>
-        <item>Busy</item>
-        <item>Hurry!</item>
-        <item>How are you?</item>
-        <item>Love</item>
-        <item>Car</item>
-        <item>Date?</item>
-        <item>Time?</item>
+        <item>Nein</item>
+        <item>spät</item>
+        <item>Anruf</item>
+        <item>leer</item>
+        <item>beschäftigt</item>
+        <item>Beeilung!</item>
+        <item>Wie geht's?</item>
+        <item>Liebe</item>
+        <item>Auto</item>
+        <item>Datum?</item>
+        <item>Zeit?</item>
     </string-array>
     <string-array name="sentenses_array">
         <item>Ok</item>
-        <item>No</item>
-        <item>"I'm late"</item>
-        <item>Call me!</item>
-        <item>"I don't have more battery"</item>
-        <item>"I can't answer, I'm busy"</item>
-        <item>Hurry up!</item>
-        <item>How are you?</item>
-        <item>"I'm thinking of you"</item>
-        <item>"I'm driving"</item>
-        <item>When?</item>
-        <item>At what time?</item>
+        <item>Nein</item>
+        <item>"Ich verspäte mich"</item>
+        <item>Ruf mich bitte an!</item>
+        <item>"Mein Akku ist leer"</item>
+        <item>"Ich kannt nicht antworten, bin beschäftigt."</item>
+        <item>Beeil Dich!</item>
+        <item>Wie geht's?</item>
+        <item>"Ich denke an Dich."</item>
+        <item>"Ich fahre Auto"</item>
+        <item>An welchem Tag?</item>
+        <item>Zu welcher Zeit?</item>
     </string-array>
 
 </resources>
