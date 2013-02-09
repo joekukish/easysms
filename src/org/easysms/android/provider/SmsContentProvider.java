@@ -74,6 +74,28 @@ public class SmsContentProvider extends ContentObserver {
 		return tmpContact;
 	}
 
+	public Bitmap getContactPhotoWithPhotoId(long photoId) {
+		Cursor c = mContext.getContentResolver().query(
+				ContactsContract.Data.CONTENT_URI,
+				new String[] { ContactsContract.CommonDataKinds.Photo.PHOTO },
+				ContactsContract.Data._ID + "=?",
+				new String[] { Long.toString(photoId) }, null);
+		byte[] imageBytes = null;
+		if (c != null) {
+			if (c.moveToFirst()) {
+				imageBytes = c.getBlob(0);
+			}
+			c.close();
+		}
+
+		if (imageBytes != null) {
+			return BitmapFactory.decodeByteArray(imageBytes, 0,
+					imageBytes.length);
+		} else {
+			return null;
+		}
+	}
+
 	public Bitmap getContactPhoto(String phoneNumber) {
 
 		// path where the contact can be found with the given phone number.

@@ -148,23 +148,25 @@ public class MessageActivity extends SherlockActivity {
 			Uri contactData = data.getData();
 			Cursor cur = getContentResolver().query(contactData, null, null,
 					null, null);
-			String nameContact = "Nom inconnu";
-			String photoId = null;
+
 			if (cur.moveToFirst()) {
+
 				String id = cur.getString(cur.getColumnIndexOrThrow(Phone._ID));
-				// contact name
-				nameContact = cur
+				String contactName = cur
 						.getString(cur
 								.getColumnIndexOrThrow(ContactsContract.Contacts.DISPLAY_NAME));
-				// photoID
-				long photo = cur
+				long photoId = cur
 						.getLong(cur
 								.getColumnIndexOrThrow(ContactsContract.Contacts.PHOTO_ID));
-				String no = "NumŽro inconnu";
-				// if the contact has a phone number
+
+				String contactNumber = null;
+
+				// checks if it has registered phone numbers.
 				if (Integer
 						.parseInt(cur.getString(cur
 								.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER))) > 0) {
+
+					// queries the number.
 					Cursor pCur = getContentResolver().query(
 							ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
 							null,
@@ -173,14 +175,15 @@ public class MessageActivity extends SherlockActivity {
 
 					// this second loop will retrieve all the contact
 					// numbers for a particular contact id
-					String mobilePhone = "Inconnu";
-					String homePhone = "Inconnu";
-					String workPhone = "Inconnu";
-					String otherPhone = "Inconnu";
+					String mobilePhone = null;
+					String homePhone = null;
+					String workPhone = null;
+					String otherPhone = null;
 
 					if (pCur != null) {
+
+						// extracts all the available numbers.
 						while (pCur.moveToNext()) {
-							// takes only the MOBILE number
 							if (pCur.getInt(pCur.getColumnIndex(Phone.TYPE)) == Phone.TYPE_MOBILE) {
 
 								switch (pCur.getInt(pCur
@@ -204,20 +207,27 @@ public class MessageActivity extends SherlockActivity {
 								}
 							}
 						}
-						if (mobilePhone != "Inconnu") {
-							no = mobilePhone;
+						// uses the first available number.
+						if (mobilePhone != null) {
+							contactNumber = mobilePhone;
+						} else if (homePhone != null) {
+							contactNumber = homePhone;
+						} else if (workPhone != null) {
+							contactNumber = workPhone;
+						} else if (otherPhone != null) {
+							otherPhone = contactNumber;
 						}
 					}
 
 					pCur.close();
 				}
 
-				// TODO: pass the photo id instead of phone number to retrieve
-				// the picture.
+				// gets the image using the photo id.
+				Bitmap profileImage = mContentProvider
+						.getContactPhotoWithPhotoId(photoId);
 
+				// sets the image of the contact.
 				ImageView profile = (ImageView) findViewById(R.id.new_message_image_contact);
-				Bitmap profileImage = mContentProvider.getContactPhoto(no);
-
 				if (profileImage != null) {
 					profile.setImageBitmap(profileImage);
 				} else {
@@ -229,18 +239,13 @@ public class MessageActivity extends SherlockActivity {
 				TextView recipientNumber = (TextView) findViewById(R.id.new_message_text_phone_number);
 
 				// append new name selected
-				recipientName.setText(nameContact);
-				recipientNumber.setText(no);
+				recipientName.setText(contactName);
+				recipientNumber.setText(contactNumber);
 
 				// sets the recipients number.
-				mContactPhoneNumber = no;
-
-				id = null;
-				nameContact = null;
-				no = null;
+				mContactPhoneNumber = contactNumber;
 
 				cur.close();
-				cur = null;
 			}
 		}
 
