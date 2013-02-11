@@ -3,6 +3,11 @@
 
     <string name="app_name">EasySMS</string>
     <string name="activity_inbox_title">Boîte de réception</string>
+    <string name="voice_help">Pour enregistrer votre message, cliquez sur le microphone à la barre du haut.</string>
+    <string name="message_sent">Message envoyé</string>
+    <string name="message_sent_error">"Erreur d'envoi du message"</string>
+    <string name="error_no_service">Erreur, pas de  service</string>
+    <string name="choose_contact">Choisissez un contact</string>
 
     <!-- Dates -->
     <string name="date_format_short">dd MMM</string>
@@ -14,5 +19,34 @@
     <string name="menu_delete">Supprimer le fil</string>
     <string name="menu_send">Envoyer</string>
     <string name="menu_call">Appeler</string>
+
+    <string-array name="icons_array">
+        <item>Ok</item>
+        <item>Non</item>
+        <item>Retard</item>
+        <item>Appeler</item>
+        <item>Vide</item>
+        <item>Occupé</item>
+        <item>Dépêche-toi!</item>
+        <item>Ça va?</item>
+        <item>Amour</item>
+        <item>Voiture</item>
+        <item>Quand?</item>
+        <item>Heure?</item>
+    </string-array>
+    <string-array name="sentenses_array">
+        <item>Ok.</item>
+        <item>Non.</item>
+        <item>Je suis en retard.</item>
+        <item>Appele-moi!</item>
+        <item>"J'ai plus de batterie"</item>
+        <item>"Je ne peux pas répondre pour l'instant, je suis occupé."</item>
+        <item>Dépêche-toi!</item>
+        <item>Ça va?</item>
+        <item>Je pense à toi.</item>
+        <item>Je suis au volant!</item>
+        <item>Quand?</item>
+        <item>À quelle heure?</item>
+    </string-array>
 
 </resources>

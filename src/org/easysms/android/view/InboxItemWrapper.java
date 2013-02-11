@@ -122,5 +122,10 @@ public class InboxItemWrapper {
 		getDateTextView().setText((String) conversation.get("date"));
 		getMessageTextView().setText((String) conversation.get("message"));
 
+		// changes the background color if it is a new message.
+		if (!(Boolean) conversation.get("read")) {
+			mRow.setBackgroundColor(mRow.getResources().getColor(
+					android.R.color.white));
+		}
 	}
 }

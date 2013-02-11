@@ -2,9 +2,9 @@ package org.easysms.android;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import org.easysms.android.data.Contact;
-import org.easysms.android.data.Sms;
 import org.easysms.android.provider.SmsContentProvider;
 import org.easysms.android.ui.KaraokeLayout;
 import org.easysms.android.util.ApplicationTracker;
@@ -34,7 +34,6 @@ import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -45,7 +44,6 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.google.analytics.tracking.android.EasyTracker;
-import com.google.analytics.tracking.android.Tracker;
 
 @TargetApi(8)
 public class MessageActivity extends SherlockActivity {
@@ -56,6 +54,8 @@ public class MessageActivity extends SherlockActivity {
 	public static final String EXTRA_NEW_MESSAGE = "Neue SMS";
 	/** Identifier of the extra used to pass the phone number. */
 	public static final String EXTRA_PHONE_NUMBER = "Tel";
+	/** Identifier of the extra used to pass the thread id. */
+	public static final String EXTRA_THREAD_ID = "ThreadId";
 
 	/** Code used to detect to the Pick Contact Intent. */
 	private static final int PICK_CONTACT = 4321;
@@ -76,9 +76,8 @@ public class MessageActivity extends SherlockActivity {
 	private boolean mIsNewMessage;
 	/** Adapter used to handle the content inside the ViewPager. */
 	private MessageViewPagerAdapter mPagerAdapter;
-	/** Tracker used for Google Analytics. */
-	protected Tracker mTracker;
-
+	/** Thread id of the displayed conversation. */
+	private long mThreadId;
 	/** Pager that allows swiping between the views. */
 	private ViewPager mViewPager;
 
@@ -97,7 +96,7 @@ public class MessageActivity extends SherlockActivity {
 		return mContactName;
 	}
 
-	public String getContactPhonenumber() {
+	public String getContactPhoneNumber() {
 		return mContactPhoneNumber;
 	}
 
@@ -105,12 +104,16 @@ public class MessageActivity extends SherlockActivity {
 		return mContentProvider;
 	}
 
+	public long getThreadId() {
+		return mThreadId;
+	}
+
 	/**
 	 * Detects if there is an active Internet connection.
 	 * 
 	 * @return true if there is an active Internet connection, otherwise false.
 	 */
-	public boolean isInternetOn() {
+	protected boolean isInternetOn() {
 		ConnectivityManager connec = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 
 		// checks if Internet is available.
@@ -148,23 +151,24 @@ public class MessageActivity extends SherlockActivity {
 			Uri contactData = data.getData();
 			Cursor cur = getContentResolver().query(contactData, null, null,
 					null, null);
-			String nameContact = "Name unbekannt";
-			String photoId = null;
 			if (cur.moveToFirst()) {
+
 				String id = cur.getString(cur.getColumnIndexOrThrow(Phone._ID));
-				// contact name
-				nameContact = cur
+				String contactName = cur
 						.getString(cur
 								.getColumnIndexOrThrow(ContactsContract.Contacts.DISPLAY_NAME));
-				// photoID
-				long photo = cur
+				long photoId = cur
 						.getLong(cur
 								.getColumnIndexOrThrow(ContactsContract.Contacts.PHOTO_ID));
-				String no = "Nummer unbekannt";
-				// if the contact has a phone number
+
+				String contactNumber = null;
+
+				// checks if it has registered phone numbers.
 				if (Integer
 						.parseInt(cur.getString(cur
 								.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER))) > 0) {
+
+					// queries the number.
 					Cursor pCur = getContentResolver().query(
 							ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
 							null,
@@ -173,51 +177,47 @@ public class MessageActivity extends SherlockActivity {
 
 					// this second loop will retrieve all the contact
 					// numbers for a particular contact id
-					String mobilePhone = "unbekannt";
-					String homePhone = "unbekannt";
-					String workPhone = "unbekannt";
-					String otherPhone = "unbekannt";
+					String mobilePhone = null;
+					String otherPhone = null;
 
 					if (pCur != null) {
-						while (pCur.moveToNext()) {
-							// takes only the MOBILE number
-							if (pCur.getInt(pCur.getColumnIndex(Phone.TYPE)) == Phone.TYPE_MOBILE) {
 
-								switch (pCur.getInt(pCur
-										.getColumnIndex(Phone.TYPE))) {
-								case Phone.TYPE_MOBILE:
-									mobilePhone = pCur.getString(pCur
-											.getColumnIndex(Phone.NUMBER));
-									break;
-								case Phone.TYPE_HOME:
-									homePhone = pCur.getString(pCur
-											.getColumnIndex(Phone.NUMBER));
-									break;
-								case Phone.TYPE_WORK:
-									workPhone = pCur.getString(pCur
-											.getColumnIndex(Phone.NUMBER));
-									break;
-								case Phone.TYPE_OTHER:
-									otherPhone = pCur.getString(pCur
-											.getColumnIndex(Phone.NUMBER));
-									break;
-								}
+						// extracts all the available numbers.
+						while (pCur.moveToNext()) {
+
+							// extracts the phone depending on the type.
+							switch (pCur
+									.getInt(pCur.getColumnIndex(Phone.TYPE))) {
+							case Phone.TYPE_MOBILE:
+								mobilePhone = pCur.getString(pCur
+										.getColumnIndex(Phone.NUMBER));
+								break;
+							default:
+								otherPhone = pCur.getString(pCur
+										.getColumnIndex(Phone.NUMBER));
+								break;
 							}
 						}
-						if (mobilePhone != "unbekannt") {
-							no = mobilePhone;
+
+						// gives priority to mobile, otherwise any other found
+						// number
+						if (mobilePhone != null) {
+							contactNumber = mobilePhone;
+						} else if (otherPhone != null) {
+							contactNumber = otherPhone;
 						}
 					}
 
+					// closes the cursor in charge of the phone numbers.
 					pCur.close();
 				}
 
-				// TODO: pass the photo id instead of phone number to retrieve
-				// the picture.
+				// gets the image using the photo id.
+				Bitmap profileImage = mContentProvider
+						.getContactPhotoWithPhotoId(photoId);
 
+				// sets the image of the contact.
 				ImageView profile = (ImageView) findViewById(R.id.new_message_image_contact);
-				Bitmap profileImage = mContentProvider.getContactPhoto(no);
-
 				if (profileImage != null) {
 					profile.setImageBitmap(profileImage);
 				} else {
@@ -229,18 +229,14 @@ public class MessageActivity extends SherlockActivity {
 				TextView recipientNumber = (TextView) findViewById(R.id.new_message_text_phone_number);
 
 				// append new name selected
-				recipientName.setText(nameContact);
-				recipientNumber.setText(no);
+				recipientName.setText(contactName);
+				recipientNumber.setText(contactNumber);
 
-				// sets the recipients number.
-				mContactPhoneNumber = no;
-
-				id = null;
-				nameContact = null;
-				no = null;
+				// sets the recipient data.
+				mContactName = contactName;
+				mContactPhoneNumber = contactNumber;
 
 				cur.close();
-				cur = null;
 			}
 		}
 
@@ -263,7 +259,6 @@ public class MessageActivity extends SherlockActivity {
 
 		// configures and loads the google analytics tracker.
 		EasyTracker.getInstance().setContext(this);
-		mTracker = EasyTracker.getTracker();
 
 		if (mIsNewMessage) {
 			// shows and existing thread.
@@ -281,12 +276,16 @@ public class MessageActivity extends SherlockActivity {
 				}
 			});
 
+			// new thread.
+			mThreadId = -1;
+
 		} else {
 
 			// shows and existing thread.
 			setContentView(R.layout.act_view_message);
 
 			// obtains the user info from the extras.
+			mThreadId = (Long) bundle.get(MessageActivity.EXTRA_THREAD_ID);
 			mContactName = (String) bundle.get(MessageActivity.EXTRA_NAME);
 			mContactPhoneNumber = (String) bundle
 					.get(MessageActivity.EXTRA_PHONE_NUMBER);
@@ -297,8 +296,7 @@ public class MessageActivity extends SherlockActivity {
 			// modifies layout depending if name is available or not.
 			if (mContactName == null || mContactName.trim().equals("")) {
 				// sets the phone number instead of the name since it is not
-				// available.
-				// the action bar handles the layout change.
+				// available. the action bar handles the layout change.
 				actionBar.setTitle(mContactPhoneNumber);
 
 			} else {
@@ -318,7 +316,7 @@ public class MessageActivity extends SherlockActivity {
 		mViewPager.setCurrentItem(0);
 
 		// gets the area where the message is composed.
-		mComposeLayout = (KaraokeLayout) findViewById(R.id.view_message_karaoke_compose);
+		mComposeLayout = (KaraokeLayout) findViewById(R.id.bottom_compose_karaoke_compose);
 		mComposeLayout
 				.setOnKaraokeClickListener(new KaraokeLayout.OnKaraokeClickListener() {
 
@@ -330,8 +328,8 @@ public class MessageActivity extends SherlockActivity {
 								EventType.CLICK, MessageActivity.this,
 								"compose_bubble_word", button.getText());
 						// tracks using google analytics.
-						mTracker.sendEvent("ui_action", "button_press",
-								"compose_bubble_word", null);
+						EasyTracker.getTracker().sendEvent("ui_action",
+								"button_press", "compose_bubble_word", null);
 
 					}
 				});
@@ -347,8 +345,9 @@ public class MessageActivity extends SherlockActivity {
 								EventType.LONG_CLICK, MessageActivity.this,
 								"compose_bubble_word", button.getText());
 						// tracks using google analytics.
-						mTracker.sendEvent("ui_action", "button_long_press",
-								"compose_bubble_word", null);
+						EasyTracker.getTracker().sendEvent("ui_action",
+								"button_long_press", "compose_bubble_word",
+								null);
 
 						// removes the test from the bubble.
 						mComposeLayout.removeWordButton(button);
@@ -377,7 +376,7 @@ public class MessageActivity extends SherlockActivity {
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
 		// gets the send button and wires the event.
-		ImageButton sendButton = (ImageButton) findViewById(R.id.view_message_button_send);
+		Button sendButton = (Button) findViewById(R.id.bottom_compose_button_send);
 		sendButton.setOnClickListener(new View.OnClickListener() {
 
 			@Override
@@ -424,8 +423,8 @@ public class MessageActivity extends SherlockActivity {
 			ApplicationTracker.getInstance().logEvent(EventType.CLICK, this,
 					"home_button", item.getItemId());
 			// tracks using google analytics.
-			mTracker.sendEvent("ui_action", "button_press", "home_button",
-					(long) item.getItemId());
+			EasyTracker.getTracker().sendEvent("ui_action", "button_press",
+					"home_button", (long) item.getItemId());
 
 			// goes back to the home upon the back button click.
 			intent = new Intent();
@@ -441,8 +440,8 @@ public class MessageActivity extends SherlockActivity {
 			ApplicationTracker.getInstance().logEvent(EventType.CLICK, this,
 					"call_button", item.getItemId());
 			// tracks using google analytics.
-			mTracker.sendEvent("ui_action", "button_press", "call_button",
-					(long) item.getItemId());
+			EasyTracker.getTracker().sendEvent("ui_action", "button_press",
+					"call_button", (long) item.getItemId());
 
 			// creates the uri.
 			String uri = "tel:" + mContactPhoneNumber;
@@ -460,8 +459,8 @@ public class MessageActivity extends SherlockActivity {
 			ApplicationTracker.getInstance().logEvent(EventType.CLICK, this,
 					"delete_button", item.getItemId());
 			// tracks using google analytics.
-			mTracker.sendEvent("ui_action", "button_press", "delete_button",
-					(long) item.getItemId());
+			EasyTracker.getTracker().sendEvent("ui_action", "button_press",
+					"delete_button", (long) item.getItemId());
 
 			Runnable runnable = new Runnable() {
 				@Override
@@ -493,8 +492,8 @@ public class MessageActivity extends SherlockActivity {
 			ApplicationTracker.getInstance().logEvent(EventType.CLICK, this,
 					"voice_button", item.getItemId());
 			// tracks using google analytics.
-			mTracker.sendEvent("ui_action", "button_press", "voice_button",
-					(long) item.getItemId());
+			EasyTracker.getTracker().sendEvent("ui_action", "button_press",
+					"voice_button", (long) item.getItemId());
 
 			if (isInternetOn()) {
 
@@ -513,7 +512,8 @@ public class MessageActivity extends SherlockActivity {
 				ApplicationTracker.getInstance().logEvent(EventType.ERROR,
 						this, "speech_recognizer",
 						"internet_connetion_not_available");
-				mTracker.sendEvent("app_error", "speech_recognizer",
+				EasyTracker.getTracker().sendEvent("app_error",
+						"speech_recognizer",
 						"internet_connetion_not_available",
 						new Date().getTime());
 			}
@@ -538,8 +538,9 @@ public class MessageActivity extends SherlockActivity {
 			// tracks the error.
 			ApplicationTracker.getInstance().logEvent(EventType.ERROR, this,
 					"speech_recognizer", "speech_recognizer_not_available");
-			mTracker.sendEvent("app_error", "speech_recognizer",
-					"speech_recognizer_not_available", new Date().getTime());
+			EasyTracker.getTracker().sendEvent("app_error",
+					"speech_recognizer", "speech_recognizer_not_available",
+					new Date().getTime());
 
 			item = menu.findItem(R.id.menu_voice);
 			item.setEnabled(false);
@@ -580,16 +581,6 @@ public class MessageActivity extends SherlockActivity {
 		EasyTracker.getInstance().activityStop(this);
 	}
 
-	public String retrieveThreadIdFromNumberContact(String phoneNumContact) {
-		for (Sms sms : mContentProvider.getMessages()) {
-			String smscontact = sms.address;
-			// TODO: could it really be null?
-			if (smscontact != null && smscontact.equals(phoneNumContact))
-				return sms.threadid;
-		}
-		return "error";
-	}
-
 	protected void sendMessage() {
 
 		// message said using the TTS and a Toast.
@@ -599,11 +590,9 @@ public class MessageActivity extends SherlockActivity {
 				&& !mComposeLayout.getText().equals("")) {
 
 			// sends the current message as an SMS.
-			mContentProvider.sendSMS(mContactPhoneNumber,
+			mContentProvider.sendSms(mContactPhoneNumber,
 					mComposeLayout.getText());
 
-			// inserts the SMS sent into DB
-			String threadid = retrieveThreadIdFromNumberContact(mContactPhoneNumber);
 			// right after the message is sent, navigates to the message
 			// details page
 			Intent i = new Intent(MessageActivity.this, MessageActivity.class);
@@ -614,6 +603,7 @@ public class MessageActivity extends SherlockActivity {
 			// creates the bundle
 			Bundle bundle = new Bundle();
 			// adds the parameters to bundle
+			bundle.putLong(EXTRA_THREAD_ID, mThreadId);
 			bundle.putString(EXTRA_NAME, contact.displayName);
 			bundle.putString(EXTRA_PHONE_NUMBER, mContactPhoneNumber);
 			bundle.putBoolean(EXTRA_NEW_MESSAGE, false);
@@ -621,11 +611,12 @@ public class MessageActivity extends SherlockActivity {
 			i.putExtras(bundle);
 			startActivity(i);
 
+			// TODO: remove strings.
 			// insert SMS in the data base content provider
 			ContentValues values = new ContentValues();
 			values.put("address", mContactPhoneNumber);
 			values.put("read", 1);
-			values.put("thread_id", threadid);
+			values.put("thread_id", mThreadId);
 			values.put("body", mComposeLayout.getText());
 			getContentResolver()
 					.insert(Uri.parse("content://sms/sent"), values);
@@ -645,7 +636,8 @@ public class MessageActivity extends SherlockActivity {
 			// plays the audio.
 			TextToSpeechManager.getInstance().say(promptText);
 
-		} else if (mContactPhoneNumber.length() > 0) {
+		} else if (mContactPhoneNumber == null
+				|| mContactPhoneNumber.trim().length() == 0) {
 
 			promptText = getResources().getString(
 					R.string.promt_enter_a_phone_number);
@@ -681,8 +673,8 @@ public class MessageActivity extends SherlockActivity {
 		// number of results the recognizer should return.
 		intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3);
 
-		// sets the default language.
-		// intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "en-US");
+		// sets the language the same as the locale
+		intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
 
 		// starts the activity.
 		startActivityForResult(intent, VOICE_RECOGNITION_REQUEST_CODE);

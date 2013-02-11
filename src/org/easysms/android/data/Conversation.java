@@ -5,7 +5,8 @@ import java.util.List;
 public class Conversation {
 
 	public List<Sms> listsms;
-	public String threadid;
+	public long threadid;
+	public boolean read;
 
 	/**
 	 * Creates a new Conversation instance.

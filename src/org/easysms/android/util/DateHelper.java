@@ -17,8 +17,6 @@ import android.content.Context;
  */
 public class DateHelper {
 
-	public static final String DATE_FORMAT = "yyyy-MM-dd";
-
 	/**
 	 * Calculates the difference in days between two dates. To do so, it
 	 * substracts the milliseconds between each date and then divides this value
@@ -91,13 +89,14 @@ public class DateHelper {
 		}
 	}
 
-	public static String formatWithDay(String date) {
+	public static String formatWithDay(Context context, String date) {
 
 		try {
 
 			// parses the giving date using the unified
 			// date format.
-			Date newDate = new SimpleDateFormat(DATE_FORMAT).parse(date);
+			Date newDate = new SimpleDateFormat(context.getResources()
+					.getString(R.string.date_format)).parse(date);
 
 			// reformats the date only to extract the day of the week.
 			return new SimpleDateFormat("EEEE").format(newDate);
@@ -114,16 +113,18 @@ public class DateHelper {
 		return calendar.getTimeInMillis();
 	}
 
-	public static String getDateNow() {
+	public static String getDateNow(Context context) {
 		Calendar currentDate = Calendar.getInstance();
-		SimpleDateFormat formatter = new SimpleDateFormat(DATE_FORMAT);
+		SimpleDateFormat formatter = new SimpleDateFormat(context
+				.getResources().getString(R.string.date_format));
 		formatter.setLenient(true);
 		return formatter.format(currentDate.getTime()) + " 00:00:00";
 	}
 
-	public static String getDatePast(int offsetDays) {
+	public static String getDatePast(Context context, int offsetDays) {
 		Calendar currentDate = Calendar.getInstance();
-		SimpleDateFormat formatter = new SimpleDateFormat(DATE_FORMAT);
+		SimpleDateFormat formatter = new SimpleDateFormat(context
+				.getResources().getString(R.string.date_format));
 		formatter.setLenient(true);
 		currentDate.add(Calendar.DATE, offsetDays);
 		return formatter.format(currentDate.getTime()) + " 00:00:00";

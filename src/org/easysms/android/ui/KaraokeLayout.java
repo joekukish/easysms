@@ -303,10 +303,9 @@ public class KaraokeLayout extends ViewGroup {
 				@Override
 				public void run() {
 
-					for (int i = 1; i < getChildCount(); ++i) {
-						if (!(getChildAt(i) instanceof Button))
-							continue;
-						final Button btn = (Button) getChildAt(i);
+					for (int i = 0; i < mButtonList.size(); ++i) {
+
+						final Button btn = mButtonList.get(i);
 						btn.setFocusableInTouchMode(true);
 						try {
 							Thread.sleep(1000);
@@ -325,7 +324,29 @@ public class KaraokeLayout extends ViewGroup {
 							}
 						});
 					}
+
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+
+					handler.post(new Runnable() {
+
+						@Override
+						public void run() {
+
+							for (int x = 0; x < mButtonList.size(); x++) {
+								mButtonList.get(x).setFocusableInTouchMode(
+										false);
+								mButtonList.get(x).clearFocus();
+							}
+							clearFocus();
+						}
+					});
+
 					mKaraokeCount = 0;
+
 				}
 			};
 			new Thread(runnable).start();
