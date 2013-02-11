@@ -3,35 +3,36 @@
 
     <string name="app_name">EasySMS</string>
     <string name="activity_inbox_title">Eingangsfach</string>
-    <string name="voice_help">Zum aufnehmen von Wörtern auf das Mikrofon oben klicken.</string>
-    <string name="message_sent">SMS gesendet</string>
-
-    <!-- Voice prompts -->
-    <string name="promt_enter_a_message">Verfassen sie die SMS</string>
-    <string name="promt_enter_a_phone_number">Geben sie bitte eine Telefonnummer ein.</string>
-    <string name="promt_voice">Sprechen sie jetzt!</string>
-    <string name="promt_no_internet">Keine Internetverbindung</string>
 
     <!-- Dates -->
-    <string name="date_format">yyyy-MM-dd</string>
-    <string name="date_format_short">MMM dd</string>
-    <string name="date_format_time">kk:mm</string>
-    <string name="date_today">today</string>
-    <string name="date_yesterday">yesterday</string>
-    <string name="date_last_week">%d days ago</string>
-    <string name="date_more_than_a_week">%d weeks ago</string>
+    <string name="date_format">dd-MM-yyyy</string>
+    <string name="date_today">Heute</string>
+    <string name="date_yesterday">Gestern</string>
+    <string name="date_last_week">vor %d Tagen</string>
+    <string name="date_more_than_a_week">vor %d Wochen</string>
 
     <!-- Menu -->
-    <string name="menu_new_message">Neue Message</string>
+    <string name="menu_new_message">Neue SMS</string>
     <string name="menu_voice">Spracheingabe</string>
     <string name="menu_delete">Konversation löschen</string>
-    <string name="menu_send">schicken</string>
+    <string name="menu_send">abschicken</string>
     <string name="menu_call">anrufen</string>
+
+    <!-- Placeholders -->
+    <string name="placeholder_date">Heute</string>
+    <string name="placeholder_name">John William Doe</string>
+    <string name="placeholder_phonenumber">+49762348225</string>
+    <string name="placeholder_text">Dies ist eine sehr lange SMS, mit
+der wir testen, was passiert wenn die Länge eines Textfeldes
+überschritten wird.</string>
+
+    <!-- Content Descriptions -->
+    <string name="description_contact_image">Contact Image</string>
 
     <!-- Arrays -->
     <string-array name="icons_array">
-        <item>ok</item>
-        <item>nein</item>
+        <item>Ok</item>
+        <item>Nein</item>
         <item>spät</item>
         <item>Anruf</item>
         <item>leer</item>
@@ -44,16 +45,16 @@
         <item>Zeit?</item>
     </string-array>
     <string-array name="sentenses_array">
-        <item>Ok.</item>
-        <item>Nein.</item>
-        <item>Ich verspäte mich.</item>
-        <item>Ruf mich an!</item>
-        <item>Mein Akku ist alle.</item>
-        <item>Ich kann gerade nicht antworten. Ich habe zu tun.</item>
+        <item>Ok</item>
+        <item>Nein</item>
+        <item>"Ich verspäte mich"</item>
+        <item>Ruf mich bitte an!</item>
+        <item>"Mein Akku ist leer"</item>
+        <item>"Ich kannt nicht antworten, bin beschäftigt."</item>
         <item>Beeil Dich!</item>
-        <item>Wie gehts?</item>
-        <item>Ich denke and Dich.</item>
-        <item>Ich fahre gerade Auto.</item>
+        <item>"Wie geht's?"</item>
+        <item>"Ich denke an Dich."</item>
+        <item>"Ich fahre Auto"</item>
         <item>An welchem Tag?</item>
         <item>Zu welcher Zeit?</item>
     </string-array>
