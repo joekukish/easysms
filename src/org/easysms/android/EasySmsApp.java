@@ -12,7 +12,6 @@ public class EasySmsApp extends Application {
 	 */
 	public static final String DEFAULT_DEVICE_ID = "#default_id#";
 	/** Defines the theme that will be used. */
-	public static final int THEME = R.style.Theme_Sherlock_Light_DarkActionBar;
 
 	/** Provider used to handle read and send SMS. */
 	private SmsContentProvider mContentProvider;

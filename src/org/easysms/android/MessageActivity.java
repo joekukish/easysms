@@ -248,9 +248,6 @@ public class MessageActivity extends SherlockActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		// sets the theme used throughout the application.
-		setTheme(EasySmsApp.THEME);
-
 		// objects the provider from the application.
 		mContentProvider = ((EasySmsApp) getApplication()).getContentProvider();
 

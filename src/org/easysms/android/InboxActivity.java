@@ -72,9 +72,6 @@ public class InboxActivity extends SherlockListActivity implements
 	public void onCreate(Bundle savedInstance) {
 		super.onCreate(savedInstance);
 
-		// sets the theme used throughout the application.
-		setTheme(EasySmsApp.THEME);
-
 		// sets the desired layout for the activity.
 		setContentView(R.layout.act_inbox);
 
