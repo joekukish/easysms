@@ -3,13 +3,15 @@
 
     <string name="app_name">EasySMS</string>
     <string name="activity_inbox_title">Inbox</string>
-    <string name="voice_help">To record your message click on the microphone at the top bar.</string>
     <string name="message_sent">Message Sent</string>
     <string name="message_sent_error">Error sending message</string>
-    <string name="error_no_service">No service available.</string>
     <string name="choose_contact">Choose a contact</string>
 
+    <!-- Error prompts -->
+    <string name="error_no_service">No service available.</string>
+
     <!-- Voice prompts -->
+    <string name="promt_voice_help">To record your message click on the microphone at the top bar.</string>
     <string name="promt_enter_a_message">Please enter a message</string>
     <string name="promt_enter_a_phone_number">Please enter a phone number</string>
     <string name="promt_voice">Speak now!</string>

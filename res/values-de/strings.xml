@@ -1,8 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">EasySMS</string>
     <string name="activity_inbox_title">Eingangsfach</string>
+    <string name="message_sent">Nachricht gesendet</string>
+    <string name="message_sent_error">Fehler beim Sender der Nachricht</string>
+    <string name="choose_contact">Kontakt auswählen</string>
+
+    <!-- Error prompts -->
+    <string name="error_no_service">Kein dienst verfügbar</string>
+
+    <!-- Voice prompts -->
+    <string name="promt_voice_help">To record your message click on the microphone at the top bar</string>
+    <string name="promt_enter_a_message">Bitte geben Sie ein Nachricht ein</string>
+    <string name="promt_enter_a_phone_number">Bitte geben Sie die Telefonnummer ein</string>
+    <string name="promt_voice">Sprechen Sie jetzt!</string>
+    <string name="promt_no_internet">Keine Internetverbindung</string>
 
     <!-- Dates -->
     <string name="date_format">dd-MM-yyyy</string>
@@ -12,16 +24,14 @@
     <string name="date_more_than_a_week">vor %d Wochen</string>
 
     <!-- Menu -->
-    <string name="menu_new_message">Neue SMS</string>
+    <string name="menu_new_message">Neue Nachricht</string>
     <string name="menu_voice">Spracheingabe</string>
     <string name="menu_delete">Konversation löschen</string>
-    <string name="menu_send">abschicken</string>
-    <string name="menu_call">anrufen</string>
+    <string name="menu_send">Abschicken</string>
+    <string name="menu_call">Anrufen</string>
 
     <!-- Placeholders -->
     <string name="placeholder_date">Heute</string>
-    <string name="placeholder_name">John William Doe</string>
-    <string name="placeholder_phonenumber">+49762348225</string>
     <string name="placeholder_text">Dies ist eine sehr lange SMS, mit
 der wir testen, was passiert wenn die Länge eines Textfeldes
 überschritten wird.</string>
@@ -33,10 +43,10 @@ der wir testen, was passiert wenn die Länge eines Textfeldes
     <string-array name="icons_array">
         <item>Ok</item>
         <item>Nein</item>
-        <item>spät</item>
+        <item>Spät</item>
         <item>Anruf</item>
-        <item>leer</item>
-        <item>beschäftigt</item>
+        <item>Leer</item>
+        <item>Beschäftigt</item>
         <item>Beeilung!</item>
         <item>"Wie geht's?"</item>
         <item>Liebe</item>
