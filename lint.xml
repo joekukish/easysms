@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <lint>
-    <issue id="ContentDescription">
-        <ignore path="res/layout/messagecomposition.xml" />
-        <ignore path="res/layout/messagedetails.xml" />
-    </issue>
+
+    <issue
+        id="ContentDescription"
+        severity="ignore" />
+
 </lint>

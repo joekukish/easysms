@@ -62,11 +62,10 @@ public class SmsContentProvider extends ContentObserver {
 		Uri lookupUri = Uri.withAppendedPath(PhoneLookup.CONTENT_FILTER_URI,
 				Uri.encode(number));
 
-		Cursor c = mContext.getContentResolver().query(
-				lookupUri,
-				new String[] { PhoneLookup._ID, PhoneLookup.PHOTO_URI,
-						PhoneLookup.PHOTO_ID, PhoneLookup.DISPLAY_NAME }, null,
-				null, null);
+		Cursor c = mContext.getContentResolver().query(lookupUri,
+				new String[] { PhoneLookup._ID, /* PhoneLookup.PHOTO_URI, */
+				PhoneLookup.PHOTO_ID, PhoneLookup.DISPLAY_NAME }, null, null,
+				null);
 
 		Contact tmpContact = new Contact();
 		tmpContact.phoneNumber = number;
@@ -76,8 +75,8 @@ public class SmsContentProvider extends ContentObserver {
 				// if we find a match we put it in a String.
 				tmpContact.id = c.getInt(c
 						.getColumnIndexOrThrow(PhoneLookup._ID));
-				tmpContact.photoUri = c.getString(c
-						.getColumnIndexOrThrow(PhoneLookup.PHOTO_URI));
+				// tmpContact.photoUri =
+				// c.getString(c.getColumnIndexOrThrow(PhoneLookup.PHOTO_URI));
 				tmpContact.photoId = c.getLong(c
 						.getColumnIndexOrThrow(PhoneLookup.PHOTO_ID));
 				tmpContact.displayName = c.getString(c
@@ -156,6 +155,7 @@ public class SmsContentProvider extends ContentObserver {
 
 		// final String[] projection = new String[] { "*" };
 
+		// thread_id, msg_count, snippet
 		Cursor c = mContext.getContentResolver().query(
 				Uri.parse("content://sms/conversations?simple=true"), null,
 				null, null, "date DESC");

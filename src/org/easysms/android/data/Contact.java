@@ -6,6 +6,6 @@ public class Contact {
 	public int id;
 	public String phoneNumber;
 	public long photoId;
-	public String photoUri;
+	// public String photoUri;
 
 }
